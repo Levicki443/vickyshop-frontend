@@ -4,9 +4,20 @@ import App from './App';
 
 import './styles/global.css';
 import './styles/products.css';
+import './styles/product-details.css';
 import './styles/layout.css';
 import './styles/auth.css';
 import './styles/admin.css';
+import './styles/pwa.css';
+
+// Enregistrement du Service Worker PWA
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('Erreur enregistrement Service Worker:', err);
+    });
+  });
+}
 
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';

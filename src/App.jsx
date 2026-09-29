@@ -12,6 +12,7 @@ import { HeroSection } from './components/home/HeroSection';
 import { FlashSale } from './components/home/FlashSale';
 import { ProductFilters } from './components/products/ProductFilters';
 import { ProductGrid } from './components/products/ProductGrid';
+import { ProductDetailsPage } from './components/products/ProductDetailsPage';
 import { QuickViewModal } from './components/products/QuickViewModal';
 import { CartDrawer } from './components/cart/CartDrawer';
 import { WishlistDrawer } from './components/cart/WishlistDrawer';
@@ -25,9 +26,9 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { NotFound404 } from './components/common/NotFound404';
 import { WelcomeOverlay } from './components/common/WelcomeOverlay';
+import { PwaInstallModal } from './components/common/PwaInstallModal';
 
 export const App = () => {
-  // Vérification de l'URL directe pour blocage 404
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname.toLowerCase());
 
   const isRestrictedDirectRoute = useMemo(() => {
@@ -49,7 +50,8 @@ export const App = () => {
 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null); // Aperçu modal
+  const [detailedProduct, setDetailedProduct] = useState(null); // Page complète produit
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isOrdersTrackingOpen, setIsOrdersTrackingOpen] = useState(false);
 
@@ -85,11 +87,13 @@ export const App = () => {
         prev.map((p) => (p._id === updatedProd._id ? updatedProd : p))
       );
       setSelectedProduct((prev) => (prev && prev._id === updatedProd._id ? updatedProd : prev));
+      setDetailedProduct((prev) => (prev && prev._id === updatedProd._id ? updatedProd : prev));
     });
 
     const unsubDeleted = onProductDeleted((deletedId) => {
       setProducts((prev) => prev.filter((p) => p._id !== deletedId));
       setSelectedProduct((prev) => (prev && prev._id === deletedId ? null : prev));
+      setDetailedProduct((prev) => (prev && prev._id === deletedId ? null : prev));
     });
 
     const unsubStock = onProductStockUpdated(({ productId, stockQuantity, inStock }) => {
@@ -100,15 +104,12 @@ export const App = () => {
             : p
         )
       );
-      setSelectedProduct((prev) =>
+      const updateFn = (prev) =>
         prev && prev._id === productId
-          ? {
-              ...prev,
-              stockQuantity,
-              inStock: inStock !== undefined ? inStock : stockQuantity > 0,
-            }
-          : prev
-      );
+          ? { ...prev, stockQuantity, inStock: inStock !== undefined ? inStock : stockQuantity > 0 }
+          : prev;
+      setSelectedProduct(updateFn);
+      setDetailedProduct(updateFn);
     });
 
     return () => {
@@ -119,14 +120,38 @@ export const App = () => {
     };
   }, []);
 
-  // Écoute des changements de navigation dans la fenêtre
+  // Gestion du bouton Retour physique / geste du téléphone via popstate
   useEffect(() => {
     const handlePopState = () => {
       setCurrentPath(window.location.pathname.toLowerCase());
+      // Si une vue secondaire ou modale est ouverte, on la ferme au retour arrière
+      if (detailedProduct) {
+        setDetailedProduct(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (selectedProduct) setSelectedProduct(null);
+      if (isCheckoutOpen) setIsCheckoutOpen(false);
+      if (isOrdersTrackingOpen) setIsOrdersTrackingOpen(false);
+      if (isAdminAuthModalOpen) setIsAdminAuthModalOpen(false);
+      if (isAdminViewActive) setIsAdminViewActive(false);
     };
+
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [detailedProduct, selectedProduct, isCheckoutOpen, isOrdersTrackingOpen, isAdminAuthModalOpen, isAdminViewActive]);
+
+  // Ouverture d'une vue de détail avec ajout d'une entrée d'historique
+  const handleOpenProductDetails = (product) => {
+    window.history.pushState({ view: 'product', id: product._id }, '');
+    setDetailedProduct(product);
+    setSelectedProduct(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToShop = () => {
+    setDetailedProduct(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Déclenchement secret Backoffice (10s maintien sur Accueil)
   const handleOpenAdminTrigger = useCallback(() => {
@@ -152,10 +177,15 @@ export const App = () => {
   }, [products, activeCategory, searchTerm]);
 
   const scrollToProducts = () => {
-    const el = document.getElementById('produits');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (detailedProduct) {
+      setDetailedProduct(null);
     }
+    setTimeout(() => {
+      const el = document.getElementById('produits');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   const handleResetFilters = () => {
@@ -163,12 +193,10 @@ export const App = () => {
     setSearchTerm('');
   };
 
-  // Si tentative d'accès direct par URL à une route secrète non autorisée -> 404
   if (isRestrictedDirectRoute && !isAdminViewActive) {
     return <NotFound404 onGoHome={() => (window.location.href = '/')} />;
   }
 
-  // Rendu de la vue Backoffice Administrateur
   if (isAdminViewActive) {
     return (
       <AdminDashboard
@@ -180,10 +208,9 @@ export const App = () => {
 
   return (
     <div className="app-root">
-      {/* Overlay de Bienvenue & Vidéo */}
       <WelcomeOverlay />
+      <PwaInstallModal />
 
-      {/* Barre d'Annonces Défilante */}
       <div className="announcement-bar">
         <div className="announcement-track">
           <div className="announcement-item">
@@ -191,7 +218,7 @@ export const App = () => {
             <span className="bullet">•</span>
             <span><i className="fa-solid fa-bolt"></i> <strong>LIVRAISON EXPRESS :</strong> 24/48h en Côte d&apos;Ivoire</span>
             <span className="bullet">•</span>
-            <span><i className="fa-solid fa-credit-card"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Wave, Orange Money, MTN MoMo</span>
+            <span><i className="fa-solid fa-credit-card"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Cash à la livraison</span>
             <span className="bullet">•</span>
             <span><i className="fa-solid fa-gift"></i> <strong>CODE PROMO :</strong> VICKY10 (-10%)</span>
           </div>
@@ -200,83 +227,75 @@ export const App = () => {
             <span className="bullet">•</span>
             <span><i className="fa-solid fa-bolt"></i> <strong>LIVRAISON EXPRESS :</strong> 24/48h en Côte d&apos;Ivoire</span>
             <span className="bullet">•</span>
-            <span><i className="fa-solid fa-credit-card"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Wave, Orange Money, MTN MoMo</span>
+            <span><i className="fa-solid fa-credit-card"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Cash à la livraison</span>
             <span className="bullet">•</span>
             <span><i className="fa-solid fa-gift"></i> <strong>CODE PROMO :</strong> VICKY10 (-10%)</span>
           </div>
         </div>
       </div>
 
-      {/* En-tête avec navigation et boutons d'action */}
       <Header
         onOpenAdmin={handleOpenAdminTrigger}
         isAdminActive={isAdminViewActive}
         onOpenOrdersTracking={() => setIsOrdersTrackingOpen(true)}
       />
 
-      {/* Hero Section */}
-      <HeroSection onExploreClick={scrollToProducts} />
-
-      {/* Section Vente Flash & Articles en Vedette */}
-      <FlashSale
-        products={products}
-        onShopNow={scrollToProducts}
-        onQuickView={(product) => setSelectedProduct(product)}
-      />
-
-      {/* Catalogue de Produits */}
-      <main className="container products" id="produits">
-        <div className="section-header">
-          <span className="section-subtitle">Notre Catalogue</span>
-          <h2 className="section-title">Nos Produits Tendance</h2>
-          <div className="title-underline"></div>
-        </div>
-
-        <ProductFilters
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          totalCount={filteredProducts.length}
+      {detailedProduct ? (
+        <ProductDetailsPage
+          product={detailedProduct}
+          allProducts={products}
+          onBack={handleBackToShop}
+          onOpenCheckout={() => setIsCheckoutOpen(true)}
+          onSelectProduct={handleOpenProductDetails}
         />
+      ) : (
+        <>
+          <HeroSection onExploreClick={scrollToProducts} />
+          <FlashSale
+            products={products}
+            onShopNow={scrollToProducts}
+            onQuickView={handleOpenProductDetails}
+          />
+          <main className="container products" id="produits">
+            <div className="section-header">
+              <span className="section-subtitle">Notre Catalogue</span>
+              <h2 className="section-title">Nos Produits Tendance</h2>
+              <div className="title-underline" />
+            </div>
 
-        <ProductGrid
-          products={filteredProducts}
-          loading={loading}
-          error={error}
-          onQuickView={(product) => setSelectedProduct(product)}
-          onResetFilters={handleResetFilters}
-        />
-      </main>
+            <ProductFilters
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              totalCount={filteredProducts.length}
+            />
 
-      {/* Pied de page */}
+            <ProductGrid
+              products={filteredProducts}
+              loading={loading}
+              error={error}
+              onQuickView={handleOpenProductDetails}
+              onResetFilters={handleResetFilters}
+            />
+          </main>
+        </>
+      )}
+
       <Footer />
 
-      {/* Panier Latéral */}
       <CartDrawer onOpenCheckout={() => setIsCheckoutOpen(true)} />
-
-      {/* Tiroir Favoris */}
       <WishlistDrawer />
-
-      {/* Modale de Suivi de Commandes & Facturation */}
       <OrdersTrackingModal
         isOpen={isOrdersTrackingOpen}
         onClose={() => setIsOrdersTrackingOpen(false)}
       />
-
-      {/* Modale de Commande Multi-Paiements */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
       />
-
-      {/* Modale d'Authentification Client */}
       <AuthModal />
-
-      {/* Modale de Gestion du Profil et Paramètres Utilisateur */}
       <UserProfileModal />
-
-      {/* Modale Secrète d'Authentification Administrateur */}
       <AdminAuthModal
         isOpen={isAdminAuthModalOpen}
         onClose={() => setIsAdminAuthModalOpen(false)}
@@ -285,14 +304,10 @@ export const App = () => {
           setIsAdminViewActive(true);
         }}
       />
-
-      {/* Modale Aperçu Rapide */}
       <QuickViewModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
       />
-
-      {/* Alertes Toasts */}
       <ToastContainer />
     </div>
   );

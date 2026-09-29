@@ -176,7 +176,7 @@ export const Header = ({ onOpenAdmin, isAdminActive, onOpenOrdersTracking }) => 
 
             <button
               type="button"
-              className="icon-btn orders-tracking-btn"
+              className="icon-btn orders-tracking-btn desktop-only-action"
               onClick={onOpenOrdersTracking}
               title="Vos commandes"
               aria-label="Vos commandes"
@@ -196,7 +196,7 @@ export const Header = ({ onOpenAdmin, isAdminActive, onOpenOrdersTracking }) => 
             </button>
 
             {isAuthenticated ? (
-              <div className="user-menu-wrap" ref={dropdownRef}>
+              <div className="user-menu-wrap desktop-only-action" ref={dropdownRef}>
                 <button
                   type="button"
                   className="btn-auth-header"
@@ -270,7 +270,7 @@ export const Header = ({ onOpenAdmin, isAdminActive, onOpenOrdersTracking }) => 
             ) : (
               <button
                 type="button"
-                className="btn-auth-header"
+                className="btn-auth-header desktop-only-action"
                 onClick={openAuthModal}
                 title="Se connecter"
               >

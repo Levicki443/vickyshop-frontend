@@ -4,8 +4,8 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useToast } from '../../context/ToastContext';
 
-export const ProductCard = ({ product, onQuickView }) => {
-  const { addToCart, openCart } = useCart();
+export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
+  const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
   const cardRef = useRef(null);
@@ -26,6 +26,14 @@ export const ProductCard = ({ product, onQuickView }) => {
     product.originalPrice && product.originalPrice > product.price
       ? Math.round((1 - product.price / product.originalPrice) * 100)
       : null;
+
+  const handleCardClick = () => {
+    if (onSelectProduct) {
+      onSelectProduct(product);
+    } else if (onQuickView) {
+      onQuickView(product);
+    }
+  };
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
@@ -71,8 +79,10 @@ export const ProductCard = ({ product, onQuickView }) => {
     <div
       ref={cardRef}
       className={`product-card ${isOutOfStock ? 'product-card-out-of-stock' : ''}`}
+      onClick={handleCardClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      style={{ cursor: 'pointer' }}
     >
       {/* Badges en haut à gauche */}
       <div className="card-badges-container">
@@ -112,16 +122,18 @@ export const ProductCard = ({ product, onQuickView }) => {
         <button
           type="button"
           className="btn-quickview"
-          onClick={() => onQuickView(product)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onQuickView) onQuickView(product);
+          }}
         >
-          <i className="fa-solid fa-eye"></i> Aperçu rapide
+          <i className="fa-solid fa-eye"></i> Détails
         </button>
       </div>
 
       <div className="card-content">
         <div className="card-meta-row">
           <span className="product-category-tag">{product.category}</span>
-          {/* Pastilles de couleurs */}
           {product.colors && product.colors.length > 0 && (
             <div className="product-card-colors" title={`${product.colors.length} coloris disponibles`}>
               {product.colors.slice(0, 3).map((col, idx) => (
@@ -176,3 +188,5 @@ export const ProductCard = ({ product, onQuickView }) => {
     </div>
   );
 };
+
+export default ProductCard;
