@@ -5,6 +5,7 @@ export const ProductGrid = ({
   products,
   loading,
   error,
+  onSelectProduct,
   onQuickView,
   onResetFilters,
 }) => {
@@ -41,7 +42,7 @@ export const ProductGrid = ({
       <div className="no-products-found">
         <i className="fa-solid fa-magnifying-glass-chart"></i>
         <h3>Aucun article ne correspond à votre recherche</h3>
-        <p>Essayez avec d'autres mots-clés ou réinitialisez les filtres.</p>
+        <p>Essayez avec d&apos;autres mots-clés ou réinitialisez les filtres.</p>
         <button
           type="button"
           className="btn btn-primary"
@@ -59,6 +60,7 @@ export const ProductGrid = ({
         <ProductCard
           key={product._id || product.id}
           product={product}
+          onSelectProduct={onSelectProduct}
           onQuickView={onQuickView}
         />
       ))}

@@ -275,7 +275,8 @@ export const App = () => {
               products={filteredProducts}
               loading={loading}
               error={error}
-              onQuickView={handleOpenProductDetails}
+              onSelectProduct={handleOpenProductDetails}
+              onQuickView={(p) => setSelectedProduct(p)}
               onResetFilters={handleResetFilters}
             />
           </main>
