@@ -1,0 +1,78 @@
+/* ==========================================================================
+   VICKY-SHOP DESIGN SYSTEM - VARIABLES & THEMES
+   ========================================================================== */
+
+:root {
+  /* Palette de Couleurs Principales */
+  --primary: #ff6b00;
+  --primary-hover: #ff8533;
+  --primary-glow: rgba(255, 107, 0, 0.4);
+  --secondary: #7928ca;
+  --secondary-hover: #9042e8;
+  --secondary-glow: rgba(121, 40, 202, 0.35);
+
+  /* Accents */
+  --accent-cyan: #00dfd8;
+  --accent-green: #00d084;
+  --accent-red: #ff385c;
+  --accent-gold: #ffb800;
+  --gold-primary: #ffd700;
+  --gold-light: #fff3a8;
+  --gold-dark: #d49b10;
+  --gold-gradient: linear-gradient(135deg, #fff2a3 0%, #ffd700 35%, #ff9900 80%, #d49b10 100%);
+  --gold-glow: rgba(255, 215, 0, 0.45);
+  --gold-glow-strong: rgba(255, 184, 0, 0.7);
+
+  /* Mode Sombre (Par Défaut) */
+  --bg-main: #0c0f17;
+  --bg-surface: #141926;
+  --bg-card: rgba(24, 30, 48, 0.75);
+  --bg-glass: rgba(20, 25, 38, 0.85);
+  --bg-input: #1a2236;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(255, 107, 0, 0.3);
+
+  /* Ombres & Lueurs */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 25px var(--primary-glow);
+
+  /* Rayons de bordure */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Typographie */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Mode Clair */
+[data-theme="light"] {
+  --bg-main: #f4f6fb;
+  --bg-surface: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --bg-input: #eef2f6;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-highlight: rgba(255, 107, 0, 0.4);
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.12);
+}
