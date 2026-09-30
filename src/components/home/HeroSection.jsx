@@ -53,7 +53,7 @@ export const HeroSection = ({ onExploreClick }) => {
         <div className="hero-visual">
           <div className="hero-image-card">
             <img
-              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800"
+              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80"
               alt="Mode et Shopping Vicky-Shop"
             />
             <div className="floating-card float-1">
