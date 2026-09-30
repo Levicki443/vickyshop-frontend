@@ -39,6 +39,22 @@ export const UserProfileModal = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+
+    if (!profileForm.name.trim() || profileForm.name.trim().length < 2) {
+      addToast('Nom requis', 'Le nom complet doit comporter au moins 2 caractères.', 'error');
+      return;
+    }
+
+    const pureDigits = profileForm.phone.replace(/\D/g, '');
+    if (!profileForm.phone.trim() || pureDigits.length < 10) {
+      addToast(
+        'Numéro de téléphone requis',
+        'Le numéro de téléphone doit comporter au moins 10 chiffres (ex : 0708091011 ou +225 0102030405).',
+        'error'
+      );
+      return;
+    }
+
     setLoading(true);
     try {
       await updateProfile(profileForm);
@@ -81,7 +97,7 @@ export const UserProfileModal = () => {
   return (
     <div className="modal-overlay" onClick={closeProfileModal}>
       <div
-        className="modal-box"
+        className="modal-box modal-profile-box"
         style={{
           maxWidth: '620px',
           width: '95%',
@@ -205,7 +221,6 @@ export const UserProfileModal = () => {
 
         {/* Corps avec défilement */}
         <div style={{ overflowY: 'auto', padding: '1.5rem' }}>
-          {/* Onglet 1 : Informations personnelles */}
           {activeTab === 'profile' && (
             <form onSubmit={handleProfileSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
@@ -224,15 +239,19 @@ export const UserProfileModal = () => {
               <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.35rem', display: 'block' }}>
-                    Téléphone (WhatsApp)
+                    Téléphone (WhatsApp) *
                   </label>
                   <input
                     type="tel"
                     className="form-input"
+                    placeholder="0708091011"
                     required
                     value={profileForm.phone}
                     onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                   />
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
+                    Minimum 10 chiffres (ex : 0708091011)
+                  </small>
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.35rem', display: 'block' }}>
@@ -267,7 +286,6 @@ export const UserProfileModal = () => {
             </form>
           )}
 
-          {/* Onglet 2 : Mot de passe */}
           {activeTab === 'password' && (
             <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
@@ -321,7 +339,6 @@ export const UserProfileModal = () => {
             </form>
           )}
 
-          {/* Onglet 3 : Résumé du compte */}
           {activeTab === 'account' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ background: 'var(--bg-card)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
@@ -353,3 +370,5 @@ export const UserProfileModal = () => {
     </div>
   );
 };
+
+export default UserProfileModal;

@@ -195,9 +195,12 @@ export const submitOrder = async (orderData, token = null) => {
       body: JSON.stringify(orderData),
     });
 
-    const json = await response.json();
+    const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(json.message || 'Échec lors de la création de la commande');
+      const detailedMessage = Array.isArray(json.errors) && json.errors.length > 0
+        ? json.errors.join(' • ')
+        : (json.message || 'Échec lors de la création de la commande');
+      throw new Error(detailedMessage);
     }
 
     return json.data.order;

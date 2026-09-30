@@ -51,6 +51,18 @@ export const AuthModal = () => {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+
+    if (!registerForm.name.trim() || registerForm.name.trim().length < 2) {
+      setErrorMessage('Le nom complet doit comporter au moins 2 caractères.');
+      return;
+    }
+
+    const pureDigits = registerForm.phone.replace(/\D/g, '');
+    if (!registerForm.phone.trim() || pureDigits.length < 10) {
+      setErrorMessage('Le numéro de téléphone doit comporter au moins 10 chiffres (ex : 0708091011 ou 0102030405).');
+      return;
+    }
+
     setLoading(true);
     setErrorMessage('');
     try {
