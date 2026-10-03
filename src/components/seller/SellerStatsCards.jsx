@@ -86,19 +86,19 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
         </div>
 
         {/* 5. Espèces à Collecter (COD) */}
-        <div className="seller-stat-card">
+        <div className="seller-stat-card stat-card-financial">
           <div className="stat-card-icon bg-gold-soft">
             <i className="fa-solid fa-hand-holding-dollar"></i>
           </div>
           <div className="stat-card-body">
             <span className="stat-label">Espèces à Collecter</span>
             <h3 className="stat-value text-accent">{formatPrice(s.amountToCollect)}</h3>
-            <span className="stat-subtext">En attente d&apos;encaissement livreur</span>
+            <span className="stat-subtext">En attente livreur</span>
           </div>
         </div>
 
         {/* 6. Chiffre d'Affaires Total */}
-        <div className="seller-stat-card">
+        <div className="seller-stat-card stat-card-financial">
           <div className="stat-card-icon bg-success-soft">
             <i className="fa-solid fa-sack-dollar"></i>
           </div>

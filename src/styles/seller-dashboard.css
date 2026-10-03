@@ -11,8 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
-  height: 65px;
+  padding: 0 1.25rem;
+  height: 60px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(12px);
@@ -23,14 +23,14 @@
 .seller-navbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .btn-back-shop {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.9rem;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-main);
@@ -38,6 +38,7 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm, 8px);
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
@@ -51,9 +52,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-main);
+  white-space: nowrap;
 }
 
 .seller-logo-img {
@@ -61,46 +63,54 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .seller-user-badge {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.35rem 0.75rem;
+  gap: 0.6rem;
+  padding: 0.35rem 0.7rem;
   background: var(--bg-body);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md, 12px);
+  white-space: nowrap;
 }
 
 .seller-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--primary-soft);
   color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.seller-info-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .seller-shop-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-main);
-  display: block;
+  line-height: 1.2;
 }
 
 .seller-role-tag {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
 }
 
 .seller-nav-notif-btn {
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm, 8px);
   border: 1px solid var(--border-color);
   background: var(--bg-body);
@@ -109,6 +119,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .notif-badge-pill {
@@ -117,11 +128,11 @@
   right: -4px;
   background: var(--accent-red, #ef4444);
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 10px;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,6 +147,16 @@
   background: var(--bg-body);
   color: var(--text-muted);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-seller-logout:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--accent-red, #ef4444);
+  border-color: var(--accent-red, #ef4444);
 }
 
 /* Layout Dashboard avec Sidebar */
@@ -412,32 +433,81 @@
   }
 
   .seller-navbar {
-    padding: 0.75rem 1rem;
-    gap: 0.5rem;
+    height: 54px;
+    padding: 0 0.6rem;
+    gap: 0.35rem;
   }
 
-  .seller-brand-tag span {
+  .seller-navbar-left,
+  .seller-navbar-right {
+    gap: 0.35rem;
+  }
+
+  .btn-back-shop {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.78rem;
+    gap: 0.3rem;
+  }
+
+  .seller-brand-tag .seller-brand-text {
+    display: none;
+  }
+
+  .seller-logo-img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .seller-user-badge {
+    padding: 0.25rem 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .seller-avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+
+  .seller-shop-name {
+    font-size: 0.78rem;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .seller-role-tag {
+    display: none;
+  }
+
+  .seller-nav-notif-btn,
+  .btn-seller-logout {
+    width: 32px;
+    height: 32px;
     font-size: 0.85rem;
   }
 
   .seller-sidebar {
     width: 100%;
+    position: sticky;
+    top: 54px;
+    z-index: 85;
+    height: auto;
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-surface);
     border-right: none;
     border-bottom: 1px solid var(--border-color);
-    padding: 0.5rem 0.75rem;
-    background: var(--bg-surface);
-    position: sticky;
-    top: 60px;
-    z-index: 40;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   .seller-sidebar-nav {
     display: flex;
     flex-direction: row;
+    align-items: center;
     overflow-x: auto;
-    gap: 0.4rem;
-    padding-bottom: 0.25rem;
+    gap: 0.35rem;
+    padding-bottom: 0.15rem;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -448,41 +518,139 @@
 
   .seller-sidebar-item {
     white-space: nowrap;
-    padding: 0.5rem 0.85rem;
-    font-size: 0.82rem;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
     border-radius: var(--radius-full, 9999px);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .seller-sidebar-item.active {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.3);
+  }
+
+  .seller-sidebar-item.active i {
+    color: #ffffff !important;
+  }
+
+  .seller-sidebar-item.active .seller-item-badge {
+    background: #ffffff !important;
+    color: var(--primary) !important;
   }
 
   .seller-sidebar-footer {
     display: none;
   }
 
+  .sidebar-label-full {
+    display: none;
+  }
+
+  .sidebar-label-short {
+    display: inline;
+  }
+
   .seller-dashboard-main-view {
-    padding: 1rem 0.75rem 3rem;
+    padding: 0.85rem 0.75rem 4rem;
   }
 
   .seller-welcome-banner {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1.25rem;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .seller-welcome-banner h2 {
+    font-size: 1.12rem;
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+  }
+
+  .seller-welcome-banner p {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    margin-bottom: 0.5rem;
   }
 
   .seller-welcome-banner .btn {
     width: 100%;
     justify-content: center;
+    padding: 0.7rem;
+    font-size: 0.9rem;
+    font-weight: 700;
   }
 
   .seller-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .seller-stat-card {
+    padding: 0.75rem 0.65rem;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.4rem;
+    min-height: 105px;
+    border-radius: var(--radius-md, 10px);
+  }
+
+  .stat-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .stat-card-body {
+    width: 100%;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    line-height: 1.2;
+    display: block;
+  }
+
+  .stat-value {
+    font-size: 1.18rem;
+    font-weight: 800;
+    margin: 0.1rem 0;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .stat-subtext {
+    font-size: 0.65rem;
+    line-height: 1.2;
+    display: block;
+  }
+
+  .seller-stat-card.stat-card-financial .stat-value {
+    font-size: 1rem;
+  }
+
+  .seller-dashboard-previews-grid {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 0.85rem;
+    margin-top: 0.85rem;
   }
 
   .seller-section-header-bar {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
   .seller-section-header-bar .btn {
@@ -511,9 +679,12 @@
   }
 }
 
-@media (min-width: 600px) and (max-width: 900px) {
-  .seller-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (min-width: 901px) {
+  .sidebar-label-full {
+    display: inline;
+  }
+  .sidebar-label-short {
+    display: none;
   }
 }
 

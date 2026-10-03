@@ -181,13 +181,13 @@ export const SellerDashboard = ({ onClose, initialTab = 'dashboard' }) => {
     <div className="seller-dashboard-root animate-fade-in">
       <header className="seller-navbar">
         <div className="seller-navbar-left">
-          <button type="button" className="btn-back-shop" onClick={onClose}>
+          <button type="button" className="btn-back-shop" onClick={onClose} title="Retour à la boutique">
             <i className="fa-solid fa-arrow-left"></i>
-            <span>Retour à la Boutique</span>
+            <span className="btn-back-label">Boutique</span>
           </button>
           <div className="seller-brand-tag">
             <img src={logoImg} alt="Vicky-Shop" className="seller-logo-img" />
-            <span>Espace <strong className="text-primary">Vendeur Pro</strong></span>
+            <span className="seller-brand-text">Espace <strong className="text-primary">Vendeur</strong></span>
           </div>
         </div>
 
@@ -208,7 +208,7 @@ export const SellerDashboard = ({ onClose, initialTab = 'dashboard' }) => {
             <div className="seller-avatar"><i className="fa-solid fa-store"></i></div>
             <div className="seller-info-text">
               <span className="seller-shop-name">{user?.shopName || user?.name}</span>
-              <span className="seller-role-tag">Vendeur Partenaire</span>
+              <span className="seller-role-tag">Vendeur</span>
             </div>
           </div>
 
