@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getRoleDisplayName, getRoleBadgeClass, getRoleIcon, isSellerRole } from '../../utils/roleUtils';
+import { getRoleDisplayName, getRoleBadgeClass, getRoleIcon } from '../../utils/roleUtils';
 
-export const UserProfileModal = () => {
+export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
   const {
     user,
-    isProfileModalOpen,
-    closeProfileModal,
+    token,
     updateProfile,
     updatePassword,
     upgradeToSeller,
     isSeller,
-    openSellerDashboard,
+    logout,
+    openAuthModal,
   } = useAuth();
   const { addToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password' | 'account' | 'upgrade'
+  const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
 
   const [profileForm, setProfileForm] = useState({ name: '', phone: '', address: '', city: 'Abidjan' });
@@ -24,6 +24,7 @@ export const UserProfileModal = () => {
   const [upgradeForm, setUpgradeForm] = useState({ shopName: '', shopPhone: '', shopAddress: '', shopDescription: '' });
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (user) {
       setProfileForm({
         name: user.name || '',
@@ -38,9 +39,29 @@ export const UserProfileModal = () => {
         shopDescription: user.shopDescription || '',
       });
     }
-  }, [user, isProfileModalOpen]);
+  }, [user]);
 
-  if (!isProfileModalOpen || !user) return null;
+  if (!user && !token) {
+    return (
+      <div className="container animate-fade-in" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '3rem 1.5rem', maxWidth: '520px', margin: '0 auto' }}>
+          <i className="fa-solid fa-user-lock" style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: '1rem' }}></i>
+          <h2 style={{ color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Connexion Requise</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+            Veuillez vous connecter pour accéder à vos informations personnelles, vos adresses et vos paramètres de compte.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            <button type="button" className="btn btn-secondary" onClick={onBackToShop}>
+              Retour à la Boutique
+            </button>
+            <button type="button" className="btn btn-primary" onClick={openAuthModal}>
+              Se Connecter
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +72,7 @@ export const UserProfileModal = () => {
     setLoading(true);
     try {
       await updateProfile(profileForm);
-      addToast('Succès', 'Votre profil a été mis à jour avec succès.', 'success');
+      addToast('Profil mis à jour', 'Vos informations personnelles ont été enregistrées.', 'success');
     } catch (err) {
       addToast('Erreur', err.message || 'Échec de la mise à jour.', 'error');
     } finally {
@@ -62,7 +83,7 @@ export const UserProfileModal = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwordForm.newPassword.length < 6) {
-      addToast('Mot de passe court', 'Le mot de passe doit contenir au moins 6 caractères.', 'error');
+      addToast('Mot de passe trop court', 'Le mot de passe doit contenir au moins 6 caractères.', 'error');
       return;
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -91,10 +112,9 @@ export const UserProfileModal = () => {
     try {
       await upgradeToSeller(upgradeForm);
       addToast('Félicitations ! 🎉', 'Votre compte Vendeur Marketplace est désormais actif.', 'success');
-      closeProfileModal();
-      window.history.pushState(null, '', '/vendeur/dashboard');
-      window.dispatchEvent(new Event('app-navigate'));
-      openSellerDashboard();
+      if (onOpenSellerDashboard) {
+        onOpenSellerDashboard();
+      }
     } catch (err) {
       addToast('Erreur', err.message || "Impossible d'activer le compte vendeur.", 'error');
     } finally {
@@ -102,64 +122,102 @@ export const UserProfileModal = () => {
     }
   };
 
-  const handleOpenSellerSpace = () => {
-    closeProfileModal();
-    window.history.pushState(null, '', '/vendeur/dashboard');
-    window.dispatchEvent(new Event('app-navigate'));
-    openSellerDashboard();
-  };
-
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name.split(' ').map((p) => p[0]).join('').substring(0, 2).toUpperCase();
-  };
-
-  const roleLabel = getRoleDisplayName(user.role);
-  const roleBadgeClass = getRoleBadgeClass(user.role);
-  const roleIcon = getRoleIcon(user.role);
+  const roleLabel = getRoleDisplayName(user?.role);
+  const roleBadgeClass = getRoleBadgeClass(user?.role);
+  const roleIcon = getRoleIcon(user?.role);
 
   return (
-    <div className="modal-overlay" onClick={closeProfileModal}>
-      <div className="modal-profile-custom" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-profile-top">
-          <div className="profile-header-user">
-            <div className="profile-avatar-circle">{getInitials(user.name)}</div>
-            <div className="profile-user-info">
-              <h3>{user.name}</h3>
-              <div className="profile-user-meta">
-                <span><i className="fa-solid fa-envelope"></i> {user.email}</span>
-                <span>•</span>
-                <span className={`profile-role-pill ${roleBadgeClass}`}>
-                  <i className={roleIcon}></i> {roleLabel}
-                </span>
-              </div>
+    <div className="container user-profile-page-root animate-fade-in" style={{ padding: '2rem 1rem 4rem' }}>
+      {/* Fil d'Ariane & Retour */}
+      <div className="details-top-bar" style={{ marginBottom: '1.5rem' }}>
+        <button type="button" className="btn-back-shop" onClick={onBackToShop}>
+          <i className="fa-solid fa-arrow-left"></i>
+          <span>Retour à la Boutique</span>
+        </button>
+        <div className="details-breadcrumb">
+          <span onClick={onBackToShop} style={{ cursor: 'pointer' }}>Accueil</span>
+          <i className="fa-solid fa-chevron-right"></i>
+          <span className="breadcrumb-current">Mon Profil &amp; Paramètres</span>
+        </div>
+      </div>
+
+      {/* Carte d'en-tête utilisateur */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800 }}>
+            {user?.name ? user.name.substring(0, 2).toUpperCase() : 'U'}
+          </div>
+          <div>
+            <h2 style={{ margin: '0 0 0.3rem', fontSize: '1.4rem', color: 'var(--text-primary)' }}>{user?.name}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <span><i className="fa-solid fa-envelope"></i> {user?.email}</span>
+              <span>•</span>
+              <span className={`profile-role-pill ${roleBadgeClass}`}>
+                <i className={roleIcon}></i> {roleLabel}
+              </span>
             </div>
           </div>
-          <button type="button" className="profile-close-btn" onClick={closeProfileModal} aria-label="Fermer">
-            <i className="fa-solid fa-xmark"></i>
-          </button>
         </div>
 
-        <div className="modal-profile-tabs">
-          <button type="button" className={`profile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-            <i className="fa-solid fa-user-pen"></i> <span>Mes Infos</span>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+          {isSeller && (
+            <button type="button" className="btn btn-primary" onClick={onOpenSellerDashboard}>
+              <i className="fa-solid fa-store"></i> <span>Espace Vendeur Pro</span>
+            </button>
+          )}
+          <button type="button" className="btn btn-secondary text-danger" onClick={logout}>
+            <i className="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
           </button>
-          <button type="button" className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`} onClick={() => setActiveTab('password')}>
-            <i className="fa-solid fa-lock"></i> <span>Mot de passe</span>
+        </div>
+      </div>
+
+      {/* Système d'onglets de configuration */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+        {/* Navigation des Onglets */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <button
+            type="button"
+            className={`profile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={() => setActiveTab('profile')}
+            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
+          >
+            <i className="fa-solid fa-user-pen"></i> <span>Informations Personnelles</span>
           </button>
-          <button type="button" className={`profile-tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>
-            <i className="fa-solid fa-shield-halved"></i> <span>Mon Compte</span>
+          <button
+            type="button"
+            className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`}
+            onClick={() => setActiveTab('password')}
+            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
+          >
+            <i className="fa-solid fa-lock"></i> <span>Sécurité &amp; Mot de passe</span>
+          </button>
+          <button
+            type="button"
+            className={`profile-tab-btn ${activeTab === 'account' ? 'active' : ''}`}
+            onClick={() => setActiveTab('account')}
+            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
+          >
+            <i className="fa-solid fa-shield-halved"></i> <span>Statut &amp; Rôle du Compte</span>
           </button>
           {!isSeller && (
-            <button type="button" className={`profile-tab-btn tab-upgrade ${activeTab === 'upgrade' ? 'active' : ''}`} onClick={() => setActiveTab('upgrade')}>
-              <i className="fa-solid fa-store"></i> <span>Devenir Vendeur</span>
+            <button
+              type="button"
+              className={`profile-tab-btn tab-upgrade ${activeTab === 'upgrade' ? 'active' : ''}`}
+              onClick={() => setActiveTab('upgrade')}
+              style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
+            >
+              <i className="fa-solid fa-store"></i> <span>Devenir Vendeur Marketplace</span>
             </button>
           )}
         </div>
 
-        <div className="modal-profile-content">
+        {/* Contenu de l'onglet actif */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1.75rem' }}>
           {activeTab === 'profile' && (
             <form onSubmit={handleProfileSubmit} className="profile-form">
+              <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
+                Modifier vos coordonnées de livraison
+              </h3>
               <div className="profile-form-group">
                 <label><i className="fa-solid fa-user"></i> Nom complet *</label>
                 <input type="text" className="profile-form-input" required placeholder="Ex : Kouamé Jean" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
@@ -175,7 +233,7 @@ export const UserProfileModal = () => {
                 </div>
               </div>
               <div className="profile-form-group">
-                <label><i className="fa-solid fa-location-dot"></i> Adresse de livraison</label>
+                <label><i className="fa-solid fa-location-dot"></i> Adresse de livraison par défaut</label>
                 <input type="text" className="profile-form-input" placeholder="Commune, quartier, repère..." value={profileForm.address} onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })} />
               </div>
               <button type="submit" className="btn btn-primary btn-profile-submit" disabled={loading}>
@@ -187,6 +245,9 @@ export const UserProfileModal = () => {
 
           {activeTab === 'password' && (
             <form onSubmit={handlePasswordSubmit} className="profile-form">
+              <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
+                Mettre à jour votre mot de passe
+              </h3>
               <div className="profile-form-group">
                 <label><i className="fa-solid fa-key"></i> Mot de passe actuel *</label>
                 <input type="password" className="profile-form-input" required placeholder="••••••••" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })} />
@@ -196,8 +257,8 @@ export const UserProfileModal = () => {
                 <input type="password" className="profile-form-input" required minLength={6} placeholder="Au moins 6 caractères" value={passwordForm.newPassword} onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })} />
               </div>
               <div className="profile-form-group">
-                <label><i className="fa-solid fa-shield-check"></i> Confirmer nouveau mot de passe *</label>
-                <input type="password" className="profile-form-input" required minLength={6} placeholder="Confirmer votre mot de passe" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} />
+                <label><i className="fa-solid fa-shield-check"></i> Confirmer le nouveau mot de passe *</label>
+                <input type="password" className="profile-form-input" required minLength={6} placeholder="Confirmez le mot de passe" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} />
               </div>
               <button type="submit" className="btn btn-primary btn-profile-submit" disabled={loading}>
                 {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-shield-halved"></i>}
@@ -208,28 +269,30 @@ export const UserProfileModal = () => {
 
           {activeTab === 'account' && (
             <div className="profile-form">
-              <div className="account-details-card">
+              <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
+                Détails du compte
+              </h3>
+              <div className="account-details-card" style={{ marginBottom: '1.5rem' }}>
                 <div className="account-info-row">
                   <span className="account-info-label"><i className="fa-solid fa-user-tag text-primary"></i> Rôle sur le site</span>
                   <span className={`profile-role-pill ${roleBadgeClass}`}>{roleLabel}</span>
                 </div>
                 <div className="account-info-row">
                   <span className="account-info-label"><i className="fa-solid fa-envelope text-primary"></i> Email de connexion</span>
-                  <strong>{user.email}</strong>
+                  <strong>{user?.email}</strong>
                 </div>
                 <div className="account-info-row">
                   <span className="account-info-label"><i className="fa-solid fa-circle-check text-success"></i> Statut du compte</span>
                   <strong className="text-success">Actif &amp; Vérifié</strong>
                 </div>
               </div>
-
               {isSeller ? (
-                <button type="button" className="btn btn-primary btn-profile-submit" onClick={handleOpenSellerSpace}>
-                  <i className="fa-solid fa-store"></i> <span>Ouvrir l&apos;Espace Gestion Vendeur</span>
+                <button type="button" className="btn btn-primary" onClick={onOpenSellerDashboard} style={{ width: '100%' }}>
+                  <i className="fa-solid fa-store"></i> <span>Accéder au Dashboard Vendeur</span>
                 </button>
               ) : (
-                <button type="button" className="btn btn-outline btn-profile-submit" onClick={() => setActiveTab('upgrade')}>
-                  <i className="fa-solid fa-store"></i> <span>Devenir Vendeur Marketplace</span>
+                <button type="button" className="btn btn-outline" onClick={() => setActiveTab('upgrade')} style={{ width: '100%' }}>
+                  <i className="fa-solid fa-store"></i> <span>Activer mon Espace Vendeur</span>
                 </button>
               )}
             </div>
@@ -237,7 +300,7 @@ export const UserProfileModal = () => {
 
           {activeTab === 'upgrade' && (
             <form onSubmit={handleUpgradeSubmit} className="profile-form">
-              <div className="alert-box-info">
+              <div className="alert-box-info" style={{ marginBottom: '1.25rem' }}>
                 <i className="fa-solid fa-store"></i>
                 <div>
                   <strong>Activez votre Boutique Partenaire</strong>
@@ -254,7 +317,7 @@ export const UserProfileModal = () => {
               </div>
               <div className="profile-form-group">
                 <label><i className="fa-solid fa-location-dot"></i> Localisation / Adresse boutique</label>
-                <input type="text" className="profile-form-input" placeholder="Ex : Marché d'Adjamé, Allée B / Treichville" value={upgradeForm.shopAddress} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopAddress: e.target.value })} />
+                <input type="text" className="profile-form-input" placeholder="Ex : Marché d'Adjamé / Treichville" value={upgradeForm.shopAddress} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopAddress: e.target.value })} />
               </div>
               <button type="submit" className="btn btn-primary btn-profile-submit" disabled={loading}>
                 {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-store"></i>}
@@ -268,5 +331,4 @@ export const UserProfileModal = () => {
   );
 };
 
-export default UserProfileModal;
-
+export default UserProfilePage;

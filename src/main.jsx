@@ -7,6 +7,10 @@ import './styles/products.css';
 import './styles/product-details.css';
 import './styles/layout.css';
 import './styles/auth.css';
+import './styles/profile-modal.css';
+import './styles/seller-dashboard.css';
+import './styles/seller-orders.css';
+import './styles/seller.css';
 import './styles/admin.css';
 import './styles/pwa.css';
 

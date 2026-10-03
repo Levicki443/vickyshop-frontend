@@ -46,16 +46,75 @@ export const joinAdminRoom = () => {
   if (s.connected) {
     s.emit('admin:join');
   } else {
-    s.once('connect', () => {
-      s.emit('admin:join');
-    });
+    s.once('connect', () => s.emit('admin:join'));
   }
 };
 
 /**
- * Écoute les nouvelles commandes entrantes en temps réel.
- * @param {Function} callback 
- * @returns {Function} Fonction de désabonnement
+ * Rejoint la salle privée d'un vendeur spécifique pour recevoir ses alertes de commande.
+ */
+export const joinSellerRoom = (sellerId) => {
+  if (!sellerId) return;
+  const s = getSocket();
+  if (s.connected) {
+    s.emit('seller:join', sellerId);
+  } else {
+    s.once('connect', () => s.emit('seller:join', sellerId));
+  }
+};
+
+/**
+ * Rejoint la salle privée d'un client spécifique pour recevoir ses notifications de suivi.
+ */
+export const joinUserRoom = (userId) => {
+  if (!userId) return;
+  const s = getSocket();
+  if (s.connected) {
+    s.emit('user:join', userId);
+  } else {
+    s.once('connect', () => s.emit('user:join', userId));
+  }
+};
+
+/**
+ * Rejoint la salle de suivi d'une référence de commande spécifique.
+ */
+export const trackOrderRoom = (orderNumber) => {
+  if (!orderNumber) return;
+  const s = getSocket();
+  if (s.connected) {
+    s.emit('order:track', orderNumber);
+  } else {
+    s.once('connect', () => s.emit('order:track', orderNumber));
+  }
+};
+
+/**
+ * Écoute les notifications et mises à jour en direct pour le client.
+ */
+export const onClientOrderUpdate = (callback) => {
+  const s = getSocket();
+  s.on('order:client:update', callback);
+  s.on('order:client:created', callback);
+  return () => {
+    s.off('order:client:update', callback);
+    s.off('order:client:created', callback);
+  };
+};
+
+/**
+ * Écoute l'arrivée d'une nouvelle commande concernant spécifiquement le vendeur connecté.
+ */
+export const onSellerNewOrder = (callback) => {
+  const s = getSocket();
+  s.on('order:seller:new', callback);
+  return () => {
+    s.off('order:seller:new', callback);
+  };
+};
+
+/**
+ * Écoute les nouvelles commandes entrantes en temps réel (Administrateurs).
  */
 export const onNewOrder = (callback) => {
   const s = getSocket();
@@ -67,8 +126,6 @@ export const onNewOrder = (callback) => {
 
 /**
  * Écoute les mises à jour de statut des commandes.
- * @param {Function} callback 
- * @returns {Function} Fonction de désabonnement
  */
 export const onOrderUpdated = (callback) => {
   const s = getSocket();
@@ -80,8 +137,6 @@ export const onOrderUpdated = (callback) => {
 
 /**
  * Écoute l'ajout d'un nouveau produit en temps réel.
- * @param {Function} callback 
- * @returns {Function} Fonction de désabonnement
  */
 export const onProductCreated = (callback) => {
   const s = getSocket();
@@ -93,8 +148,6 @@ export const onProductCreated = (callback) => {
 
 /**
  * Écoute la modification d'un produit en temps réel.
- * @param {Function} callback 
- * @returns {Function} Fonction de désabonnement
  */
 export const onProductUpdated = (callback) => {
   const s = getSocket();
@@ -106,8 +159,6 @@ export const onProductUpdated = (callback) => {
 
 /**
  * Écoute la suppression d'un produit en temps réel.
- * @param {Function} callback 
- * @returns {Function} Fonction de désabonnement
  */
 export const onProductDeleted = (callback) => {
   const s = getSocket();
@@ -119,8 +170,6 @@ export const onProductDeleted = (callback) => {
 
 /**
  * Écoute la mise à jour de stock d'un produit en temps réel.
- * @param {Function} callback 
- * @returns {Function} Fonction de désabonnement
  */
 export const onProductStockUpdated = (callback) => {
   const s = getSocket();

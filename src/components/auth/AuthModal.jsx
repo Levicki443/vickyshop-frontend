@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { RegisterRoleSelector } from './RegisterRoleSelector';
+import { LoginForm } from './LoginForm';
+import { ROLES, isSellerRole, getRoleDisplayName } from '../../utils/roleUtils';
 import logoImg from '../../assets/logo.png';
 
 export const AuthModal = () => {
-  const { isAuthModalOpen, closeAuthModal, login, register } = useAuth();
+  const { isAuthModalOpen, closeAuthModal, login, register, openSellerDashboard } = useAuth();
   const { addToast } = useToast();
 
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // États des formulaires
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({
     name: '',
@@ -20,6 +22,10 @@ export const AuthModal = () => {
     password: '',
     address: '',
     city: 'Abidjan',
+    role: ROLES.CLIENT,
+    shopName: '',
+    shopDescription: '',
+    shopPhone: '',
   });
 
   if (!isAuthModalOpen) return null;
@@ -34,14 +40,32 @@ export const AuthModal = () => {
     setErrorMessage('');
   };
 
+  const handleRoleSelect = (selectedRole) => {
+    setRegisterForm((prev) => ({
+      ...prev,
+      role: selectedRole,
+      shopName: isSellerRole(selectedRole) ? (prev.shopName || `${prev.name} Boutique`.trim()) : '',
+    }));
+    setErrorMessage('');
+  };
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage('');
     try {
-      const user = await login(loginForm.email, loginForm.password);
-      addToast('Ravi de vous revoir !', `Bienvenue, ${user.name}.`, 'success');
+      const loggedUser = await login(loginForm.email, loginForm.password);
+      const roleText = getRoleDisplayName(loggedUser.role);
+
+      addToast('Ravi de vous revoir !', `Bienvenue, ${loggedUser.name} (${roleText}).`, 'success');
       setLoginForm({ email: '', password: '' });
+
+      // Redirection automatique immédiate si vendeur
+      if (isSellerRole(loggedUser.role)) {
+        window.history.pushState(null, '', '/vendeur/dashboard');
+        window.dispatchEvent(new Event('app-navigate'));
+        openSellerDashboard();
+      }
     } catch (err) {
       setErrorMessage(err.message || 'Identifiants invalides.');
     } finally {
@@ -51,7 +75,6 @@ export const AuthModal = () => {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-
     if (!registerForm.name.trim() || registerForm.name.trim().length < 2) {
       setErrorMessage('Le nom complet doit comporter au moins 2 caractères.');
       return;
@@ -59,15 +82,30 @@ export const AuthModal = () => {
 
     const pureDigits = registerForm.phone.replace(/\D/g, '');
     if (!registerForm.phone.trim() || pureDigits.length < 10) {
-      setErrorMessage('Le numéro de téléphone doit comporter au moins 10 chiffres (ex : 0708091011 ou 0102030405).');
+      setErrorMessage('Le numéro de téléphone doit comporter au moins 10 chiffres (ex : 0708091011).');
+      return;
+    }
+
+    if (isSellerRole(registerForm.role) && (!registerForm.shopName || !registerForm.shopName.trim())) {
+      setErrorMessage('Veuillez renseigner le nom de votre boutique pour le compte vendeur.');
       return;
     }
 
     setLoading(true);
     setErrorMessage('');
     try {
-      const user = await register(registerForm);
-      addToast('Compte créé avec succès !', `Bienvenue chez Vicky-Shop, ${user.name}.`, 'success');
+      const createdUser = await register(registerForm);
+      const isSeller = isSellerRole(createdUser.role);
+      const roleText = getRoleDisplayName(createdUser.role);
+
+      addToast('Compte créé avec succès !', `Bienvenue chez Vicky-Shop en tant que ${roleText}, ${createdUser.name}.`, 'success');
+
+      if (isSeller) {
+        window.history.pushState(null, '', '/vendeur/dashboard');
+        window.dispatchEvent(new Event('app-navigate'));
+        openSellerDashboard();
+      }
+
       setRegisterForm({
         name: '',
         email: '',
@@ -75,6 +113,10 @@ export const AuthModal = () => {
         password: '',
         address: '',
         city: 'Abidjan',
+        role: ROLES.CLIENT,
+        shopName: '',
+        shopDescription: '',
+        shopPhone: '',
       });
     } catch (err) {
       setErrorMessage(err.message || 'Erreur lors de l\'inscription.');
@@ -98,12 +140,12 @@ export const AuthModal = () => {
         <div className="auth-header">
           <div className="auth-logo">
             <img src={logoImg} alt="Vicky-Shop" className="auth-logo-img rounded-logo" />
-            <span>Vicky<span style={{ color: '#ff6b00' }}>-Shop</span></span>
+            <span>Vicky<span className="brand-accent">-Shop</span></span>
           </div>
           <p className="auth-subtitle">
             {mode === 'login'
-              ? 'Connectez-vous pour commander en toute simplicité.'
-              : 'Créez votre compte pour suivre vos commandes et bénéficier d\'offres exclusives.'}
+              ? 'Connectez-vous pour commander ou gérer votre boutique.'
+              : 'Choisissez votre rôle pour personnaliser votre expérience.'}
           </p>
         </div>
 
@@ -131,7 +173,6 @@ export const AuthModal = () => {
           </button>
         </div>
 
-        {/* Message d'erreur */}
         {errorMessage && (
           <div className="auth-error-alert">
             <i className="fa-solid fa-circle-exclamation"></i>
@@ -139,66 +180,24 @@ export const AuthModal = () => {
           </div>
         )}
 
-        {/* Formulaire de Connexion */}
         {mode === 'login' ? (
-          <form className="auth-form" onSubmit={handleLoginSubmit}>
-            <div className="form-group">
-              <label htmlFor="login-email">Adresse Email *</label>
-              <input
-                type="email"
-                id="login-email"
-                name="email"
-                className="form-input"
-                placeholder="votre-email@example.com"
-                required
-                value={loginForm.email}
-                onChange={handleLoginChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="login-password">Mot de passe *</label>
-              <input
-                type="password"
-                id="login-password"
-                name="password"
-                className="form-input"
-                placeholder="••••••••"
-                required
-                value={loginForm.password}
-                onChange={handleLoginChange}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary btn-block auth-submit-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <span>Connexion en cours...</span>
-              ) : (
-                <>
-                  <span>Se connecter</span>
-                  <i className="fa-solid fa-arrow-right-to-bracket"></i>
-                </>
-              )}
-            </button>
-
-            <p className="auth-switch-text">
-              Pas encore de compte ?{' '}
-              <button
-                type="button"
-                className="text-link"
-                onClick={() => setMode('register')}
-              >
-                Créer un compte
-              </button>
-            </p>
-          </form>
+          <LoginForm
+            loginForm={loginForm}
+            onChange={handleLoginChange}
+            onSubmit={handleLoginSubmit}
+            loading={loading}
+            onSwitchToRegister={() => setMode('register')}
+          />
         ) : (
-          /* Formulaire d'Inscription */
           <form className="auth-form" onSubmit={handleRegisterSubmit}>
+            <RegisterRoleSelector
+              selectedRole={registerForm.role}
+              onSelectRole={handleRoleSelect}
+              shopName={registerForm.shopName}
+              shopDescription={registerForm.shopDescription}
+              onChange={handleRegisterChange}
+            />
+
             <div className="form-group">
               <label htmlFor="reg-name">Nom complet *</label>
               <input
@@ -259,13 +258,13 @@ export const AuthModal = () => {
 
             <div className="form-row">
               <div className="form-group flex-2">
-                <label htmlFor="reg-address">Adresse de livraison par défaut</label>
+                <label htmlFor="reg-address">Adresse / Commune</label>
                 <input
                   type="text"
                   id="reg-address"
                   name="address"
                   className="form-input"
-                  placeholder="Ex : Cocody Angré"
+                  placeholder="Ex : Cocody Angré 8ème Tranche"
                   value={registerForm.address}
                   onChange={handleRegisterChange}
                 />
@@ -289,11 +288,13 @@ export const AuthModal = () => {
               disabled={loading}
             >
               {loading ? (
-                <span>Création du compte...</span>
+                <span>Création en cours...</span>
               ) : (
                 <>
-                  <span>Créer mon compte</span>
-                  <i className="fa-solid fa-user-plus"></i>
+                  <span>
+                    {isSellerRole(registerForm.role) ? 'Créer mon compte Vendeur' : 'Créer mon compte Client'}
+                  </span>
+                  <i className="fa-solid fa-arrow-right"></i>
                 </>
               )}
             </button>
@@ -314,3 +315,5 @@ export const AuthModal = () => {
     </div>
   );
 };
+
+export default AuthModal;

@@ -53,7 +53,7 @@ export const fetchProductById = async (id) => {
 };
 
 /**
- * Connexion d'un utilisateur existant.
+ * Connexion d'un utilisateur existant (Client, Vendeur, Admin).
  */
 export const loginUser = async (credentials) => {
   try {
@@ -72,14 +72,14 @@ export const loginUser = async (credentials) => {
   } catch (error) {
     console.error('[API] Erreur loginUser :', error);
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Impossible de contacter le serveur. Veuillez vérifier la connexion ou patienter pendant le réveil du backend Render.');
+      throw new Error('Impossible de contacter le serveur. Veuillez vérifier la connexion.');
     }
     throw error;
   }
 };
 
 /**
- * Inscription d'un nouveau client.
+ * Inscription d'un nouveau client ou vendeur marketplace.
  */
 export const registerUser = async (userData) => {
   try {
@@ -98,7 +98,7 @@ export const registerUser = async (userData) => {
   } catch (error) {
     console.error('[API] Erreur registerUser :', error);
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Impossible de contacter le serveur. Veuillez vérifier la connexion ou patienter pendant le réveil du backend Render.');
+      throw new Error('Impossible de contacter le serveur. Veuillez vérifier la connexion.');
     }
     throw error;
   }
@@ -180,7 +180,7 @@ export const updateUserPassword = async (passwordData, token) => {
 };
 
 /**
- * Envoie une nouvelle commande vers la base de données MongoDB.
+ * Envoie une nouvelle commande en espèces à la livraison (COD).
  */
 export const submitOrder = async (orderData, token = null) => {
   try {
@@ -206,6 +206,29 @@ export const submitOrder = async (orderData, token = null) => {
     return json.data.order;
   } catch (error) {
     console.error('[API] Erreur submitOrder :', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les commandes du client connecté.
+ */
+export const fetchMyOrders = async (token) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/my-orders`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const json = await response.json();
+    if (!response.ok) {
+      throw new Error(json.message || 'Erreur lors du chargement de vos commandes');
+    }
+
+    return json.data.orders || [];
+  } catch (error) {
+    console.error('[API] Erreur fetchMyOrders :', error);
     throw error;
   }
 };

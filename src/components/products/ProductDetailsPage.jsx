@@ -15,70 +15,47 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  // Liste des images (support multi-images ou fallback sur image unique)
-  const images = product?.images && product.images.length > 0 ? product.images : [product?.image].filter(Boolean);
+  const images = product?.images?.length > 0 ? product.images : [product?.image].filter(Boolean);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setSelectedImageIndex(0);
     setQuantity(1);
-    if (product?.colors && product.colors.length > 0) {
-      setSelectedColor(product.colors[0]);
-    } else {
-      setSelectedColor(null);
-    }
-    if (product?.sizes && product.sizes.length > 0) {
-      setSelectedSize(product.sizes[0]);
-    } else {
-      setSelectedSize(null);
-    }
+    setSelectedColor(product?.colors?.[0] || null);
+    setSelectedSize(product?.sizes?.[0] || null);
   }, [product]);
 
   if (!product) return null;
 
   const isFavorited = isInWishlist(product);
-  const isOutOfStock =
-    product.inStock === false ||
-    (product.stockQuantity !== undefined && product.stockQuantity <= 0);
+  const isOutOfStock = product.inStock === false || (product.stockQuantity !== undefined && product.stockQuantity <= 0);
+  const discountPercent = product.originalPrice && product.originalPrice > product.price
+    ? Math.round((1 - product.price / product.originalPrice) * 100)
+    : null;
 
-  const discountPercent =
-    product.originalPrice && product.originalPrice > product.price
-      ? Math.round((1 - product.price / product.originalPrice) * 100)
-      : null;
-
-  const handleNextImage = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const handlePrevImage = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  const handleNextImage = () => setSelectedImageIndex((prev) => (prev + 1) % images.length);
+  const handlePrevImage = () => setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
 
   const handleAddToCart = () => {
     if (isOutOfStock) {
-      addToast('Produit indisponible', `${product.title} est actuellement en rupture de stock.`, 'warning');
+      addToast('Produit indisponible', `${product.title} est en rupture de stock.`, 'warning');
       return;
     }
     addToCart(product, quantity, selectedColor, selectedSize);
-    addToast('Article ajouté !', `${quantity}x ${product.title} a été ajouté à votre panier.`, 'success');
+    addToast('Article ajouté !', `${quantity}x ${product.title} ajouté à votre panier.`, 'success');
   };
 
   const handleBuyNow = () => {
     if (isOutOfStock) {
-      addToast('Produit indisponible', `${product.title} est actuellement en rupture de stock.`, 'warning');
+      addToast('Produit indisponible', `${product.title} est en rupture de stock.`, 'warning');
       return;
     }
     addToCart(product, quantity, selectedColor, selectedSize);
-    if (onOpenCheckout) {
-      onOpenCheckout();
-    } else {
-      openCart();
-    }
+    if (onOpenCheckout) onOpenCheckout();
+    else openCart();
   };
 
-  const relatedProducts = allProducts
-    .filter((p) => p._id !== product._id)
-    .slice(0, 4);
+  const relatedProducts = allProducts.filter((p) => p._id !== product._id).slice(0, 4);
 
   return (
     <div className="product-details-container container animate-fade-in">
@@ -86,7 +63,7 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
       <div className="details-top-bar">
         <button type="button" className="btn-back-shop" onClick={onBack}>
           <i className="fa-solid fa-arrow-left"></i>
-          <span>Retour à la boutique</span>
+          <span>Retour au catalogue</span>
         </button>
         <div className="details-breadcrumb">
           <span onClick={onBack} style={{ cursor: 'pointer' }}>Accueil</span>
@@ -98,39 +75,18 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
       </div>
 
       <div className="product-details-grid">
-        {/* COLONNE GAUCHE : GALERIE & CARROUSEL D'IMAGES */}
+        {/* COLONNE GAUCHE : GALERIE D'IMAGES */}
         <div className="details-gallery-section">
           <div className="main-image-display">
-            <img
-              src={images[selectedImageIndex] || product.image}
-              alt={product.title}
-              className="main-gallery-img"
-            />
-            {discountPercent && (
-              <span className="details-badge-discount">-{discountPercent}%</span>
-            )}
-            {isOutOfStock && (
-              <div className="details-stock-overlay">
-                <span>Rupture de stock</span>
-              </div>
-            )}
-
+            <img src={images[selectedImageIndex] || product.image} alt={product.title} className="main-gallery-img" />
+            {discountPercent && <span className="details-badge-discount">-{discountPercent}%</span>}
+            {isOutOfStock && <div className="details-stock-overlay"><span>Rupture de stock</span></div>}
             {images.length > 1 && (
               <>
-                <button
-                  type="button"
-                  className="gallery-nav-btn btn-prev"
-                  onClick={handlePrevImage}
-                  aria-label="Image précédente"
-                >
+                <button type="button" className="gallery-nav-btn btn-prev" onClick={handlePrevImage} aria-label="Précédent">
                   <i className="fa-solid fa-chevron-left"></i>
                 </button>
-                <button
-                  type="button"
-                  className="gallery-nav-btn btn-next"
-                  onClick={handleNextImage}
-                  aria-label="Image suivante"
-                >
+                <button type="button" className="gallery-nav-btn btn-next" onClick={handleNextImage} aria-label="Suivant">
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>
               </>
@@ -153,7 +109,7 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
           )}
         </div>
 
-        {/* COLONNE DROITE : INFORMATIONS & ACTIONS */}
+        {/* COLONNE DROITE : INFORMATIONS & ACHAT */}
         <div className="details-info-section">
           <div className="details-category-tag">{product.category}</div>
           <h1 className="details-title">{product.title}</h1>
@@ -169,7 +125,7 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
             </div>
             <span className="bullet">•</span>
             <span className="details-reviews-count">
-              <i className="fa-regular fa-comment-dots"></i> {product.reviewsCount || 12} avis clients
+              <i className="fa-regular fa-comment-dots"></i> {product.reviewsCount || 14} avis vérifiés
             </span>
           </div>
 
@@ -182,24 +138,22 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
             </div>
             {product.originalPrice && product.originalPrice > product.price && (
               <div className="details-saving-note">
-                <i className="fa-solid fa-tags"></i> Vous économisez {formatPrice(product.originalPrice - product.price)}
+                <i className="fa-solid fa-tags"></i> Économisez {formatPrice(product.originalPrice - product.price)}
               </div>
             )}
           </div>
 
           {product.description && (
             <div className="details-description-box">
-              <h4>Description</h4>
+              <h4>Description de l&apos;article</h4>
               <p>{product.description}</p>
             </div>
           )}
 
-          {/* SÉLECTEUR DE COLORIS */}
-          {product.colors && product.colors.length > 0 && (
+          {/* SÉLECTEUR DE COULEURS */}
+          {product.colors?.length > 0 && (
             <div className="variant-group">
-              <label>
-                Couleur : <strong>{selectedColor}</strong>
-              </label>
+              <label>Couleur : <strong>{selectedColor}</strong></label>
               <div className="colors-selector-row">
                 {product.colors.map((color, idx) => (
                   <button
@@ -217,11 +171,9 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
           )}
 
           {/* SÉLECTEUR DE TAILLES */}
-          {product.sizes && product.sizes.length > 0 && (
+          {product.sizes?.length > 0 && (
             <div className="variant-group">
-              <label>
-                Taille : <strong>{selectedSize}</strong>
-              </label>
+              <label>Taille : <strong>{selectedSize}</strong></label>
               <div className="sizes-selector-row">
                 {product.sizes.map((size, idx) => (
                   <button
@@ -237,7 +189,7 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
             </div>
           )}
 
-          {/* SÉLECTEUR DE QUANTITÉ & BOUTONS D'ACTION */}
+          {/* ACTIONS D'ACHAT */}
           <div className="details-actions-wrapper">
             <div className="quantity-controls">
               <button
@@ -259,24 +211,14 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
               </button>
             </div>
 
-            <button
-              type="button"
-              className="btn btn-secondary btn-details-add"
-              onClick={handleAddToCart}
-              disabled={isOutOfStock}
-            >
+            <button type="button" className="btn btn-secondary btn-details-add" onClick={handleAddToCart} disabled={isOutOfStock}>
               <i className="fa-solid fa-cart-plus"></i>
               <span>Ajouter au panier</span>
             </button>
 
-            <button
-              type="button"
-              className="btn btn-primary btn-details-buy"
-              onClick={handleBuyNow}
-              disabled={isOutOfStock}
-            >
+            <button type="button" className="btn btn-primary btn-details-buy" onClick={handleBuyNow} disabled={isOutOfStock}>
               <i className="fa-solid fa-bolt"></i>
-              <span>Acheter maintenant</span>
+              <span>Acheter (Paiement Cash)</span>
             </button>
 
             <button
@@ -284,19 +226,15 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
               className={`btn-details-fav ${isFavorited ? 'active' : ''}`}
               onClick={() => {
                 toggleWishlist(product);
-                addToast(
-                  isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris',
-                  `${product.title} ${isFavorited ? 'a été retiré de' : 'a été ajouté à'} vos favoris.`,
-                  'info'
-                );
+                addToast(isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris', `${product.title}`, 'info');
               }}
-              title={isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              title={isFavorited ? 'Retirer' : 'Favori'}
             >
               <i className={isFavorited ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
             </button>
           </div>
 
-          {/* AVANTAGES & GARANTIES CLIENT */}
+          {/* RÉASSURANCES CLIENTS */}
           <div className="details-trust-grid">
             <div className="trust-card">
               <i className="fa-solid fa-truck-fast text-primary"></i>
@@ -316,14 +254,14 @@ export const ProductDetailsPage = ({ product, allProducts = [], onBack, onOpenCh
               <i className="fa-solid fa-shield-halved text-success"></i>
               <div>
                 <strong>Garantie Authenticité</strong>
-                <small>Produits neufs et 100% certifiés</small>
+                <small>Produits 100% neufs et vérifiés</small>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* SECTION ARTICLES SIMILAIRES */}
+      {/* ARTICLES SIMILAIRES */}
       {relatedProducts.length > 0 && (
         <div className="details-related-section">
           <div className="section-header">

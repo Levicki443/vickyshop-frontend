@@ -1,0 +1,510 @@
+/* ==========================================================================
+   STYLES ESPACE VENDEUR - PRODUITS & COMMANDES REÇUES (COD)
+   100% conforme aux tokens CSS et au design system Vicky-Shop.
+   ========================================================================== */
+
+/* En-tête des sections */
+.seller-section-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.seller-section-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-bottom: 0.2rem;
+}
+
+.seller-section-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Barre de filtres produits & commandes */
+.seller-filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-wrapper {
+  flex: 2;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper i.fa-magnifying-glass {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+}
+
+.search-input-wrapper input {
+  padding-left: 2.5rem;
+  width: 100%;
+}
+
+.category-select-wrapper {
+  flex: 1;
+}
+
+/* Cartes Commandes Vendeur */
+.seller-orders-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.seller-order-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.seller-order-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.seller-order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 1rem 1.4rem;
+  background: var(--bg-body);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-main-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.order-ref-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid rgba(255, 107, 0, 0.2);
+}
+
+.order-date-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.badge-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.badge-payment.badge-pending {
+  background: rgba(234, 179, 8, 0.12);
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.badge-payment.badge-paye {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* Corps de la carte de commande */
+.seller-order-card-body {
+  padding: 1.4rem;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 1.5rem;
+}
+
+.order-customer-details {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 10px);
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-customer-details h5 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.customer-info-line {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.4rem;
+}
+
+.customer-info-line strong {
+  color: var(--text-color);
+  min-width: 75px;
+}
+
+.tel-link {
+  color: #25d366;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Section Articles */
+.order-items-table-wrapper {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 10px);
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.order-items-table-wrapper h5 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.seller-order-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.seller-order-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.item-left-col {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1 1 220px;
+}
+
+.order-item-mini-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-sm, 8px);
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.item-main-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.item-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: capitalize;
+}
+
+.item-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.35rem;
+}
+
+.item-price-calc {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.item-status-workflow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.badge-status-sm {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--radius-full, 9999px);
+  white-space: nowrap;
+}
+
+.badge-status-sm.badge-warning {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.badge-status-sm.badge-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-status-sm.badge-primary {
+  background: rgba(255, 107, 0, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+}
+
+.badge-status-sm.badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-status-sm.badge-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-workflow-action {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.btn-workflow-cancel {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 6px);
+}
+
+/* Pied de carte de commande */
+.seller-order-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.95rem 1.4rem;
+  background: var(--bg-body);
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-history-trigger {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.btn-history-trigger:hover {
+  text-decoration: underline;
+}
+
+.footer-amount-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.footer-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.footer-total-amount {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+/* Modale d'Historique de Traçabilité */
+.modal-history-box {
+  max-width: 520px !important;
+  width: 95% !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  box-shadow: var(--shadow-xl) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.modal-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-history-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.modal-history-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-color);
+}
+
+.modal-history-body {
+  padding: 1.5rem;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--border-color);
+  margin-left: 0.75rem;
+}
+
+.timeline-step {
+  position: relative;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: calc(-1.5rem - 13px);
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  box-shadow: 0 0 0 4px var(--bg-card);
+}
+
+.timeline-content {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.85rem 1rem;
+}
+
+.timeline-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.timeline-status-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.timeline-comment {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+.timeline-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .seller-order-card-body {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .seller-order-card-header,
+  .seller-order-card-footer {
+    padding: 0.85rem 1rem;
+  }
+}

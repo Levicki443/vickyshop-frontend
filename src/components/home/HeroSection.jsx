@@ -9,9 +9,6 @@ export const HeroSection = ({ onExploreClick }) => {
 
       <div className="container hero-container">
         <div className="hero-text-content">
-          <div className="hero-badge">
-            <span className="pulse-dot"></span> Nouvelle Collection 2026
-          </div>
           <h1 className="hero-title">
             Sublimez Votre Style avec <span className="gradient-text">Vicky-Shop</span>
           </h1>

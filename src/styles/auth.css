@@ -7,11 +7,30 @@
   width: 100%;
   padding: 2.2rem;
   background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 18px);
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 0, 0.3) transparent;
+}
+
+.modal-auth::-webkit-scrollbar {
+  width: 5px;
+}
+
+.modal-auth::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 0, 0.35);
+  border-radius: 4px;
 }
 
 @media (max-width: 600px) {
   .modal-auth {
     padding: 1.5rem 1.15rem;
+    max-height: 94vh;
+    border-radius: var(--radius-md, 14px);
+    width: 95%;
   }
 }
 
@@ -36,8 +55,8 @@
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255, 107, 0, 0.45);
-  box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 10px var(--primary-soft);
 }
 
 .auth-subtitle {
@@ -116,6 +135,131 @@
 
 .text-link:hover {
   color: var(--primary-hover);
+}
+
+/* -----------------------------
+   SÉLECTEUR DE RÔLE (CLIENT / VENDEUR)
+   ----------------------------- */
+.role-selector-group {
+  margin-bottom: 0.25rem;
+}
+
+.role-selector-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+}
+
+.role-buttons-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .role-buttons-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .role-choice-btn {
+    padding: 0.65rem 0.55rem;
+    gap: 0.5rem;
+  }
+  .role-icon-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+}
+
+.role-choice-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.role-choice-btn:hover {
+  border-color: var(--primary);
+  background: var(--bg-surface);
+}
+
+.role-choice-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-soft, rgba(255, 107, 0, 0.08));
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.role-radio-indicator {
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-choice-btn.active .role-radio-indicator {
+  color: var(--primary);
+}
+
+.role-icon-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.role-choice-btn.active .role-icon-badge {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.role-choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.role-choice-text strong {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.role-choice-text small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.seller-specific-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 0.85rem;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
 }
 
 /* -----------------------------

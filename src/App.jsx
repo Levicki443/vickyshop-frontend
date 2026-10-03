@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchProducts } from './services/api';
+import { fetchProducts, formatPrice } from './services/api';
 import { getAdminToken } from './services/adminApi';
 import {
   onProductCreated,
   onProductUpdated,
   onProductDeleted,
   onProductStockUpdated,
+  joinSellerRoom,
+  onSellerNewOrder,
+  onClientOrderUpdate,
 } from './services/socket';
 import { Header } from './components/common/Header';
 import { HeroSection } from './components/home/HeroSection';
@@ -13,47 +16,66 @@ import { FlashSale } from './components/home/FlashSale';
 import { ProductFilters } from './components/products/ProductFilters';
 import { ProductGrid } from './components/products/ProductGrid';
 import { ProductDetailsPage } from './components/products/ProductDetailsPage';
-import { QuickViewModal } from './components/products/QuickViewModal';
+import { UserOrdersPage } from './components/orders/UserOrdersPage';
+import { UserProfilePage } from './components/auth/UserProfilePage';
 import { CartDrawer } from './components/cart/CartDrawer';
 import { WishlistDrawer } from './components/cart/WishlistDrawer';
-import { OrdersTrackingModal } from './components/cart/OrdersTrackingModal';
 import { CheckoutModal } from './components/cart/CheckoutModal';
 import { AuthModal } from './components/auth/AuthModal';
-import { UserProfileModal } from './components/auth/UserProfileModal';
 import { Footer } from './components/common/Footer';
 import { ToastContainer } from './components/common/ToastContainer';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
+import { SellerDashboard } from './components/seller/SellerDashboard';
 import { NotFound404 } from './components/common/NotFound404';
 import { WelcomeOverlay } from './components/common/WelcomeOverlay';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
+import { useAuth } from './context/AuthContext';
+import { useToast } from './context/ToastContext';
 
 export const App = () => {
+  const { user, isSeller, openAuthModal, refreshSellerUnreadCount, refreshClientUnreadCount, loading: authLoading } = useAuth();
+  const { addToast } = useToast();
+
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname.toLowerCase());
-
-  const isRestrictedDirectRoute = useMemo(() => {
-    return (
-      currentPath.startsWith('/admin') ||
-      currentPath.startsWith('/dashboard') ||
-      currentPath.startsWith('/backoffice')
-    );
-  }, [currentPath]);
-
-  // États du Backoffice
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState(null);
   const [isAdminViewActive, setIsAdminViewActive] = useState(false);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
 
-  // États de la boutique
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(null); // Aperçu modal
-  const [detailedProduct, setDetailedProduct] = useState(null); // Page complète produit
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isOrdersTrackingOpen, setIsOrdersTrackingOpen] = useState(false);
+
+  // Détection des routes
+  const isSellerRoute = currentPath.startsWith('/vendeur');
+  const isAdminRoute = currentPath.startsWith('/admin') || currentPath.startsWith('/dashboard') || currentPath.startsWith('/backoffice');
+  const isOrdersRoute = currentPath.startsWith('/commandes') || currentPath.startsWith('/orders');
+  const isProfileRoute = currentPath.startsWith('/profil') || currentPath.startsWith('/profile');
+  const isProductRoute = currentPath.startsWith('/produit/') || currentPath.startsWith('/product/');
+
+  // Extraction de l'ID produit pour la page détails
+  const currentProductId = useMemo(() => {
+    if (!isProductRoute) return null;
+    const parts = currentPath.split('/').filter(Boolean);
+    return parts[1] || null;
+  }, [isProductRoute, currentPath]);
+
+  const detailedProduct = useMemo(() => {
+    if (!currentProductId) return null;
+    return products.find((p) => String(p._id || p.id) === String(currentProductId)) || null;
+  }, [currentProductId, products]);
+
+  const sellerInitialTab = useMemo(() => {
+    if (currentPath.includes('produit')) return 'products';
+    if (currentPath.includes('commande')) return 'orders';
+    if (currentPath.includes('notif')) return 'notifications';
+    if (currentPath.includes('profil')) return 'profile';
+    if (currentPath.includes('parametre') || currentPath.includes('setting')) return 'settings';
+    return 'dashboard';
+  }, [currentPath]);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -72,138 +94,98 @@ export const App = () => {
     loadProducts();
   }, [loadProducts]);
 
-  // Synchronisation en direct des produits via Socket.IO
+  // Écoute Socket.IO globale pour vendeur connecté
   useEffect(() => {
-    const unsubCreated = onProductCreated((newProd) => {
-      setProducts((prev) => {
-        const exists = prev.some((p) => p._id === newProd._id);
-        if (exists) return prev.map((p) => (p._id === newProd._id ? newProd : p));
-        return [newProd, ...prev];
+    if (isSeller && user) {
+      const sellerId = user.id || user._id;
+      joinSellerRoom(sellerId);
+      const unsub = onSellerNewOrder((orderData) => {
+        if (refreshSellerUnreadCount) refreshSellerUnreadCount();
+        addToast('📦 Nouvelle Commande Reçue !', `Commande #${orderData.orderNumber} (${formatPrice(orderData.total)}).`, 'success');
       });
-    });
+      return () => unsub();
+    }
+  }, [isSeller, user, addToast, refreshSellerUnreadCount]);
 
-    const unsubUpdated = onProductUpdated((updatedProd) => {
-      setProducts((prev) =>
-        prev.map((p) => (p._id === updatedProd._id ? updatedProd : p))
-      );
-      setSelectedProduct((prev) => (prev && prev._id === updatedProd._id ? updatedProd : prev));
-      setDetailedProduct((prev) => (prev && prev._id === updatedProd._id ? updatedProd : prev));
-    });
+  // Écoute Socket.IO en direct pour le Client connecté
+  useEffect(() => {
+    if (user) {
+      const unsub = onClientOrderUpdate((updateData) => {
+        if (refreshClientUnreadCount) refreshClientUnreadCount();
+        addToast(
+          updateData.title || '🔔 Commande mise à jour',
+          updateData.message || `Votre commande #${updateData.orderNumber} a changé de statut.`,
+          'info'
+        );
+      });
+      return () => unsub();
+    }
+  }, [user, addToast, refreshClientUnreadCount]);
 
-    const unsubDeleted = onProductDeleted((deletedId) => {
-      setProducts((prev) => prev.filter((p) => p._id !== deletedId));
-      setSelectedProduct((prev) => (prev && prev._id === deletedId ? null : prev));
-      setDetailedProduct((prev) => (prev && prev._id === deletedId ? null : prev));
+  // Synchronisation temps réel du catalogue
+  useEffect(() => {
+    const u1 = onProductCreated((p) => setProducts((prev) => (prev.some((x) => x._id === p._id) ? prev : [p, ...prev])));
+    const u2 = onProductUpdated((p) => setProducts((prev) => prev.map((x) => ((x._id || x.id) === (p._id || p.id) ? p : x))));
+    const u3 = onProductDeleted((id) => setProducts((prev) => prev.filter((x) => (x._id || x.id) !== id)));
+    const u4 = onProductStockUpdated(({ productId, stockQuantity, inStock }) => {
+      setProducts((prev) => prev.map((x) => ((x._id || x.id) === productId ? { ...x, stockQuantity, inStock: inStock ?? stockQuantity > 0 } : x)));
     });
-
-    const unsubStock = onProductStockUpdated(({ productId, stockQuantity, inStock }) => {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p._id === productId
-            ? { ...p, stockQuantity, inStock: inStock !== undefined ? inStock : stockQuantity > 0 }
-            : p
-        )
-      );
-      const updateFn = (prev) =>
-        prev && prev._id === productId
-          ? { ...prev, stockQuantity, inStock: inStock !== undefined ? inStock : stockQuantity > 0 }
-          : prev;
-      setSelectedProduct(updateFn);
-      setDetailedProduct(updateFn);
-    });
-
-    return () => {
-      unsubCreated();
-      unsubUpdated();
-      unsubDeleted();
-      unsubStock();
-    };
+    return () => { u1(); u2(); u3(); u4(); };
   }, []);
 
-  // Gestion du bouton Retour physique / geste du téléphone via popstate
+  // Synchronisation avec l'historique et la barre d'adresse
   useEffect(() => {
-    const handlePopState = () => {
+    const handleLocationChange = () => {
       setCurrentPath(window.location.pathname.toLowerCase());
-      // Si une vue secondaire ou modale est ouverte, on la ferme au retour arrière
-      if (detailedProduct) {
-        setDetailedProduct(null);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      if (selectedProduct) setSelectedProduct(null);
       if (isCheckoutOpen) setIsCheckoutOpen(false);
-      if (isOrdersTrackingOpen) setIsOrdersTrackingOpen(false);
       if (isAdminAuthModalOpen) setIsAdminAuthModalOpen(false);
       if (isAdminViewActive) setIsAdminViewActive(false);
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [detailedProduct, selectedProduct, isCheckoutOpen, isOrdersTrackingOpen, isAdminAuthModalOpen, isAdminViewActive]);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('app-navigate', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('app-navigate', handleLocationChange);
+    };
+  }, [isCheckoutOpen, isAdminAuthModalOpen, isAdminViewActive]);
 
-  // Ouverture d'une vue de détail avec ajout d'une entrée d'historique
-  const handleOpenProductDetails = (product) => {
-    window.history.pushState({ view: 'product', id: product._id }, '');
-    setDetailedProduct(product);
-    setSelectedProduct(null);
+  const navigateTo = (path) => {
+    window.history.pushState(null, '', path);
+    setCurrentPath(path.toLowerCase());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleBackToShop = () => {
-    setDetailedProduct(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleSelectProduct = (prod) => {
+    navigateTo(`/produit/${prod._id || prod.id}`);
   };
 
-  // Déclenchement secret Backoffice (10s maintien sur Accueil)
-  const handleOpenAdminTrigger = useCallback(() => {
-    const adminToken = getAdminToken();
-    if (adminToken) {
-      setIsAdminViewActive(true);
-    } else {
-      setIsAdminAuthModalOpen(true);
+  // Sécurité et restrictions d'accès Vendeur
+  useEffect(() => {
+    if (authLoading) return;
+    if (isSellerRoute && !user) {
+      addToast('Connexion requise', 'Veuillez vous connecter à votre compte Vendeur.', 'info');
+      openAuthModal();
     }
-  }, []);
+  }, [isSellerRoute, user, authLoading, addToast, openAuthModal]);
 
-  // Filtrage local en temps réel
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      const matchesCategory =
-        activeCategory === 'all' || p.category.toLowerCase() === activeCategory.toLowerCase();
-      const matchesSearch =
-        !searchTerm.trim() ||
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchesCategory && matchesSearch;
+      const matchesCat = activeCategory === 'all' || p.category.toLowerCase() === activeCategory.toLowerCase();
+      const matchesText = !searchTerm.trim() || p.title.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesCat && matchesText;
     });
   }, [products, activeCategory, searchTerm]);
 
-  const scrollToProducts = () => {
-    if (detailedProduct) {
-      setDetailedProduct(null);
-    }
-    setTimeout(() => {
-      const el = document.getElementById('produits');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 50);
-  };
-
-  const handleResetFilters = () => {
-    setActiveCategory('all');
-    setSearchTerm('');
-  };
-
-  if (isRestrictedDirectRoute && !isAdminViewActive) {
-    return <NotFound404 onGoHome={() => (window.location.href = '/')} />;
+  // Vues Plein Écran : 404, Admin, Vendeur
+  if (isAdminRoute && !isAdminViewActive) {
+    return <NotFound404 onGoHome={() => navigateTo('/')} />;
   }
-
   if (isAdminViewActive) {
-    return (
-      <AdminDashboard
-        onClose={() => setIsAdminViewActive(false)}
-        onProductsUpdated={loadProducts}
-      />
-    );
+    return <AdminDashboard onClose={() => setIsAdminViewActive(false)} onProductsUpdated={loadProducts} />;
+  }
+  if (isSellerRoute && isSeller) {
+    return <SellerDashboard onClose={() => navigateTo('/')} initialTab={sellerInitialTab} />;
   }
 
   return (
@@ -214,51 +196,56 @@ export const App = () => {
       <div className="announcement-bar">
         <div className="announcement-track">
           <div className="announcement-item">
-            <span><i className="fa-solid fa-fire"></i> <strong>VENTE FLASH :</strong> Jusqu&apos;à -50%</span>
+            <span><i className="fa-solid fa-store"></i> <strong>MARKETPLACE :</strong> Devenez Vendeur Partenaire</span>
             <span className="bullet">•</span>
-            <span><i className="fa-solid fa-bolt"></i> <strong>LIVRAISON EXPRESS :</strong> 24/48h en Côte d&apos;Ivoire</span>
+            <span><i className="fa-solid fa-hand-holding-dollar"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Espèces à la livraison</span>
             <span className="bullet">•</span>
-            <span><i className="fa-solid fa-credit-card"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Cash à la livraison</span>
-            <span className="bullet">•</span>
-            <span><i className="fa-solid fa-gift"></i> <strong>CODE PROMO :</strong> VICKY10 (-10%)</span>
-          </div>
-          <div className="announcement-item" aria-hidden="true">
-            <span><i className="fa-solid fa-fire"></i> <strong>VENTE FLASH :</strong> Jusqu&apos;à -50%</span>
-            <span className="bullet">•</span>
-            <span><i className="fa-solid fa-bolt"></i> <strong>LIVRAISON EXPRESS :</strong> 24/48h en Côte d&apos;Ivoire</span>
-            <span className="bullet">•</span>
-            <span><i className="fa-solid fa-credit-card"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Cash à la livraison</span>
-            <span className="bullet">•</span>
-            <span><i className="fa-solid fa-gift"></i> <strong>CODE PROMO :</strong> VICKY10 (-10%)</span>
+            <span><i className="fa-solid fa-bolt"></i> <strong>LIVRAISON EXPRESS :</strong> 24/48h partout en Côte d&apos;Ivoire</span>
           </div>
         </div>
       </div>
 
       <Header
-        onOpenAdmin={handleOpenAdminTrigger}
+        onOpenAdmin={() => (getAdminToken() ? setIsAdminViewActive(true) : setIsAdminAuthModalOpen(true))}
         isAdminActive={isAdminViewActive}
-        onOpenOrdersTracking={() => setIsOrdersTrackingOpen(true)}
+        onOpenOrdersTracking={(ordNum) => {
+          if (ordNum) setSelectedOrderNumber(ordNum);
+          navigateTo('/commandes');
+        }}
+        onOpenProfile={() => navigateTo('/profil')}
+        onOpenSeller={() => navigateTo('/vendeur/dashboard')}
       />
 
-      {detailedProduct ? (
+      {/* ROUTE 1 : PAGE DÉDIÉE DÉTAILS DU PRODUIT */}
+      {isProductRoute && detailedProduct ? (
         <ProductDetailsPage
           product={detailedProduct}
           allProducts={products}
-          onBack={handleBackToShop}
+          onBack={() => navigateTo('/')}
           onOpenCheckout={() => setIsCheckoutOpen(true)}
-          onSelectProduct={handleOpenProductDetails}
+          onSelectProduct={handleSelectProduct}
+        />
+      ) : isOrdersRoute ? (
+        /* ROUTE 2 : PAGE DÉDIÉE VOS COMMANDES */
+        <UserOrdersPage onBackToShop={() => navigateTo('/')} initialOrderNumber={selectedOrderNumber} />
+      ) : isProfileRoute ? (
+        /* ROUTE 3 : PAGE DÉDIÉE PROFIL & PARAMÈTRES */
+        <UserProfilePage
+          onBackToShop={() => navigateTo('/')}
+          onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')}
         />
       ) : (
+        /* ROUTE 4 : PAGE D'ACCUEIL & CATALOGUE PRINCIPAL */
         <>
-          <HeroSection onExploreClick={scrollToProducts} />
+          <HeroSection onExploreClick={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })} />
           <FlashSale
             products={products}
-            onShopNow={scrollToProducts}
-            onQuickView={handleOpenProductDetails}
+            onShopNow={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })}
+            onQuickView={handleSelectProduct}
           />
           <main className="container products" id="produits">
             <div className="section-header">
-              <span className="section-subtitle">Notre Catalogue</span>
+              <span className="section-subtitle">Notre Catalogue Marketplace</span>
               <h2 className="section-title">Nos Produits Tendance</h2>
               <div className="title-underline" />
             </div>
@@ -275,39 +262,23 @@ export const App = () => {
               products={filteredProducts}
               loading={loading}
               error={error}
-              onSelectProduct={handleOpenProductDetails}
-              onQuickView={(p) => setSelectedProduct(p)}
-              onResetFilters={handleResetFilters}
+              onSelectProduct={handleSelectProduct}
+              onQuickView={handleSelectProduct}
+              onResetFilters={() => { setActiveCategory('all'); setSearchTerm(''); }}
             />
           </main>
         </>
       )}
 
       <Footer />
-
       <CartDrawer onOpenCheckout={() => setIsCheckoutOpen(true)} />
       <WishlistDrawer />
-      <OrdersTrackingModal
-        isOpen={isOrdersTrackingOpen}
-        onClose={() => setIsOrdersTrackingOpen(false)}
-      />
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-      />
+      <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
       <AuthModal />
-      <UserProfileModal />
       <AdminAuthModal
         isOpen={isAdminAuthModalOpen}
         onClose={() => setIsAdminAuthModalOpen(false)}
-        onAuthSuccess={() => {
-          setIsAdminAuthModalOpen(false);
-          setIsAdminViewActive(true);
-        }}
-      />
-      <QuickViewModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
+        onAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
       />
       <ToastContainer />
     </div>

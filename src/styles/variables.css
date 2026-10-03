@@ -56,21 +56,34 @@
   /* Typographie */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Alias & Compatibilité */
+  --text-main: var(--text-primary);
+  --text-color: var(--text-primary);
+  --bg-body: var(--bg-main);
+  --primary-soft: rgba(255, 107, 0, 0.12);
+  --accent-red-soft: rgba(239, 68, 68, 0.12);
 }
 
 /* Mode Clair */
 [data-theme="light"] {
   --bg-main: #f4f6fb;
   --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.9);
-  --bg-glass: rgba(255, 255, 255, 0.9);
-  --bg-input: #eef2f6;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  --bg-input: #f1f5f9;
 
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-highlight: rgba(255, 107, 0, 0.4);
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border-color: rgba(0, 0, 0, 0.12);
+  --border-highlight: rgba(255, 107, 0, 0.5);
+
+  --text-main: #0f172a;
+  --text-color: #0f172a;
+  --bg-body: #f4f6fb;
+  --primary-soft: rgba(255, 107, 0, 0.1);
+  --accent-red-soft: rgba(239, 68, 68, 0.1);
 
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
