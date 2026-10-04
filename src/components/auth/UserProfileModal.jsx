@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getRoleDisplayName, getRoleBadgeClass, getRoleIcon, isSellerRole } from '../../utils/roleUtils';
+import { getRoleDisplayName, getRoleBadgeClass, getRoleIcon } from '../../utils/roleUtils';
 
 export const UserProfileModal = () => {
   const {
@@ -10,18 +10,16 @@ export const UserProfileModal = () => {
     closeProfileModal,
     updateProfile,
     updatePassword,
-    upgradeToSeller,
     isSeller,
     openSellerDashboard,
   } = useAuth();
   const { addToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password' | 'account' | 'upgrade'
+  const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
 
   const [profileForm, setProfileForm] = useState({ name: '', phone: '', address: '', city: 'Abidjan' });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [upgradeForm, setUpgradeForm] = useState({ shopName: '', shopPhone: '', shopAddress: '', shopDescription: '' });
 
   useEffect(() => {
     if (user) {
@@ -30,12 +28,6 @@ export const UserProfileModal = () => {
         phone: user.phone || '',
         address: user.address || '',
         city: user.city || 'Abidjan',
-      });
-      setUpgradeForm({
-        shopName: user.shopName || `${user.name} Boutique`,
-        shopPhone: user.shopPhone || user.phone || '',
-        shopAddress: user.shopAddress || user.address || '',
-        shopDescription: user.shopDescription || '',
       });
     }
   }, [user, isProfileModalOpen]);
@@ -76,27 +68,6 @@ export const UserProfileModal = () => {
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
       addToast('Erreur', err.message || 'Mot de passe actuel incorrect.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpgradeSubmit = async (e) => {
-    e.preventDefault();
-    if (!upgradeForm.shopName.trim()) {
-      addToast('Nom requis', 'Veuillez renseigner le nom de votre boutique.', 'error');
-      return;
-    }
-    setLoading(true);
-    try {
-      await upgradeToSeller(upgradeForm);
-      addToast('Félicitations ! 🎉', 'Votre compte Vendeur Marketplace est désormais actif.', 'success');
-      closeProfileModal();
-      window.history.pushState(null, '', '/vendeur/dashboard');
-      window.dispatchEvent(new Event('app-navigate'));
-      openSellerDashboard();
-    } catch (err) {
-      addToast('Erreur', err.message || "Impossible d'activer le compte vendeur.", 'error');
     } finally {
       setLoading(false);
     }
@@ -150,11 +121,6 @@ export const UserProfileModal = () => {
           <button type="button" className={`profile-tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>
             <i className="fa-solid fa-shield-halved"></i> <span>Mon Compte</span>
           </button>
-          {!isSeller && (
-            <button type="button" className={`profile-tab-btn tab-upgrade ${activeTab === 'upgrade' ? 'active' : ''}`} onClick={() => setActiveTab('upgrade')}>
-              <i className="fa-solid fa-store"></i> <span>Devenir Vendeur</span>
-            </button>
-          )}
         </div>
 
         <div className="modal-profile-content">
@@ -223,44 +189,12 @@ export const UserProfileModal = () => {
                 </div>
               </div>
 
-              {isSeller ? (
+              {isSeller && (
                 <button type="button" className="btn btn-primary btn-profile-submit" onClick={handleOpenSellerSpace}>
                   <i className="fa-solid fa-store"></i> <span>Ouvrir l&apos;Espace Gestion Vendeur</span>
                 </button>
-              ) : (
-                <button type="button" className="btn btn-outline btn-profile-submit" onClick={() => setActiveTab('upgrade')}>
-                  <i className="fa-solid fa-store"></i> <span>Devenir Vendeur Marketplace</span>
-                </button>
               )}
             </div>
-          )}
-
-          {activeTab === 'upgrade' && (
-            <form onSubmit={handleUpgradeSubmit} className="profile-form">
-              <div className="alert-box-info">
-                <i className="fa-solid fa-store"></i>
-                <div>
-                  <strong>Activez votre Boutique Partenaire</strong>
-                  <p>Vendez vos produits sur Vicky-Shop, gérez vos commandes en direct et encaissez en espèces à la livraison.</p>
-                </div>
-              </div>
-              <div className="profile-form-group">
-                <label><i className="fa-solid fa-shop"></i> Nom de votre Boutique *</label>
-                <input type="text" className="profile-form-input" required placeholder="Ex : Vicky Mode &amp; Tendance" value={upgradeForm.shopName} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopName: e.target.value })} />
-              </div>
-              <div className="profile-form-group">
-                <label><i className="fa-brands fa-whatsapp"></i> Téléphone Commercial WhatsApp *</label>
-                <input type="tel" className="profile-form-input" required placeholder="05 00 00 00 00" value={upgradeForm.shopPhone} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopPhone: e.target.value })} />
-              </div>
-              <div className="profile-form-group">
-                <label><i className="fa-solid fa-location-dot"></i> Localisation / Adresse boutique</label>
-                <input type="text" className="profile-form-input" placeholder="Ex : Marché d'Adjamé, Allée B / Treichville" value={upgradeForm.shopAddress} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopAddress: e.target.value })} />
-              </div>
-              <button type="submit" className="btn btn-primary btn-profile-submit" disabled={loading}>
-                {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-store"></i>}
-                <span>Activer mon Espace Vendeur</span>
-              </button>
-            </form>
           )}
         </div>
       </div>
@@ -269,4 +203,3 @@ export const UserProfileModal = () => {
 };
 
 export default UserProfileModal;
-

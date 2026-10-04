@@ -9,7 +9,6 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
     token,
     updateProfile,
     updatePassword,
-    upgradeToSeller,
     isSeller,
     logout,
     openAuthModal,
@@ -21,22 +20,15 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
 
   const [profileForm, setProfileForm] = useState({ name: '', phone: '', address: '', city: 'Abidjan' });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [upgradeForm, setUpgradeForm] = useState({ shopName: '', shopPhone: '', shopAddress: '', shopDescription: '' });
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
     if (user) {
       setProfileForm({
         name: user.name || '',
         phone: user.phone || '',
         address: user.address || '',
         city: user.city || 'Abidjan',
-      });
-      setUpgradeForm({
-        shopName: user.shopName || `${user.name} Boutique`,
-        shopPhone: user.shopPhone || user.phone || '',
-        shopAddress: user.shopAddress || user.address || '',
-        shopDescription: user.shopDescription || '',
       });
     }
   }, [user]);
@@ -102,33 +94,12 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
     }
   };
 
-  const handleUpgradeSubmit = async (e) => {
-    e.preventDefault();
-    if (!upgradeForm.shopName.trim()) {
-      addToast('Nom requis', 'Veuillez renseigner le nom de votre boutique.', 'error');
-      return;
-    }
-    setLoading(true);
-    try {
-      await upgradeToSeller(upgradeForm);
-      addToast('Félicitations ! 🎉', 'Votre compte Vendeur Marketplace est désormais actif.', 'success');
-      if (onOpenSellerDashboard) {
-        onOpenSellerDashboard();
-      }
-    } catch (err) {
-      addToast('Erreur', err.message || "Impossible d'activer le compte vendeur.", 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const roleLabel = getRoleDisplayName(user?.role);
   const roleBadgeClass = getRoleBadgeClass(user?.role);
   const roleIcon = getRoleIcon(user?.role);
 
   return (
     <div className="container user-profile-page-root animate-fade-in" style={{ padding: '2rem 1rem 4rem' }}>
-      {/* Fil d'Ariane & Retour */}
       <div className="details-top-bar" style={{ marginBottom: '1.5rem' }}>
         <button type="button" className="btn-back-shop" onClick={onBackToShop}>
           <i className="fa-solid fa-arrow-left"></i>
@@ -141,7 +112,6 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
         </div>
       </div>
 
-      {/* Carte d'en-tête utilisateur */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800 }}>
@@ -171,9 +141,7 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
         </div>
       </div>
 
-      {/* Système d'onglets de configuration */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'start' }}>
-        {/* Navigation des Onglets */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
           <button
             type="button"
@@ -199,19 +167,8 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
           >
             <i className="fa-solid fa-shield-halved"></i> <span>Statut &amp; Rôle du Compte</span>
           </button>
-          {!isSeller && (
-            <button
-              type="button"
-              className={`profile-tab-btn tab-upgrade ${activeTab === 'upgrade' ? 'active' : ''}`}
-              onClick={() => setActiveTab('upgrade')}
-              style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
-            >
-              <i className="fa-solid fa-store"></i> <span>Devenir Vendeur Marketplace</span>
-            </button>
-          )}
         </div>
 
-        {/* Contenu de l'onglet actif */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1.75rem' }}>
           {activeTab === 'profile' && (
             <form onSubmit={handleProfileSubmit} className="profile-form">
@@ -272,7 +229,7 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
               <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
                 Détails du compte
               </h3>
-              <div className="account-details-card" style={{ marginBottom: '1.5rem' }}>
+              <div className="account-details-card">
                 <div className="account-info-row">
                   <span className="account-info-label"><i className="fa-solid fa-user-tag text-primary"></i> Rôle sur le site</span>
                   <span className={`profile-role-pill ${roleBadgeClass}`}>{roleLabel}</span>
@@ -286,44 +243,12 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
                   <strong className="text-success">Actif &amp; Vérifié</strong>
                 </div>
               </div>
-              {isSeller ? (
-                <button type="button" className="btn btn-primary" onClick={onOpenSellerDashboard} style={{ width: '100%' }}>
+              {isSeller && (
+                <button type="button" className="btn btn-primary" onClick={onOpenSellerDashboard} style={{ width: '100%', marginTop: '1.5rem' }}>
                   <i className="fa-solid fa-store"></i> <span>Accéder au Dashboard Vendeur</span>
-                </button>
-              ) : (
-                <button type="button" className="btn btn-outline" onClick={() => setActiveTab('upgrade')} style={{ width: '100%' }}>
-                  <i className="fa-solid fa-store"></i> <span>Activer mon Espace Vendeur</span>
                 </button>
               )}
             </div>
-          )}
-
-          {activeTab === 'upgrade' && (
-            <form onSubmit={handleUpgradeSubmit} className="profile-form">
-              <div className="alert-box-info" style={{ marginBottom: '1.25rem' }}>
-                <i className="fa-solid fa-store"></i>
-                <div>
-                  <strong>Activez votre Boutique Partenaire</strong>
-                  <p>Vendez vos produits sur Vicky-Shop, gérez vos commandes en direct et encaissez en espèces à la livraison.</p>
-                </div>
-              </div>
-              <div className="profile-form-group">
-                <label><i className="fa-solid fa-shop"></i> Nom de votre Boutique *</label>
-                <input type="text" className="profile-form-input" required placeholder="Ex : Vicky Mode &amp; Tendance" value={upgradeForm.shopName} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopName: e.target.value })} />
-              </div>
-              <div className="profile-form-group">
-                <label><i className="fa-brands fa-whatsapp"></i> Téléphone Commercial WhatsApp *</label>
-                <input type="tel" className="profile-form-input" required placeholder="05 00 00 00 00" value={upgradeForm.shopPhone} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopPhone: e.target.value })} />
-              </div>
-              <div className="profile-form-group">
-                <label><i className="fa-solid fa-location-dot"></i> Localisation / Adresse boutique</label>
-                <input type="text" className="profile-form-input" placeholder="Ex : Marché d'Adjamé / Treichville" value={upgradeForm.shopAddress} onChange={(e) => setUpgradeForm({ ...upgradeForm, shopAddress: e.target.value })} />
-              </div>
-              <button type="submit" className="btn btn-primary btn-profile-submit" disabled={loading}>
-                {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-store"></i>}
-                <span>Activer mon Espace Vendeur</span>
-              </button>
-            </form>
           )}
         </div>
       </div>

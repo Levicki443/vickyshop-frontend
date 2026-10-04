@@ -192,13 +192,9 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                         <small>{isSeller ? '🏪 Compte Vendeur' : '⚙️ Paramètres & Profil'}</small>
                       </div>
                     </div>
-                    {isSeller ? (
+                    {isSeller && (
                       <button type="button" className="btn btn-primary btn-block mt-2" onClick={handleSellerClick}>
                         <i className="fa-solid fa-store"></i> <span>Ouvrir Gestion Vendeur</span>
-                      </button>
-                    ) : (
-                      <button type="button" className="btn btn-outline btn-block mt-2" onClick={handleProfileClick}>
-                        <i className="fa-solid fa-store"></i> <span>Devenir Vendeur Marketplace</span>
                       </button>
                     )}
                     <button
@@ -282,13 +278,9 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                       <small>{isSeller ? `🏪 ${user?.shopName || 'Boutique'}` : user?.email}</small>
                     </div>
 
-                    {isSeller ? (
+                    {isSeller && (
                       <button type="button" className="dropdown-item text-primary font-weight-bold" onClick={handleSellerClick}>
                         <i className="fa-solid fa-store"></i> Panneau Gestion Vendeur
-                      </button>
-                    ) : (
-                      <button type="button" className="dropdown-item text-primary font-weight-bold" onClick={handleProfileClick}>
-                        <i className="fa-solid fa-store"></i> Activer mon Compte Vendeur
                       </button>
                     )}
 
