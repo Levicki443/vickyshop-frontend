@@ -55,6 +55,24 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
     return name.split(' ').map((p) => p[0]).join('').substring(0, 2).toUpperCase();
   };
 
+  const handleNavAnchor = (e, anchorId) => {
+    setMobileMenuOpen(false);
+    if (window.location.pathname !== '/') {
+      e.preventDefault();
+      window.history.pushState(null, '', '/');
+      window.dispatchEvent(new Event('app-navigate'));
+      setTimeout(() => {
+        if (anchorId) {
+          const el = document.getElementById(anchorId);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          else window.scrollTo({ top: 0, behavior: 'instant' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+      }, 60);
+    }
+  };
+
   const handleSellerClick = () => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
@@ -106,13 +124,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
             href="#accueil"
             className="logo"
             {...triggerProps}
-            onClick={(e) => {
-              if (window.location.pathname !== '/') {
-                e.preventDefault();
-                window.history.pushState(null, '', '/');
-                window.dispatchEvent(new Event('app-navigate'));
-              }
-            }}
+            onClick={(e) => handleNavAnchor(e, 'accueil')}
           >
             <img src={logoImg} alt="Vicky-Shop" className="logo-img rounded-logo" />
             <span className="logo-text">Vicky<span className="logo-accent">-Shop</span></span>
@@ -131,17 +143,17 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
 
             <ul className="nav-links">
               <li>
-                <a href="#accueil" onClick={() => setMobileMenuOpen(false)} className="nav-link-item" {...triggerProps}>
+                <a href="#accueil" onClick={(e) => handleNavAnchor(e, 'accueil')} className="nav-link-item" {...triggerProps}>
                   <i className="fa-solid fa-house nav-icon-mobile"></i> Accueil
                 </a>
               </li>
               <li>
-                <a href="#produits" onClick={() => setMobileMenuOpen(false)}>
+                <a href="#produits" onClick={(e) => handleNavAnchor(e, 'produits')} className="nav-link-item">
                   <i className="fa-solid fa-grid-2 nav-icon-mobile"></i> Produits
                 </a>
               </li>
               <li>
-                <a href="#flash-sale" onClick={() => setMobileMenuOpen(false)}>
+                <a href="#flash-sale" onClick={(e) => handleNavAnchor(e, 'flash-sale')} className="nav-link-item">
                   <i className="fa-solid fa-fire nav-icon-mobile"></i> Vente Flash <span className="hot-badge">Hot</span>
                 </a>
               </li>

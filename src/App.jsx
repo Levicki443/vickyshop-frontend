@@ -49,14 +49,18 @@ export const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  // Détection des routes
+  // Détection exhaustive des routes
   const isSellerRoute = currentPath.startsWith('/vendeur');
   const isAdminRoute = currentPath.startsWith('/admin') || currentPath.startsWith('/dashboard') || currentPath.startsWith('/backoffice');
   const isOrdersRoute = currentPath.startsWith('/commandes') || currentPath.startsWith('/orders');
   const isProfileRoute = currentPath.startsWith('/profil') || currentPath.startsWith('/profile');
-  const isProductRoute = currentPath.startsWith('/produit/') || currentPath.startsWith('/product/');
+  const isProductRoute =
+    currentPath.startsWith('/produit/') ||
+    currentPath.startsWith('/produits/') ||
+    currentPath.startsWith('/product/') ||
+    currentPath.startsWith('/products/');
 
-  // Extraction de l'ID produit pour la page détails
+  // Extraction propre de l'identifiant produit
   const currentProductId = useMemo(() => {
     if (!isProductRoute) return null;
     const parts = currentPath.split('/').filter(Boolean);
@@ -64,7 +68,7 @@ export const App = () => {
   }, [isProductRoute, currentPath]);
 
   const detailedProduct = useMemo(() => {
-    if (!currentProductId) return null;
+    if (!currentProductId || products.length === 0) return null;
     return products.find((p) => String(p._id || p.id) === String(currentProductId)) || null;
   }, [currentProductId, products]);
 
@@ -153,11 +157,14 @@ export const App = () => {
   const navigateTo = (path) => {
     window.history.pushState(null, '', path);
     setCurrentPath(path.toLowerCase());
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleSelectProduct = (prod) => {
-    navigateTo(`/produit/${prod._id || prod.id}`);
+    const id = prod?._id || prod?.id || prod;
+    if (id) {
+      navigateTo(`/produit/${id}`);
+    }
   };
 
   // Sécurité et restrictions d'accès Vendeur
@@ -216,10 +223,11 @@ export const App = () => {
         onOpenSeller={() => navigateTo('/vendeur/dashboard')}
       />
 
-      {/* ROUTE 1 : PAGE DÉDIÉE DÉTAILS DU PRODUIT */}
-      {isProductRoute && detailedProduct ? (
+      {/* ROUTE 1 : PAGE DÉDIÉE DÉTAILS DU PRODUIT (STRICTEMENT ISOLÉE) */}
+      {isProductRoute ? (
         <ProductDetailsPage
-          product={detailedProduct}
+          productId={currentProductId}
+          initialProduct={detailedProduct}
           allProducts={products}
           onBack={() => navigateTo('/')}
           onOpenCheckout={() => setIsCheckoutOpen(true)}
