@@ -13,6 +13,7 @@ import './styles/seller-orders.css';
 import './styles/seller.css';
 import './styles/admin.css';
 import './styles/pwa.css';
+import './styles/responsive.css';
 
 // Enregistrement du Service Worker PWA
 if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {

@@ -22,8 +22,20 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;
+  width: 100%;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: clip;
+  position: relative;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -31,6 +43,8 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.25;
   color: var(--text-primary);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 a {
@@ -49,9 +63,10 @@ button, input, select, textarea {
 button {
   cursor: pointer;
   background: none;
+  touch-action: manipulation;
 }
 
-img {
+img, picture, video, canvas, svg {
   max-width: 100%;
   height: auto;
   display: block;
@@ -163,15 +178,10 @@ img {
 }
 
 .container {
-  max-width: 1280px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 1rem;
-  }
+  padding: 0 var(--container-padding);
+  width: 100%;
 }
 
 /* -----------------------------

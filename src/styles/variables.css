@@ -57,6 +57,13 @@
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
 
+  /* Dimensions de Layout & Responsive */
+  --container-max: 1280px;
+  --container-padding: clamp(0.75rem, 3vw, 1.5rem);
+  --header-height-desktop: 72px;
+  --header-height-mobile: 62px;
+  --tap-min-size: 42px;
+
   /* Alias & Compatibilité */
   --text-main: var(--text-primary);
   --text-color: var(--text-primary);
