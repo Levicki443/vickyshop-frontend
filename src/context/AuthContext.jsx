@@ -5,10 +5,12 @@ import {
   fetchUserProfile,
   updateUserProfile,
   updateUserPassword,
+  requestPasswordReset,
+  submitPasswordReset,
 } from '../services/api';
 import { fetchSellerNotifications, upgradeToSellerAccount } from '../services/sellerApi';
 import { fetchClientNotifications } from '../services/notificationApi';
-import { joinUserRoom, joinSellerRoom } from '../services/socket';
+import { joinUserRoom, joinSellerRoom, reauthenticateSocket } from '../services/socket';
 import { isSellerRole, isClientRole, isAdminRole, normalizeRole } from '../utils/roleUtils';
 
 const AuthContext = createContext();
@@ -43,6 +45,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('vicky_auth_user', JSON.stringify(authUser));
       setUser(authUser);
     }
+    reauthenticateSocket();
   }, []);
 
   const clearSession = useCallback(() => {
@@ -52,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setSellerUnreadCount(0);
     setClientUnreadCount(0);
+    reauthenticateSocket();
   }, []);
 
   const checkAuth = useCallback(async () => {
@@ -77,7 +81,6 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, [checkAuth]);
 
-  // Connexion automatique aux rooms WebSocket Socket.IO
   useEffect(() => {
     if (user) {
       const uId = user._id || user.id;
@@ -88,7 +91,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Actualisation des compteurs de notifications client et vendeur
   const refreshClientUnreadCount = useCallback(async () => {
     const activeToken = token || localStorage.getItem('vicky_auth_token');
     if (!activeToken || !user) {
@@ -136,6 +138,19 @@ export const AuthProvider = ({ children }) => {
     persistSession(receivedToken, data.user);
     setIsAuthModalOpen(false);
     return data.user;
+  };
+
+  const forgotPassword = async (email) => {
+    return await requestPasswordReset(email);
+  };
+
+  const resetPassword = async (resetToken, newPassword) => {
+    const response = await submitPasswordReset(resetToken, newPassword);
+    if (response.token) {
+      setToken(response.token);
+      localStorage.setItem('vicky_auth_token', response.token);
+    }
+    return response;
   };
 
   const updateProfile = async (userData) => {
@@ -193,6 +208,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         register,
+        forgotPassword,
+        resetPassword,
         updateProfile,
         upgradeToSeller,
         updatePassword,

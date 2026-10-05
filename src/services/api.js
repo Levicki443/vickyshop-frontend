@@ -6,21 +6,12 @@
 const rawBaseUrl = (import.meta.env.VITE_URL || import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
 const API_BASE_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl : `${rawBaseUrl}/api`;
 
-/**
- * Récupère le catalogue de produits avec filtres optionnels.
- */
 export const fetchProducts = async (params = {}) => {
   try {
     const query = new URLSearchParams();
-    if (params.category && params.category !== 'all') {
-      query.append('category', params.category);
-    }
-    if (params.search) {
-      query.append('search', params.search);
-    }
-    if (params.sort) {
-      query.append('sort', params.sort);
-    }
+    if (params.category && params.category !== 'all') query.append('category', params.category);
+    if (params.search) query.append('search', params.search);
+    if (params.sort) query.append('sort', params.sort);
 
     const response = await fetch(`${API_BASE_URL}/products?${query.toString()}`);
     if (!response.ok) {
@@ -35,9 +26,6 @@ export const fetchProducts = async (params = {}) => {
   }
 };
 
-/**
- * Récupère les détails d'un produit par son identifiant MongoDB.
- */
 export const fetchProductById = async (id) => {
   try {
     const response = await fetch(`${API_BASE_URL}/products/${id}`);
@@ -52,9 +40,6 @@ export const fetchProductById = async (id) => {
   }
 };
 
-/**
- * Connexion d'un utilisateur existant (Client, Vendeur, Admin).
- */
 export const loginUser = async (credentials) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -78,9 +63,6 @@ export const loginUser = async (credentials) => {
   }
 };
 
-/**
- * Inscription d'un nouveau client ou vendeur marketplace.
- */
 export const registerUser = async (userData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -104,15 +86,42 @@ export const registerUser = async (userData) => {
   }
 };
 
-/**
- * Récupère le profil de l'utilisateur connecté via son jeton JWT.
- */
+export const requestPasswordReset = async (email) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const json = await response.json();
+    if (!response.ok) throw new Error(json.message || 'Erreur lors de la demande de réinitialisation.');
+    return json;
+  } catch (error) {
+    console.error('[API] Erreur requestPasswordReset :', error);
+    throw error;
+  }
+};
+
+export const submitPasswordReset = async (token, newPassword) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword }),
+    });
+    const json = await response.json();
+    if (!response.ok) throw new Error(json.message || 'Erreur lors de la réinitialisation du mot de passe.');
+    return json;
+  } catch (error) {
+    console.error('[API] Erreur submitPasswordReset :', error);
+    throw error;
+  }
+};
+
 export const fetchUserProfile = async (token) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const json = await response.json();
@@ -127,9 +136,6 @@ export const fetchUserProfile = async (token) => {
   }
 };
 
-/**
- * Met à jour les informations du profil utilisateur connecté.
- */
 export const updateUserProfile = async (userData, token) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/update-profile`, {
@@ -153,9 +159,6 @@ export const updateUserProfile = async (userData, token) => {
   }
 };
 
-/**
- * Met à jour le mot de passe de l'utilisateur connecté.
- */
 export const updateUserPassword = async (passwordData, token) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/update-password`, {
@@ -179,9 +182,6 @@ export const updateUserPassword = async (passwordData, token) => {
   }
 };
 
-/**
- * Envoie une nouvelle commande en espèces à la livraison (COD).
- */
 export const submitOrder = async (orderData, token = null) => {
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -210,15 +210,10 @@ export const submitOrder = async (orderData, token = null) => {
   }
 };
 
-/**
- * Récupère les commandes du client connecté.
- */
 export const fetchMyOrders = async (token) => {
   try {
     const response = await fetch(`${API_BASE_URL}/orders/my-orders`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const json = await response.json();
@@ -233,9 +228,6 @@ export const fetchMyOrders = async (token) => {
   }
 };
 
-/**
- * Formate un nombre en Francs CFA avec séparateur de milliers.
- */
 export const formatPrice = (amount) => {
   if (typeof amount !== 'number') return '0 FCFA';
   return `${amount.toLocaleString('fr-FR')} FCFA`;

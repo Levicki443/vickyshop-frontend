@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
 /**
- * Service de gestion de la connexion WebSocket Socket.IO pour le frontend Vicky-Shop.
+ * Service de gestion de la connexion WebSocket Socket.IO sécurisée pour le frontend Vicky-Shop.
  */
 
 const rawBaseUrl = (import.meta.env.VITE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000').trim().replace(/\/+$/, '');
@@ -9,17 +9,26 @@ const SOCKET_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl.replace(/\/api$/, ''
 
 let socket = null;
 
+const getActiveToken = () => {
+  return localStorage.getItem('vicky_auth_token') || localStorage.getItem('vicky_admin_token') || null;
+};
+
 /**
- * Initialise ou retourne la connexion Socket.IO singleton.
+ * Initialise ou retourne la connexion Socket.IO singleton avec transmission du jeton JWT.
  */
 export const getSocket = () => {
   if (!socket) {
+    const token = getActiveToken();
+
     socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 2000,
       withCredentials: true,
+      auth: {
+        token,
+      },
     });
 
     socket.on('connect', () => {
@@ -36,6 +45,17 @@ export const getSocket = () => {
   }
 
   return socket;
+};
+
+/**
+ * Réinitialise la connexion Socket.IO lors du changement de session (Connexion / Déconnexion).
+ */
+export const reauthenticateSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+  return getSocket();
 };
 
 /**
