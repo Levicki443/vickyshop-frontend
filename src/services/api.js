@@ -232,3 +232,17 @@ export const formatPrice = (amount) => {
   if (typeof amount !== 'number') return '0 FCFA';
   return `${amount.toLocaleString('fr-FR')} FCFA`;
 };
+
+export const fetchShopSettings = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/settings`);
+    if (!response.ok) {
+      throw new Error(`Erreur chargement paramètres (${response.status})`);
+    }
+    const json = await response.json();
+    return json.data?.settings || null;
+  } catch (error) {
+    console.error('[API] Erreur fetchShopSettings :', error);
+    return null;
+  }
+};

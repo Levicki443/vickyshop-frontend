@@ -24,6 +24,7 @@ import { CheckoutModal } from './components/cart/CheckoutModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { Footer } from './components/common/Footer';
 import { ToastContainer } from './components/common/ToastContainer';
+import { AnnouncementBar } from './components/common/AnnouncementBar';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { SellerDashboard } from './components/seller/SellerDashboard';
@@ -216,17 +217,7 @@ export const App = () => {
       <WelcomeOverlay />
       <PwaInstallModal />
 
-      <div className="announcement-bar">
-        <div className="announcement-track">
-          <div className="announcement-item">
-            <span><i className="fa-solid fa-store"></i> <strong>MARKETPLACE :</strong> Devenez Vendeur Partenaire</span>
-            <span className="bullet">•</span>
-            <span><i className="fa-solid fa-hand-holding-dollar"></i> <strong>PAIEMENT SÉCURISÉ :</strong> Espèces à la livraison</span>
-            <span className="bullet">•</span>
-            <span><i className="fa-solid fa-bolt"></i> <strong>LIVRAISON EXPRESS :</strong> 24/48h partout en Côte d&apos;Ivoire</span>
-          </div>
-        </div>
-      </div>
+      <AnnouncementBar />
 
       <Header
         onOpenAdmin={() => (getAdminToken() ? setIsAdminViewActive(true) : setIsAdminAuthModalOpen(true))}

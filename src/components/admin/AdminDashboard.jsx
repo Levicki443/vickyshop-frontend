@@ -54,6 +54,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
     freeShippingThreshold: 50000,
     defaultShippingCost: 2000,
     announcementText: '',
+    isAnnouncementActive: true,
     activePromoCode: 'VICKY10',
     promoDiscountPercent: 10,
     whatsappNumber: '2250700000000',
@@ -1420,15 +1421,29 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
                       </div>
 
                       <div className="admin-form-group">
-                        <label htmlFor="announcement-text">Message de la banniere defilante (Ticker)</label>
+                        <label htmlFor="announcement-text">Message de la bannière défilante (Ticker / Marquee)</label>
                         <textarea
                           id="announcement-text"
                           rows={3}
                           value={settings.announcementText || ''}
                           onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
                           className="admin-textarea"
-                          placeholder="Ex: VENTE FLASH : Jusqu'a -50% | LIVRAISON EXPRESS : 24/48h..."
+                          placeholder="Ex: VENTE FLASH : Jusqu'à -50% | LIVRAISON EXPRESS : 24/48h en Côte d'Ivoire..."
                         />
+                        <small style={{ color: 'var(--text-muted, #8b9bb4)', fontSize: '0.75rem', marginTop: '0.35rem', display: 'block' }}>
+                          Astuce : Utilisez le séparateur <strong>|</strong> pour scinder vos annonces avec des puces élégantes.
+                        </small>
+                      </div>
+
+                      <div className="admin-checkbox-group" style={{ marginBottom: '0.75rem' }}>
+                        <label className="admin-checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={settings.isAnnouncementActive !== false}
+                            onChange={(e) => setSettings({ ...settings, isAnnouncementActive: e.target.checked })}
+                          />
+                          <span>Activer et afficher la bannière défilante sur la boutique</span>
+                        </label>
                       </div>
 
                       <div className="admin-checkbox-group">

@@ -200,6 +200,17 @@ export const onProductStockUpdated = (callback) => {
 };
 
 /**
+ * Écoute la mise à jour des paramètres généraux (bannière défilante, infos boutique) en temps réel.
+ */
+export const onSettingsUpdated = (callback) => {
+  const s = getSocket();
+  s.on('settings:updated', callback);
+  return () => {
+    s.off('settings:updated', callback);
+  };
+};
+
+/**
  * Déconnecte proprement le client Socket.IO.
  */
 export const disconnectSocket = () => {
