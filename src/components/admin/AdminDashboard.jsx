@@ -39,7 +39,7 @@ import logoImg from '../../assets/logo.png';
  * 4. Base Clients
  * 5. Parametres de la Boutique
  */
-export const AdminDashboard = ({ onExitToShop, onLogout }) => {
+export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpdated }) => {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'orders', 'products', 'users', 'settings'
   const [adminUser] = useState(() => getAdminUser());
 
@@ -263,9 +263,21 @@ export const AdminDashboard = ({ onExitToShop, onLogout }) => {
     }
   };
 
+  const handleExitShop = () => {
+    if (typeof onExitToShop === 'function') {
+      onExitToShop();
+    } else if (typeof onClose === 'function') {
+      onClose();
+    }
+  };
+
   const handleLogout = () => {
     removeAdminToken();
-    if (onLogout) onLogout();
+    if (typeof onLogout === 'function') {
+      onLogout();
+    } else {
+      handleExitShop();
+    }
   };
 
   const showNotification = (message, type = 'success') => {
@@ -356,7 +368,7 @@ export const AdminDashboard = ({ onExitToShop, onLogout }) => {
             <div className="admin-brand-name">
               Vicky<span className="admin-brand-accent">-Shop</span> Backoffice
             </div>
-            <div className="admin-brand-sub">Espace Administrateur Securise</div>
+            <div className="admin-brand-sub">Espace Administrateur Sécurisé</div>
           </div>
         </div>
 
@@ -380,8 +392,8 @@ export const AdminDashboard = ({ onExitToShop, onLogout }) => {
           <button
             type="button"
             className="admin-btn admin-btn-outline"
-            onClick={onExitToShop}
-            title="Revenir a la boutique en ligne"
+            onClick={handleExitShop}
+            title="Revenir à la boutique en ligne"
           >
             <i className="fa-solid fa-store"></i>
             <span>Voir la boutique</span>
@@ -391,10 +403,10 @@ export const AdminDashboard = ({ onExitToShop, onLogout }) => {
             type="button"
             className="admin-btn admin-btn-danger-outline"
             onClick={handleLogout}
-            title="Se deconnecter de l'administration"
+            title="Se déconnecter de l'administration"
           >
             <i className="fa-solid fa-power-off"></i>
-            <span>Deconnexion</span>
+            <span>Déconnexion</span>
           </button>
         </div>
       </header>

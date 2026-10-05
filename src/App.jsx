@@ -189,7 +189,23 @@ export const App = () => {
     return <NotFound404 onGoHome={() => navigateTo('/')} />;
   }
   if (isAdminViewActive) {
-    return <AdminDashboard onClose={() => setIsAdminViewActive(false)} onProductsUpdated={loadProducts} />;
+    return (
+      <AdminDashboard
+        onClose={() => {
+          setIsAdminViewActive(false);
+          navigateTo('/');
+        }}
+        onExitToShop={() => {
+          setIsAdminViewActive(false);
+          navigateTo('/');
+        }}
+        onLogout={() => {
+          setIsAdminViewActive(false);
+          navigateTo('/');
+        }}
+        onProductsUpdated={loadProducts}
+      />
+    );
   }
   if (isSellerRoute && isSeller) {
     return <SellerDashboard onClose={() => navigateTo('/')} initialTab={sellerInitialTab} />;
