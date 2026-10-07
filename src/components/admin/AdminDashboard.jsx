@@ -3,6 +3,7 @@ import {
   fetchDashboardKPIs,
   fetchAdminOrders,
   fetchAdminProducts,
+  seedAdminProductsApi,
   deleteProductApi,
   toggleProductStockApi,
   fetchAdminUsers,
@@ -82,6 +83,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [seedingLoading, setSeedingLoading] = useState(false);
 
   // Chargement des KPIs
   const loadKPIs = useCallback(async () => {
@@ -305,11 +307,30 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
   const handleToggleStock = async (productId, currentTitle) => {
     try {
       const updated = await toggleProductStockApi(productId);
-      showNotification(`Disponibilite du produit "${currentTitle}" mise a jour.`);
+      showNotification(`Disponibilité du produit "${currentTitle}" mise à jour.`);
       loadProducts();
       loadKPIs();
     } catch (err) {
       showNotification(err.message || 'Erreur lors du changement de stock.', 'danger');
+    }
+  };
+
+  const handleRestoreDemoProducts = async () => {
+    if (products.length > 0 && !window.confirm('Voulez-vous réinitialiser et restaurer le catalogue complet de produits initiaux ?')) {
+      return;
+    }
+    setSeedingLoading(true);
+    try {
+      showNotification('Restauration du catalogue en cours...');
+      const res = await seedAdminProductsApi();
+      showNotification(res.message || 'Catalogue restauré avec succès !');
+      await loadProducts();
+      await loadKPIs();
+      if (typeof onProductsUpdated === 'function') onProductsUpdated();
+    } catch (err) {
+      showNotification(err.message || 'Erreur lors de la restauration du catalogue.', 'danger');
+    } finally {
+      setSeedingLoading(false);
     }
   };
 
@@ -992,16 +1013,28 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
                       </div>
                       <p className="admin-page-desc">Ajoutez, modifiez, gérez les stocks et publiez instantanément sur la boutique</p>
                     </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-primary"
-                      onClick={() => {
-                        setSelectedProduct(null);
-                        setIsProductModalOpen(true);
-                      }}
-                    >
-                      <i className="fa-solid fa-plus"></i> Ajouter un Produit
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={handleRestoreDemoProducts}
+                        disabled={seedingLoading}
+                        title="Restaurer le catalogue complet d'articles initiaux"
+                      >
+                        <i className={`fa-solid ${seedingLoading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-down'}`}></i>
+                        <span>{seedingLoading ? 'Restauration...' : 'Restaurer Catalogue'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-primary"
+                        onClick={() => {
+                          setSelectedProduct(null);
+                          setIsProductModalOpen(true);
+                        }}
+                      >
+                        <i className="fa-solid fa-plus"></i> Ajouter un Produit
+                      </button>
+                    </div>
                   </div>
 
                   {/* Filtres Rapides par Statut de Stock */}
@@ -1219,9 +1252,20 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
                           })}
                           {products.length === 0 && (
                             <tr>
-                              <td colSpan={7} className="admin-empty-text">
-                                <i className="fa-solid fa-box-open" style={{ fontSize: '24px', display: 'block', marginBottom: '8px', color: '#9ca3af' }}></i>
-                                Aucun produit ne correspond à vos critères de recherche.
+                              <td colSpan={7} className="admin-empty-text" style={{ padding: '2.5rem 1rem' }}>
+                                <i className="fa-solid fa-box-open" style={{ fontSize: '32px', display: 'block', marginBottom: '12px', color: '#9ca3af' }}></i>
+                                <p style={{ fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Aucun article trouvé dans le catalogue</p>
+                                <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>Votre base de données est actuellement vide ou aucun article ne correspond aux filtres.</p>
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-primary"
+                                  onClick={handleRestoreDemoProducts}
+                                  disabled={seedingLoading}
+                                  style={{ margin: '0 auto' }}
+                                >
+                                  <i className={`fa-solid ${seedingLoading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-down'}`}></i>
+                                  <span>{seedingLoading ? 'Restauration en cours...' : 'Restaurer le Catalogue Initial'}</span>
+                                </button>
                               </td>
                             </tr>
                           )}

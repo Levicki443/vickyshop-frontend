@@ -140,6 +140,16 @@ export const createProductApi = async (productData) => {
   return json.data.product;
 };
 
+export const seedAdminProductsApi = async () => {
+  const response = await fetch(`${API_BASE_URL}/admin/products/seed`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  const json = await response.json();
+  if (!response.ok) throw new Error(json.message || 'Erreur lors de la restauration du catalogue.');
+  return json.data?.products || [];
+};
+
 export const updateProductApi = async (productId, productData) => {
   const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
     method: 'PUT',
