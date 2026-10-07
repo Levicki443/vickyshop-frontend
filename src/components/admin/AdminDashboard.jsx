@@ -13,6 +13,7 @@ import {
 } from '../../services/adminApi';
 import { AdminOrderDetailsModal } from './AdminOrderDetailsModal';
 import { AdminProductModal } from './AdminProductModal';
+import { AdminReviewsTab } from './AdminReviewsTab';
 import {
   joinAdminRoom,
   onNewOrder,
@@ -57,7 +58,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
     isAnnouncementActive: true,
     activePromoCode: 'VICKY10',
     promoDiscountPercent: 10,
-    whatsappNumber: '2250700000000',
+    whatsappNumber: '2250554726574',
     isShopOpen: true,
     contactEmail: 'contact@vickyshop.ci',
   });
@@ -498,6 +499,15 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
             >
               <i className="fa-solid fa-users"></i>
               <span>Base Clients</span>
+            </button>
+
+            <button
+              type="button"
+              className={`admin-nav-item ${activeTab === 'reviews' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reviews')}
+            >
+              <i className="fa-solid fa-comments"></i>
+              <span>Témoignages &amp; Avis</span>
             </button>
 
             <button
@@ -1477,6 +1487,11 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
                     </form>
                   </div>
                 </div>
+              )}
+
+              {/* ONGLET 6 : TÉMOIGNAGES & AVIS CLIENTS */}
+              {activeTab === 'reviews' && (
+                <AdminReviewsTab onFeedback={showNotification} />
               )}
             </>
           )}

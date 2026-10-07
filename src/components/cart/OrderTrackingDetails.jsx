@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatPrice } from '../../services/api';
+import { ReviewModal } from '../reviews/ReviewModal';
 
 const STATUS_STEPS = [
   { key: 'recue', label: 'Reçue', icon: 'fa-receipt' },
@@ -11,6 +12,8 @@ const STATUS_STEPS = [
 
 export const OrderTrackingDetails = ({ order }) => {
   if (!order) return null;
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const getStepIndex = (status) => {
     const map = {
@@ -30,7 +33,7 @@ export const OrderTrackingDetails = ({ order }) => {
     const text = encodeURIComponent(
       `Bonjour Vicky-Shop ! Je souhaite suivre ma commande #${ord.orderNumber} (Montant : ${formatPrice(ord.total)}).`
     );
-    return `https://wa.me/2250700000000?text=${text}`;
+    return `https://wa.me/2250554726574?text=${text}`;
   };
 
   return (
@@ -166,12 +169,20 @@ export const OrderTrackingDetails = ({ order }) => {
 
       {/* Boutons d'action */}
       <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.2rem', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => setIsReviewModalOpen(true)}
+          style={{ flex: 1, minWidth: '190px' }}
+        >
+          <i className="fa-solid fa-star"></i> Donner mon avis vérifié
+        </button>
         <a
           href={getWhatsAppLink(order)}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-outline"
-          style={{ flex: 1, minWidth: '180px', color: '#25D366', borderColor: '#25D366', textDecoration: 'none' }}
+          style={{ flex: 1, minWidth: '160px', color: '#25D366', borderColor: '#25D366', textDecoration: 'none' }}
         >
           <i className="fa-brands fa-whatsapp"></i> Aide WhatsApp
         </a>
@@ -179,11 +190,26 @@ export const OrderTrackingDetails = ({ order }) => {
           type="button"
           className="btn btn-outline"
           onClick={() => window.print()}
-          style={{ flex: 1, minWidth: '160px' }}
+          style={{ flex: 1, minWidth: '150px' }}
         >
-          <i className="fa-solid fa-print"></i> Imprimer Facture
+          <i className="fa-solid fa-print"></i> Imprimer
         </button>
       </div>
+
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        initialOrderNumber={order.orderNumber}
+        initialProduct={
+          order.items?.[0]
+            ? {
+                _id: order.items[0].productId,
+                title: order.items[0].title,
+                image: order.items[0].image,
+              }
+            : null
+        }
+      />
     </div>
   );
 };

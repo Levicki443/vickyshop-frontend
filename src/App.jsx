@@ -13,6 +13,8 @@ import {
 import { Header } from './components/common/Header';
 import { HeroSection } from './components/home/HeroSection';
 import { FlashSale } from './components/home/FlashSale';
+import { TestimonialsSection } from './components/home/TestimonialsSection';
+import { ReviewModal } from './components/reviews/ReviewModal';
 import { ProductFilters } from './components/products/ProductFilters';
 import { ProductGrid } from './components/products/ProductGrid';
 import { ProductDetailsPage } from './components/products/ProductDetailsPage';
@@ -29,7 +31,6 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { SellerDashboard } from './components/seller/SellerDashboard';
 import { NotFound404 } from './components/common/NotFound404';
-import { WelcomeOverlay } from './components/common/WelcomeOverlay';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
 import { useAuth } from './context/AuthContext';
 import { useToast } from './context/ToastContext';
@@ -49,6 +50,9 @@ export const App = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewTargetProduct, setReviewTargetProduct] = useState(null);
+  const [reviewTargetOrderNumber, setReviewTargetOrderNumber] = useState('');
 
   // Détection exhaustive des routes
   const isSellerRoute = currentPath.startsWith('/vendeur');
@@ -214,7 +218,6 @@ export const App = () => {
 
   return (
     <div className="app-root">
-      <WelcomeOverlay />
       <PwaInstallModal />
 
       <AnnouncementBar />
@@ -282,6 +285,14 @@ export const App = () => {
               onResetFilters={() => { setActiveCategory('all'); setSearchTerm(''); }}
             />
           </main>
+          <TestimonialsSection
+            onOpenReviewModal={() => {
+              setReviewTargetProduct(null);
+              setReviewTargetOrderNumber('');
+              setIsReviewModalOpen(true);
+            }}
+            onSelectProduct={handleSelectProduct}
+          />
         </>
       )}
 
@@ -289,6 +300,12 @@ export const App = () => {
       <CartDrawer onOpenCheckout={() => setIsCheckoutOpen(true)} />
       <WishlistDrawer />
       <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        initialProduct={reviewTargetProduct}
+        initialOrderNumber={reviewTargetOrderNumber}
+      />
       <AuthModal />
       <AdminAuthModal
         isOpen={isAdminAuthModalOpen}

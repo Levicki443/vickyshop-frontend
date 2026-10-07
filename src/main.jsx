@@ -11,6 +11,7 @@ import './styles/profile-modal.css';
 import './styles/seller-dashboard.css';
 import './styles/seller-orders.css';
 import './styles/seller.css';
+import './styles/testimonials.css';
 import './styles/admin.css';
 import './styles/pwa.css';
 import './styles/responsive.css';

@@ -151,7 +151,15 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
           )}
         </div>
         
-        <div className="product-rating">
+        <div
+          className="product-rating"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCardClick();
+          }}
+          title="Consulter les avis et évaluations de cet article"
+          style={{ cursor: 'pointer' }}
+        >
           <i className="fa-solid fa-star"></i>
           <span>({product.rating?.toFixed(1) || '5.0'})</span>
           {product.reviewsCount > 0 && (

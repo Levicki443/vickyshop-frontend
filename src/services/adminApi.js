@@ -198,3 +198,13 @@ export const updateAdminSettingsApi = async (settingsData) => {
   if (!response.ok) throw new Error(json.message || 'Erreur mise à jour paramètres.');
   return json.data.settings;
 };
+
+// Exports pour la gestion des avis clients et témoignages
+export {
+  fetchAdminReviews,
+  updateReviewStatusApi,
+  toggleReviewActiveApi,
+  updateReviewAdminApi,
+  deleteReviewAdminApi,
+} from './reviewApi';
+
