@@ -651,24 +651,37 @@
   left: 0.75rem;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 0.35rem;
   z-index: 5;
+  pointer-events: none;
+  max-width: calc(100% - 4.5rem);
+}
+
+.card-badges-container .card-badge {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: fit-content;
+  pointer-events: auto;
 }
 
 .badge-out-stock {
-  background: #ef4444 !important;
+  background: var(--accent-red, #ef4444) !important;
   color: #fff !important;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
 }
 
 .badge-low-stock {
-  background: #f59e0b !important;
+  background: var(--accent-amber, #f59e0b) !important;
   color: #fff !important;
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
   animation: pulse 2s infinite;
 }
@@ -676,8 +689,9 @@
 .badge-discount {
   background: #ec4899 !important;
   color: #fff !important;
-  font-weight: 700;
-  font-size: 0.72rem;
+  font-weight: 800;
+  font-size: 0.7rem;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
 }
 
 .out-of-stock-overlay {

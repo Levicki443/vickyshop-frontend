@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { getRoleDisplayName, getRoleBadgeClass, getRoleIcon } from '../../utils/roleUtils';
+import { NotificationSettingsTab } from './NotificationSettingsTab';
 
-export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
+export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTab = 'profile' }) => {
   const {
     user,
     token,
@@ -15,7 +16,7 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
   } = useAuth();
   const { addToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(initialTab || 'profile');
   const [loading, setLoading] = useState(false);
 
   const [profileForm, setProfileForm] = useState({ name: '', phone: '', address: '', city: 'Abidjan' });
@@ -32,6 +33,12 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   if (!user && !token) {
     return (
@@ -153,6 +160,14 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
           </button>
           <button
             type="button"
+            className={`profile-tab-btn ${activeTab === 'notifications' ? 'active' : ''}`}
+            onClick={() => setActiveTab('notifications')}
+            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
+          >
+            <i className="fa-solid fa-bell"></i> <span>Paramètres de Notifications</span>
+          </button>
+          <button
+            type="button"
             className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`}
             onClick={() => setActiveTab('password')}
             style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
@@ -198,6 +213,10 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard }) => {
                 <span>Enregistrer les modifications</span>
               </button>
             </form>
+          )}
+
+          {activeTab === 'notifications' && (
+            <NotificationSettingsTab />
           )}
 
           {activeTab === 'password' && (

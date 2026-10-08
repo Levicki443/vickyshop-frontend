@@ -156,6 +156,17 @@ export const onOrderUpdated = (callback) => {
 };
 
 /**
+ * Écoute la mise à jour spécifique du statut et de l'historique d'une commande.
+ */
+export const onOrderStatusUpdated = (callback) => {
+  const s = getSocket();
+  s.on('order:status_updated', callback);
+  return () => {
+    s.off('order:status_updated', callback);
+  };
+};
+
+/**
  * Écoute l'ajout d'un nouveau produit en temps réel.
  */
 export const onProductCreated = (callback) => {

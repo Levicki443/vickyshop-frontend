@@ -14,13 +14,15 @@ import './styles/seller.css';
 import './styles/testimonials.css';
 import './styles/admin.css';
 import './styles/pwa.css';
+import './styles/notifications.css';
+import './styles/orders.css';
 import './styles/responsive.css';
 
-// Enregistrement du Service Worker PWA
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// Enregistrement standard du Service Worker PWA et Web Push
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('Erreur enregistrement Service Worker:', err);
+      console.warn('[ServiceWorker] Enregistrement sw.js :', err.message);
     });
   });
 }
@@ -30,17 +32,20 @@ import { ToastProvider } from './context/ToastContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </WishlistProvider>
+          <NotificationProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </WishlistProvider>
+          </NotificationProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>

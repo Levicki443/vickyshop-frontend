@@ -3,23 +3,17 @@ import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import { useSecretAdminTrigger } from '../../hooks/useSecretAdminTrigger';
 import { NotificationDropdown } from './NotificationDropdown';
 import logoImg from '../../assets/logo.png';
 
-export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpenSeller }) => {
+export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpenSeller, onOpenNotificationCenter, onSelectProduct }) => {
   const { theme, toggleTheme } = useTheme();
   const { totalItems, openCart } = useCart();
   const { wishlistCount, openWishlist } = useWishlist();
-  const {
-    user,
-    isSeller,
-    isAuthenticated,
-    sellerUnreadCount,
-    clientUnreadCount,
-    openAuthModal,
-    logout,
-  } = useAuth();
+  const { user, isSeller, isAuthenticated, openAuthModal, logout } = useAuth();
+  const { unreadCount, openNotificationCenter } = useNotifications();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -97,35 +91,33 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
     }
   };
 
-  const handleProfileClick = () => {
+  const handleProfileClick = (tab = 'profile') => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
     setNotifDropdownOpen(false);
     if (onOpenProfile) {
-      onOpenProfile();
+      onOpenProfile(tab);
     } else {
       window.history.pushState(null, '', '/profil');
       window.dispatchEvent(new Event('app-navigate'));
     }
   };
 
-  const handleMobileLogout = () => {
+  const handleOpenNotifs = () => {
     setMobileMenuOpen(false);
-    setUserDropdownOpen(false);
     setNotifDropdownOpen(false);
-    logout();
+    if (onOpenNotificationCenter) {
+      onOpenNotificationCenter();
+    } else {
+      openNotificationCenter();
+    }
   };
 
   return (
     <>
       <header className={`main-header ${scrolled ? 'scrolled' : ''}`}>
         <div className="container nav-container">
-          <a
-            href="#accueil"
-            className="logo"
-            {...triggerProps}
-            onClick={(e) => handleNavAnchor(e, 'accueil')}
-          >
+          <a href="#accueil" className="logo" {...triggerProps} onClick={(e) => handleNavAnchor(e, 'accueil')}>
             <img src={logoImg} alt="Vicky-Shop" className="logo-img rounded-logo" />
             <span className="logo-text">Vicky<span className="logo-accent">-Shop</span></span>
           </a>
@@ -163,7 +155,15 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                   <button type="button" className="nav-link-item nav-link-btn seller-nav-highlight-btn" onClick={handleSellerClick}>
                     <i className="fa-solid fa-store"></i>
                     <span>Gestion Vendeur</span>
-                    {sellerUnreadCount > 0 && <span className="badge-count-pill seller-badge-count">{sellerUnreadCount}</span>}
+                  </button>
+                </li>
+              )}
+
+              {isAuthenticated && (
+                <li className="mobile-only-nav-item">
+                  <button type="button" className="nav-link-item nav-link-btn" onClick={handleOpenNotifs}>
+                    <i className="fa-solid fa-bell nav-icon-mobile text-primary"></i> Notifications
+                    {unreadCount > 0 && <span className="badge-count-pill">{unreadCount}</span>}
                   </button>
                 </li>
               )}
@@ -185,7 +185,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
               <div className="mobile-auth-section">
                 {isAuthenticated ? (
                   <div className="mobile-user-box">
-                    <div className="mobile-user-card" onClick={handleProfileClick}>
+                    <div className="mobile-user-card" onClick={() => handleProfileClick('profile')}>
                       <div className="user-avatar-badge">{getInitials(user?.name)}</div>
                       <div className="mobile-user-info-col">
                         <strong>{user?.name}</strong>
@@ -197,11 +197,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                         <i className="fa-solid fa-store"></i> <span>Ouvrir Gestion Vendeur</span>
                       </button>
                     )}
-                    <button
-                      type="button"
-                      className="btn btn-block mobile-logout-btn mt-2"
-                      onClick={handleMobileLogout}
-                    >
+                    <button type="button" className="btn btn-block mobile-logout-btn mt-2" onClick={() => { setMobileMenuOpen(false); logout(); }}>
                       <i className="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
                     </button>
                   </div>
@@ -219,7 +215,6 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
               <button type="button" className="btn btn-primary btn-sm desktop-only-action header-seller-btn-pulse" onClick={handleSellerClick} title="Espace Vendeur">
                 <i className="fa-solid fa-store"></i>
                 <span>Gestion Vendeur</span>
-                {sellerUnreadCount > 0 && <span className="seller-header-badge">{sellerUnreadCount}</span>}
               </button>
             )}
 
@@ -227,24 +222,26 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
               <i className={theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'}></i>
             </button>
 
-            {/* Cloche de notifications Client en temps réel */}
+            {/* Cloche de notifications unifiée en temps réel */}
             {isAuthenticated && (
               <div className="header-notif-wrapper" ref={notifRef}>
                 <button
                   type="button"
-                  className={`icon-btn header-notif-btn ${clientUnreadCount > 0 ? 'has-unread' : ''}`}
+                  className={`icon-btn header-notif-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
                   onClick={() => setNotifDropdownOpen((prev) => !prev)}
                   title="Notifications"
                   aria-label="Notifications"
                 >
                   <i className="fa-solid fa-bell"></i>
-                  {clientUnreadCount > 0 && <span className="badge-count notif-badge-count">{clientUnreadCount}</span>}
+                  {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
                 </button>
 
                 <NotificationDropdown
                   isOpen={notifDropdownOpen}
                   onClose={() => setNotifDropdownOpen(false)}
                   onSelectOrder={(ordNum) => handleOrdersClick(ordNum)}
+                  onSelectProduct={(prodId) => onSelectProduct && onSelectProduct(prodId)}
+                  onOpenCenter={handleOpenNotifs}
                 />
               </div>
             )}
@@ -284,7 +281,11 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                       </button>
                     )}
 
-                    <button type="button" className="dropdown-item" onClick={handleProfileClick}>
+                    <button type="button" className="dropdown-item" onClick={() => handleOpenNotifs()}>
+                      <i className="fa-solid fa-bell"></i> Centre de Notifications
+                      {unreadCount > 0 && <span className="badge-count notif-badge-count" style={{ position: 'static', marginLeft: 'auto' }}>{unreadCount}</span>}
+                    </button>
+                    <button type="button" className="dropdown-item" onClick={() => handleProfileClick('profile')}>
                       <i className="fa-solid fa-user-gear"></i> Paramètres &amp; Profil
                     </button>
                     <button type="button" className="dropdown-item" onClick={() => handleOrdersClick()}>

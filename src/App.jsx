@@ -1,15 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchProducts, formatPrice } from './services/api';
+import { fetchProducts } from './services/api';
 import { getAdminToken } from './services/adminApi';
-import {
-  onProductCreated,
-  onProductUpdated,
-  onProductDeleted,
-  onProductStockUpdated,
-  joinSellerRoom,
-  onSellerNewOrder,
-  onClientOrderUpdate,
-} from './services/socket';
+import { onProductCreated, onProductUpdated, onProductDeleted, onProductStockUpdated } from './services/socket';
 import { Header } from './components/common/Header';
 import { HeroSection } from './components/home/HeroSection';
 import { FlashSale } from './components/home/FlashSale';
@@ -32,17 +24,22 @@ import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { SellerDashboard } from './components/seller/SellerDashboard';
 import { NotFound404 } from './components/common/NotFound404';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
+import { NotificationCenterModal } from './components/common/NotificationCenterModal';
+import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { useAuth } from './context/AuthContext';
+import { useNotifications } from './context/NotificationContext';
 import { useToast } from './context/ToastContext';
 
 export const App = () => {
-  const { user, isSeller, openAuthModal, refreshSellerUnreadCount, refreshClientUnreadCount, loading: authLoading } = useAuth();
+  const { user, isSeller, openAuthModal, loading: authLoading } = useAuth();
+  const { isNotificationCenterOpen, closeNotificationCenter, openNotificationCenter } = useNotifications();
   const { addToast } = useToast();
 
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname.toLowerCase());
   const [selectedOrderNumber, setSelectedOrderNumber] = useState(null);
   const [isAdminViewActive, setIsAdminViewActive] = useState(false);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
+  const [profileInitialTab, setProfileInitialTab] = useState('profile');
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +51,6 @@ export const App = () => {
   const [reviewTargetProduct, setReviewTargetProduct] = useState(null);
   const [reviewTargetOrderNumber, setReviewTargetOrderNumber] = useState('');
 
-  // Détection exhaustive des routes
   const isSellerRoute = currentPath.startsWith('/vendeur');
   const isAdminRoute = currentPath.startsWith('/admin') || currentPath.startsWith('/dashboard') || currentPath.startsWith('/backoffice');
   const isOrdersRoute = currentPath.startsWith('/commandes') || currentPath.startsWith('/orders');
@@ -65,7 +61,6 @@ export const App = () => {
     currentPath.startsWith('/product/') ||
     currentPath.startsWith('/products/');
 
-  // Extraction propre de l'identifiant produit
   const currentProductId = useMemo(() => {
     if (!isProductRoute) return null;
     const parts = currentPath.split('/').filter(Boolean);
@@ -103,34 +98,6 @@ export const App = () => {
     loadProducts();
   }, [loadProducts]);
 
-  // Écoute Socket.IO globale pour vendeur connecté
-  useEffect(() => {
-    if (isSeller && user) {
-      const sellerId = user.id || user._id;
-      joinSellerRoom(sellerId);
-      const unsub = onSellerNewOrder((orderData) => {
-        if (refreshSellerUnreadCount) refreshSellerUnreadCount();
-        addToast('📦 Nouvelle Commande Reçue !', `Commande #${orderData.orderNumber} (${formatPrice(orderData.total)}).`, 'success');
-      });
-      return () => unsub();
-    }
-  }, [isSeller, user, addToast, refreshSellerUnreadCount]);
-
-  // Écoute Socket.IO en direct pour le Client connecté
-  useEffect(() => {
-    if (user) {
-      const unsub = onClientOrderUpdate((updateData) => {
-        if (refreshClientUnreadCount) refreshClientUnreadCount();
-        addToast(
-          updateData.title || '🔔 Commande mise à jour',
-          updateData.message || `Votre commande #${updateData.orderNumber} a changé de statut.`,
-          'info'
-        );
-      });
-      return () => unsub();
-    }
-  }, [user, addToast, refreshClientUnreadCount]);
-
   // Synchronisation temps réel du catalogue
   useEffect(() => {
     const u1 = onProductCreated((p) => setProducts((prev) => (prev.some((x) => x._id === p._id) ? prev : [p, ...prev])));
@@ -142,7 +109,6 @@ export const App = () => {
     return () => { u1(); u2(); u3(); u4(); };
   }, []);
 
-  // Synchronisation avec l'historique et la barre d'adresse
   useEffect(() => {
     const handleLocationChange = () => {
       setCurrentPath(window.location.pathname.toLowerCase());
@@ -167,12 +133,9 @@ export const App = () => {
 
   const handleSelectProduct = (prod) => {
     const id = prod?._id || prod?.id || prod;
-    if (id) {
-      navigateTo(`/produit/${id}`);
-    }
+    if (id) navigateTo(`/produit/${id}`);
   };
 
-  // Sécurité et restrictions d'accès Vendeur
   useEffect(() => {
     if (authLoading) return;
     if (isSellerRoute && !user) {
@@ -189,25 +152,15 @@ export const App = () => {
     });
   }, [products, activeCategory, searchTerm]);
 
-  // Vues Plein Écran : 404, Admin, Vendeur
   if (isAdminRoute && !isAdminViewActive) {
     return <NotFound404 onGoHome={() => navigateTo('/')} />;
   }
   if (isAdminViewActive) {
     return (
       <AdminDashboard
-        onClose={() => {
-          setIsAdminViewActive(false);
-          navigateTo('/');
-        }}
-        onExitToShop={() => {
-          setIsAdminViewActive(false);
-          navigateTo('/');
-        }}
-        onLogout={() => {
-          setIsAdminViewActive(false);
-          navigateTo('/');
-        }}
+        onClose={() => { setIsAdminViewActive(false); navigateTo('/'); }}
+        onExitToShop={() => { setIsAdminViewActive(false); navigateTo('/'); }}
+        onLogout={() => { setIsAdminViewActive(false); navigateTo('/'); }}
         onProductsUpdated={loadProducts}
       />
     );
@@ -219,7 +172,6 @@ export const App = () => {
   return (
     <div className="app-root">
       <PwaInstallModal />
-
       <AnnouncementBar />
 
       <Header
@@ -229,11 +181,15 @@ export const App = () => {
           if (ordNum) setSelectedOrderNumber(ordNum);
           navigateTo('/commandes');
         }}
-        onOpenProfile={() => navigateTo('/profil')}
+        onOpenProfile={(tab = 'profile') => {
+          setProfileInitialTab(tab);
+          navigateTo('/profil');
+        }}
         onOpenSeller={() => navigateTo('/vendeur/dashboard')}
+        onOpenNotificationCenter={openNotificationCenter}
+        onSelectProduct={handleSelectProduct}
       />
 
-      {/* ROUTE 1 : PAGE DÉDIÉE DÉTAILS DU PRODUIT (STRICTEMENT ISOLÉE) */}
       {isProductRoute ? (
         <ProductDetailsPage
           productId={currentProductId}
@@ -244,16 +200,14 @@ export const App = () => {
           onSelectProduct={handleSelectProduct}
         />
       ) : isOrdersRoute ? (
-        /* ROUTE 2 : PAGE DÉDIÉE VOS COMMANDES */
         <UserOrdersPage onBackToShop={() => navigateTo('/')} initialOrderNumber={selectedOrderNumber} />
       ) : isProfileRoute ? (
-        /* ROUTE 3 : PAGE DÉDIÉE PROFIL & PARAMÈTRES */
         <UserProfilePage
           onBackToShop={() => navigateTo('/')}
           onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')}
+          initialTab={profileInitialTab}
         />
       ) : (
-        /* ROUTE 4 : PAGE D'ACCUEIL & CATALOGUE PRINCIPAL */
         <>
           <HeroSection onExploreClick={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })} />
           <FlashSale
@@ -312,6 +266,20 @@ export const App = () => {
         onClose={() => setIsAdminAuthModalOpen(false)}
         onAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
       />
+      <NotificationCenterModal
+        isOpen={isNotificationCenterOpen}
+        onClose={closeNotificationCenter}
+        onSelectOrder={(ordNum) => {
+          setSelectedOrderNumber(ordNum);
+          navigateTo('/commandes');
+        }}
+        onSelectProduct={handleSelectProduct}
+        onOpenSettings={() => {
+          setProfileInitialTab('notifications');
+          navigateTo('/profil');
+        }}
+      />
+      <MobileBottomNav currentPath={currentPath} onNavigate={navigateTo} />
       <ToastContainer />
     </div>
   );

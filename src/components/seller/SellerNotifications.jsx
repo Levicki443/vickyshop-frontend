@@ -1,97 +1,126 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
-import {
-  fetchSellerNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
-} from '../../services/sellerApi';
+import React, { useState } from 'react';
+import { useNotifications } from '../../context/NotificationContext';
 
-export const SellerNotifications = ({ onRefreshCounts }) => {
-  const { token } = useAuth();
-  const { addToast } = useToast();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const SellerNotifications = ({ onSelectOrder }) => {
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+  } = useNotifications();
 
-  const loadNotifications = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const data = await fetchSellerNotifications(token);
-      setNotifications(data.notifications || []);
-    } catch (err) {
-      console.warn('Erreur chargement notifications :', err);
-    } finally {
-      setLoading(false);
+  const [filterType, setFilterType] = useState('all');
+
+  const sellerNotifications = notifications.filter((n) => {
+    if (n.role !== 'vendeur' && !['order_new', 'stock_alert'].includes(n.type)) {
+      return false;
     }
-  }, [token]);
+    if (filterType === 'unread') return !n.isRead;
+    if (filterType === 'orders') return n.type === 'order_new';
+    if (filterType === 'stock') return n.type === 'stock_alert';
+    return true;
+  });
 
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
-
-  const handleMarkAsRead = async (id) => {
-    try {
-      await markNotificationRead(id, token);
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
-      );
-      if (onRefreshCounts) onRefreshCounts();
-    } catch (err) {
-      addToast('Erreur', 'Impossible de marquer la notification comme lue.', 'error');
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    try {
-      await markAllNotificationsRead(token);
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      addToast('Notifications', 'Toutes les notifications sont marquées comme lues.', 'success');
-      if (onRefreshCounts) onRefreshCounts();
-    } catch (err) {
-      addToast('Erreur', 'Impossible de marquer toutes les notifications.', 'error');
+  const handleCardClick = (notif) => {
+    if (!notif.isRead) markAsRead(notif._id);
+    if (notif.orderNumber && onSelectOrder) {
+      onSelectOrder(notif.orderNumber);
     }
   };
 
   return (
-    <div className="seller-notifications-section">
+    <div className="seller-notifications-section animate-fade-in">
       <div className="seller-section-header-bar">
         <div>
-          <h3 className="seller-section-title">Centre de Notifications</h3>
-          <p className="seller-section-desc">Historique de vos alertes de commandes et d&apos;activité boutique.</p>
+          <h3 className="seller-section-title">
+            <i className="fa-solid fa-bell text-primary"></i> Centre de Notifications Vendeur
+          </h3>
+          <p className="seller-section-desc">
+            Alertes instantanées sur vos nouvelles commandes, validations et alertes de stock.
+          </p>
         </div>
-        {notifications.some((n) => !n.isRead) && (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={handleMarkAllRead}>
-            <i className="fa-solid fa-check-double"></i>
-            <span>Tout marquer comme lu</span>
-          </button>
-        )}
+
+        <div className="seller-notif-header-actions">
+          {unreadCount > 0 && (
+            <button type="button" className="btn btn-secondary btn-sm" onClick={markAllAsRead}>
+              <i className="fa-solid fa-check-double"></i>
+              <span>Tout marquer comme lu</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {loading ? (
+      {/* Barre de filtres rapides */}
+      <div className="seller-notif-filters">
+        <button
+          type="button"
+          className={`seller-chip-btn ${filterType === 'all' ? 'active' : ''}`}
+          onClick={() => setFilterType('all')}
+        >
+          Toutes ({notifications.length})
+        </button>
+        <button
+          type="button"
+          className={`seller-chip-btn ${filterType === 'unread' ? 'active' : ''}`}
+          onClick={() => setFilterType('unread')}
+        >
+          Non lues ({unreadCount})
+        </button>
+        <button
+          type="button"
+          className={`seller-chip-btn ${filterType === 'orders' ? 'active' : ''}`}
+          onClick={() => setFilterType('orders')}
+        >
+          Commandes
+        </button>
+        <button
+          type="button"
+          className={`seller-chip-btn ${filterType === 'stock' ? 'active' : ''}`}
+          onClick={() => setFilterType('stock')}
+        >
+          Stock &amp; Alertes
+        </button>
+      </div>
+
+      {loading && notifications.length === 0 ? (
         <div className="seller-table-loading">
           <i className="fa-solid fa-spinner fa-spin"></i>
-          <span>Chargement de vos notifications...</span>
+          <span>Chargement des alertes boutique...</span>
         </div>
-      ) : notifications.length === 0 ? (
+      ) : sellerNotifications.length === 0 ? (
         <div className="seller-empty-state">
           <i className="fa-solid fa-bell-slash empty-icon"></i>
-          <h4>Aucune notification</h4>
-          <p>Vous n&apos;avez aucune notification pour l&apos;instant.</p>
+          <h4>Aucune notification trouvée</h4>
+          <p>Vous n&apos;avez aucune alerte correspondant à vos critères actuels.</p>
         </div>
       ) : (
         <div className="seller-notifications-list">
-          {notifications.map((notif) => (
+          {sellerNotifications.map((notif) => (
             <div
               key={notif._id}
               className={`seller-notification-card ${notif.isRead ? 'read' : 'unread'}`}
+              onClick={() => handleCardClick(notif)}
             >
               <div className="notification-icon-wrap">
-                <i className="fa-solid fa-bag-shopping"></i>
+                <i
+                  className={`fa-solid ${
+                    notif.type === 'order_new'
+                      ? 'fa-bag-shopping text-primary'
+                      : notif.type === 'stock_alert'
+                      ? 'fa-triangle-exclamation text-warning'
+                      : 'fa-info'
+                  }`}
+                ></i>
               </div>
+
               <div className="notification-body">
                 <div className="notification-header-row">
-                  <strong>{notif.title}</strong>
+                  <div className="d-flex align-items-center gap-2">
+                    <strong>{notif.title}</strong>
+                    {!notif.isRead && <span className="seller-unread-dot" />}
+                  </div>
                   <span className="notification-time">
                     {new Date(notif.createdAt).toLocaleDateString('fr-FR', {
                       day: 'numeric',
@@ -101,19 +130,42 @@ export const SellerNotifications = ({ onRefreshCounts }) => {
                     })}
                   </span>
                 </div>
+
                 <p className="notification-text">{notif.message}</p>
+
+                {notif.orderNumber && (
+                  <div className="seller-notif-meta">
+                    <span>
+                      <i className="fa-solid fa-receipt text-primary"></i> Commande :{' '}
+                      <strong>#{notif.orderNumber}</strong>
+                    </span>
+                    <span className="seller-view-link">
+                      Consulter la commande <i className="fa-solid fa-arrow-right"></i>
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {!notif.isRead && (
+              <div className="notification-card-actions" onClick={(e) => e.stopPropagation()}>
+                {!notif.isRead && (
+                  <button
+                    type="button"
+                    className="btn-mark-read"
+                    title="Marquer comme lu"
+                    onClick={() => markAsRead(notif._id)}
+                  >
+                    <i className="fa-solid fa-check"></i>
+                  </button>
+                )}
                 <button
                   type="button"
-                  className="btn-mark-read"
-                  title="Marquer comme lu"
-                  onClick={() => handleMarkAsRead(notif._id)}
+                  className="btn-delete-notif"
+                  title="Supprimer"
+                  onClick={() => removeNotification(notif._id)}
                 >
-                  <i className="fa-solid fa-check"></i>
+                  <i className="fa-solid fa-trash-can"></i>
                 </button>
-              )}
+              </div>
             </div>
           ))}
         </div>
@@ -121,3 +173,5 @@ export const SellerNotifications = ({ onRefreshCounts }) => {
     </div>
   );
 };
+
+export default SellerNotifications;

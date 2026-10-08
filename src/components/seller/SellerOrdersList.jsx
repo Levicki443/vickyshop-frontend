@@ -5,12 +5,16 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
 const STATUS_MAP = {
-  en_attente: { label: 'Nouvelle', color: 'badge-warning', next: 'confirmee', nextLabel: 'Confirmer' },
+  en_attente: { label: 'Reçue', color: 'badge-warning', next: 'confirmee', nextLabel: 'Confirmer' },
+  recue: { label: 'Reçue', color: 'badge-warning', next: 'confirmee', nextLabel: 'Confirmer' },
   confirmee: { label: 'Confirmée', color: 'badge-info', next: 'en_preparation', nextLabel: 'En préparation' },
   en_preparation: { label: 'En préparation', color: 'badge-primary', next: 'expediee', nextLabel: 'Expédier' },
-  expediee: { label: 'Prête / Expédiée', color: 'badge-accent', next: 'livree', nextLabel: 'Livrée' },
+  expediee: { label: 'Expédiée', color: 'badge-accent', next: 'en_livraison', nextLabel: 'En livraison' },
+  en_livraison: { label: 'En livraison', color: 'badge-warning', next: 'livree', nextLabel: 'Marquer livrée' },
   livree: { label: 'Livrée avec succès', color: 'badge-success', next: null, nextLabel: null },
   annulee: { label: 'Annulée', color: 'badge-danger', next: null, nextLabel: null },
+  refusee: { label: 'Refusée', color: 'badge-danger', next: null, nextLabel: null },
+  retournee: { label: 'Retournée', color: 'badge-info', next: null, nextLabel: null },
 };
 
 export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
@@ -43,7 +47,7 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
     setUpdatingItemId(itemId);
     try {
       await updateSellerOrderItemStatus(orderId, itemId, newStatus, token);
-      addToast('Statut mis à jour', `L'article est maintenant "${newStatus}".`, 'success');
+      addToast('Statut mis à jour', `L'article est maintenant "${STATUS_MAP[newStatus]?.label || newStatus}".`, 'success');
       onRefresh();
     } catch (err) {
       addToast('Erreur', err.message || 'Impossible de mettre à jour le statut.', 'error');
@@ -57,7 +61,7 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
       <div className="seller-section-header-bar">
         <div>
           <h3 className="seller-section-title">Mes Commandes Reçues</h3>
-          <p className="seller-section-desc">Gérez le cycle de préparation et d&apos;expédition de vos articles.</p>
+          <p className="seller-section-desc">Gérez le workflow de validation, préparation et expédition de vos articles.</p>
         </div>
         <button type="button" className="btn btn-secondary btn-sm" onClick={onRefresh}>
           <i className="fa-solid fa-rotate-right"></i>
@@ -80,10 +84,11 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
         <div className="category-select-wrapper">
           <select className="form-input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">Tous les statuts</option>
-            <option value="en_attente">Nouvelles / En attente</option>
+            <option value="en_attente">Reçues / En attente</option>
             <option value="confirmee">Confirmées</option>
             <option value="en_preparation">En préparation</option>
-            <option value="expediee">Expédiées / Prêtes</option>
+            <option value="expediee">Expédiées</option>
+            <option value="en_livraison">En livraison</option>
             <option value="livree">Livrées</option>
             <option value="annulee">Annulées</option>
           </select>
@@ -202,7 +207,7 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
                   onClick={() => setSelectedOrderDetails(order)}
                 >
                   <i className="fa-solid fa-clock-rotate-left"></i>
-                  <span>Historique ({order.statusHistory?.length || 0})</span>
+                  <span>Traçabilité &amp; Journal ({order.statusHistory?.length || 0})</span>
                 </button>
                 <div className="footer-amount-wrap">
                   <span className="footer-label">Sous-total Vendeur :</span>
@@ -224,7 +229,7 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
                   <i className="fa-solid fa-clock-rotate-left"></i>
                 </div>
                 <div>
-                  <h4>Historique de Traçabilité</h4>
+                  <h4>Journal de Traçabilité</h4>
                   <span className="text-muted text-xs">Commande #{selectedOrderDetails.orderNumber}</span>
                 </div>
               </div>
@@ -263,6 +268,11 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
                           </span>
                         </div>
                         {h.comment && <p className="timeline-comment">{h.comment}</p>}
+                        {h.changedByName && (
+                          <span className="text-xs text-muted">
+                            Auteur : <strong>{h.changedByName}</strong> ({h.changedByRole || 'système'})
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))
@@ -280,3 +290,5 @@ export const SellerOrdersList = ({ orders, loading, onRefresh }) => {
     </div>
   );
 };
+
+export default SellerOrdersList;
