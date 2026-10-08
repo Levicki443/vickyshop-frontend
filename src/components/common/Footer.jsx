@@ -150,7 +150,16 @@ export const Footer = () => {
                 </button>
               </li>
               <li>
-                <a href="/commandes" className="footer-link-btn">
+                <a
+                  href="/commandes"
+                  className="footer-link-btn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.history.pushState(null, '', '/commandes');
+                    window.dispatchEvent(new Event('app-navigate'));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
                   <i className="fa-solid fa-angle-right"></i> Suivi de Commande 📦
                 </a>
               </li>

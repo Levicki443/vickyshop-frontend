@@ -44,8 +44,10 @@ export const NotificationDropdown = ({ isOpen, onClose, onSelectOrder, onSelectP
   const recentNotifications = notifications.slice(0, 6);
 
   return (
-    <div className="notification-dropdown-panel animate-fade-in" onClick={(e) => e.stopPropagation()}>
-      <div className="notif-dropdown-header">
+    <>
+      <div className="notif-dropdown-backdrop" onClick={onClose} />
+      <div className="notification-dropdown-panel animate-fade-in" onClick={(e) => e.stopPropagation()}>
+        <div className="notif-dropdown-header">
         <div className="d-flex align-items-center gap-2">
           <i className="fa-solid fa-bell text-primary"></i>
           <strong>Notifications</strong>
@@ -115,6 +117,7 @@ export const NotificationDropdown = ({ isOpen, onClose, onSelectOrder, onSelectP
         </button>
       </div>
     </div>
+    </>
   );
 };
 

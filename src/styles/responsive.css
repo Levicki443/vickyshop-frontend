@@ -1,11 +1,9 @@
 /* ==========================================================================
    VICKY-SHOP - FEUILLE DE STYLE RESPONSIVE CENTRALISÉE
-   Couverture complète : Mobile (320-480px), Tablette (481-1024px), Desktop (>=1025px)
+   Couverture : Mobile (320-480px), Tablette (481-1024px), Desktop (>=1025px)
    ========================================================================== */
 
-/* --------------------------------------------------------------------------
-   1. SMARTPHONES & PETITS ÉCRANS (320px à 480px)
-   -------------------------------------------------------------------------- */
+/* 1. SMARTPHONES & PETITS ÉCRANS (320px à 480px) */
 @media (max-width: 480px) {
   /* En-tête & Barre de Navigation */
   .main-header .nav-container {
@@ -100,82 +98,76 @@
   .stats-grid, .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.65rem; }
   .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-  /* Footer & Réassurance Mobile */
-  .footer-trust-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.65rem !important;
-  }
-  .footer-trust-item {
-    padding: 0.75rem 0.65rem !important;
-    gap: 0.65rem !important;
-  }
-  .trust-icon-box {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 1rem !important;
-  }
-  .trust-text-box strong {
-    font-size: 0.8rem !important;
-  }
-  .trust-text-box span {
-    font-size: 0.68rem !important;
-  }
+  /* Footer, Contact & Réassurance Mobile */
+  .footer-trust-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.65rem !important; }
+  .footer-trust-item { padding: 0.75rem 0.65rem !important; gap: 0.65rem !important; }
+  .trust-icon-box { width: 36px !important; height: 36px !important; font-size: 1rem !important; }
+  .trust-text-box strong { font-size: 0.8rem !important; }
+  .trust-text-box span { font-size: 0.68rem !important; }
 
-  .footer-grid {
-    grid-template-columns: 1fr !important;
-    gap: 2rem !important;
-    text-align: left;
+  .footer-grid { grid-template-columns: 1fr !important; gap: 2rem !important; text-align: left; }
+  .footer-brand-desc { font-size: 0.88rem !important; line-height: 1.55 !important; margin-bottom: 1.15rem !important; }
+  .footer-contact-list { gap: 0.65rem !important; }
+  .footer-contact-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    font-size: 0.88rem !important;
   }
-  .footer-links-list {
-    display: grid !important;
-    grid-template-columns: 1fr;
-    gap: 0.5rem !important;
+  .footer-contact-item i {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: var(--radius-sm) !important;
+    background: rgba(255, 107, 0, 0.12) !important;
+    color: var(--primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.85rem !important;
+    flex-shrink: 0 !important;
   }
+  .social-links-wrapper { gap: 0.65rem !important; margin-top: 1rem !important; }
+  .social-btn { width: 38px !important; height: 38px !important; font-size: 0.95rem !important; }
+
+  .footer-links-list { display: grid !important; grid-template-columns: 1fr; gap: 0.5rem !important; }
   .footer-link-btn {
     width: 100%;
-    padding: 0.55rem 0.75rem !important;
+    padding: 0.65rem 0.85rem !important;
     background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     border-radius: var(--radius-sm) !important;
-    font-size: 0.82rem !important;
+    font-size: 0.84rem !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
   }
-  .footer-link-btn i {
-    order: 2;
-    font-size: 0.75rem !important;
-    opacity: 0.7;
-  }
+  .footer-link-btn i { order: 2; font-size: 0.75rem !important; color: var(--primary) !important; opacity: 0.8; }
+
   .payment-badges-grid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.5rem !important;
   }
+  .payment-badges-grid > :last-child { grid-column: 1 / -1 !important; }
   .payment-badge-pill {
     width: 100%;
     justify-content: center;
-    padding: 0.55rem 0.5rem !important;
-    font-size: 0.75rem !important;
+    padding: 0.65rem 0.5rem !important;
+    font-size: 0.78rem !important;
   }
+
   .footer-bottom-bar {
-    padding-bottom: calc(75px + env(safe-area-inset-bottom, 10px)) !important;
+    padding: 1.5rem 1rem calc(75px + env(safe-area-inset-bottom, 12px)) !important;
   }
-  .footer-bottom-flex {
-    flex-direction: column !important;
-    gap: 0.85rem !important;
-    text-align: center !important;
-  }
+  .footer-bottom-flex { flex-direction: column !important; gap: 0.65rem !important; text-align: center !important; }
+  .btn-scroll-top { display: none !important; }
 }
 
-/* --------------------------------------------------------------------------
-   2. TABLETTES & ÉCRANS MOYENS (481px à 1024px)
-   -------------------------------------------------------------------------- */
+/* 2. TABLETTES & ÉCRANS MOYENS (481px à 1024px) */
 @media (min-width: 481px) and (max-width: 768px) {
-  .products-grid, .product-container {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.9rem;
-  }
+  .products-grid, .product-container { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.9rem; }
   .hero-container { grid-template-columns: 1fr; gap: 2rem; }
   .flash-product-slide { flex: 0 0 50% !important; max-width: 50% !important; }
   .product-details-grid { grid-template-columns: 1fr; gap: 2rem; }
@@ -184,29 +176,19 @@
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  .products-grid, .product-container {
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 1.25rem;
-  }
+  .products-grid, .product-container { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1.25rem; }
   .flash-product-slide { flex: 0 0 33.333% !important; max-width: 33.333% !important; }
   .stats-grid, .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
   .footer-grid { grid-template-columns: repeat(3, 1fr); gap: 2rem; }
 }
 
-/* --------------------------------------------------------------------------
-   3. GRANDS ÉCRANS (>= 1280px & 1920px)
-   -------------------------------------------------------------------------- */
+/* 3. GRANDS ÉCRANS (>= 1280px & 1920px) */
 @media (min-width: 1280px) {
   .container { max-width: 1280px; }
-  .products-grid, .product-container {
-    grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-    gap: 1.6rem;
-  }
+  .products-grid, .product-container { grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); gap: 1.6rem; }
 }
 
-/* --------------------------------------------------------------------------
-   4. BARRE DE NAVIGATION INFÉRIEURE MOBILE (BOTTOM NAV)
-   -------------------------------------------------------------------------- */
+/* 4. BARRE DE NAVIGATION INFÉRIEURE MOBILE (BOTTOM NAV) */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
@@ -227,12 +209,8 @@
 }
 
 @media (max-width: 768px) {
-  .mobile-bottom-nav {
-    display: grid;
-  }
-  .app-root {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
-  }
+  .mobile-bottom-nav { display: grid; }
+  .app-root { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
 }
 
 .mobile-nav-tab {
@@ -262,19 +240,9 @@
   transition: transform var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease);
 }
 
-.mobile-nav-tab:active i {
-  transform: scale(0.9);
-}
-
-.mobile-nav-tab.active {
-  color: var(--primary);
-  font-weight: 700;
-}
-
-.mobile-nav-tab.active i {
-  color: var(--primary);
-  transform: translateY(-2px);
-}
+.mobile-nav-tab:active i { transform: scale(0.9); }
+.mobile-nav-tab.active { color: var(--primary); font-weight: 700; }
+.mobile-nav-tab.active i { color: var(--primary); transform: translateY(-2px); }
 
 .mobile-nav-icon-wrap {
   position: relative;
@@ -303,14 +271,9 @@
   line-height: 1;
 }
 
-.mobile-nav-badge.count-highlight {
-  background: var(--primary, #f97316);
-}
+.mobile-nav-badge.count-highlight { background: var(--primary, #f97316); }
 
-/* --------------------------------------------------------------------------
-   5. RÈGLES D'INTÉGRITÉ & ACCESSIBILITÉ
-   -------------------------------------------------------------------------- */
+/* 5. RÈGLES D'INTÉGRITÉ & ACCESSIBILITÉ */
 *, *::before, *::after { max-width: 100%; box-sizing: border-box; }
 html, body { overflow-x: clip; width: 100%; }
 button, a, input, select { min-height: var(--tap-min-size, 40px); }
-

@@ -702,9 +702,39 @@
   font-size: 0.9rem;
 }
 
+.notif-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1040;
+}
+
 @media (max-width: 640px) {
   .notification-dropdown-panel {
-    width: 320px;
+    position: fixed !important;
+    top: 66px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+    z-index: 1050 !important;
+  }
+  .notif-dropdown-header {
+    padding: 0.8rem 1rem !important;
+  }
+  .notif-dropdown-header strong {
+    font-size: 0.95rem;
+  }
+  .notif-title-row strong {
+    font-size: 0.86rem;
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .notif-modal-card {
     max-height: 95vh;
