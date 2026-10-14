@@ -6,6 +6,7 @@
   padding: 2.5rem 1rem 5rem;
   max-width: 1200px;
   margin: 0 auto;
+  animation: fadeSlideUp 0.38s var(--ease-out-expo) forwards;
 }
 
 .details-top-bar {

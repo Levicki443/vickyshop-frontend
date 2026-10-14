@@ -248,7 +248,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
 
             <button type="button" className="icon-btn desktop-only-action" onClick={openWishlist} title="Favoris" aria-label="Favoris">
               <i className="fa-solid fa-heart"></i>
-              {wishlistCount > 0 && <span className="badge-count">{wishlistCount}</span>}
+              {wishlistCount > 0 && <span key={wishlistCount} className="badge-count badge-pop">{wishlistCount}</span>}
             </button>
 
             <button type="button" className="icon-btn orders-tracking-btn desktop-only-action" onClick={() => handleOrdersClick()} title="Vos commandes" aria-label="Commandes">
@@ -257,7 +257,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
 
             <button type="button" className="icon-btn cart-btn-active" onClick={openCart} title="Panier" aria-label="Panier">
               <i className="fa-solid fa-cart-shopping"></i>
-              {totalItems > 0 && <span className="badge-count">{totalItems}</span>}
+              {totalItems > 0 && <span key={totalItems} className="badge-count badge-pop">{totalItems}</span>}
             </button>
 
             {isAuthenticated ? (

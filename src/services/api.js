@@ -40,6 +40,20 @@ export const fetchProductById = async (id) => {
   }
 };
 
+export const fetchSimilarProducts = async (id, limit = 4) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/products/${id}/similar?limit=${limit}`);
+    if (!response.ok) {
+      throw new Error(`Erreur serveur (${response.status})`);
+    }
+    const json = await response.json();
+    return json.data.products || [];
+  } catch (error) {
+    console.warn('[API] Erreur fetchSimilarProducts, bascule sur le moteur de recommandation local :', error.message);
+    return null;
+  }
+};
+
 export const loginUser = async (credentials) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {

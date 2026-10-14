@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchProducts } from './services/api';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getAdminToken } from './services/adminApi';
-import { onProductCreated, onProductUpdated, onProductDeleted, onProductStockUpdated } from './services/socket';
+import { useShopProducts } from './hooks/useShopProducts';
 import { Header } from './components/common/Header';
 import { HeroSection } from './components/home/HeroSection';
 import { FlashSale } from './components/home/FlashSale';
-import { TestimonialsSection } from './components/home/TestimonialsSection';
 import { ReviewModal } from './components/reviews/ReviewModal';
 import { ProductFilters } from './components/products/ProductFilters';
 import { ProductGrid } from './components/products/ProductGrid';
@@ -27,13 +25,16 @@ import { PwaInstallModal } from './components/common/PwaInstallModal';
 import { NotificationCenterModal } from './components/common/NotificationCenterModal';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { useAuth } from './context/AuthContext';
+import { useCart } from './context/CartContext';
 import { useNotifications } from './context/NotificationContext';
 import { useToast } from './context/ToastContext';
 
 export const App = () => {
-  const { user, isSeller, openAuthModal, loading: authLoading } = useAuth();
+  const { user, isSeller, openAuthModal, loading: authLoading, isAuthModalOpen } = useAuth();
+  const { isCartOpen, openCart } = useCart();
   const { isNotificationCenterOpen, closeNotificationCenter, openNotificationCenter } = useNotifications();
   const { addToast } = useToast();
+  const { products, loading, error, loadProducts } = useShopProducts();
 
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname.toLowerCase());
   const [selectedOrderNumber, setSelectedOrderNumber] = useState(null);
@@ -41,9 +42,6 @@ export const App = () => {
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
   const [profileInitialTab, setProfileInitialTab] = useState('profile');
 
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -51,15 +49,77 @@ export const App = () => {
   const [reviewTargetProduct, setReviewTargetProduct] = useState(null);
   const [reviewTargetOrderNumber, setReviewTargetOrderNumber] = useState('');
 
-  const isSellerRoute = currentPath.startsWith('/vendeur');
-  const isAdminRoute = currentPath.startsWith('/admin') || currentPath.startsWith('/dashboard') || currentPath.startsWith('/backoffice');
-  const isOrdersRoute = currentPath.startsWith('/commandes') || currentPath.startsWith('/orders');
-  const isProfileRoute = currentPath.startsWith('/profil') || currentPath.startsWith('/profile');
+  // Normalisation rigoureuse de l'URL (exclusion des query params, hash et barres obliques finales)
+  const cleanPath = useMemo(() => {
+    return currentPath.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
+  }, [currentPath]);
+
+  // Détection stricte de la véritable page d'accueil publique (évite le piège startsWith('/'))
+  const isHomePath =
+    cleanPath === '/' ||
+    cleanPath === '/accueil' ||
+    cleanPath === '/home' ||
+    cleanPath === '/index.html';
+
+  const isSellerRoute = cleanPath.startsWith('/vendeur') || cleanPath.startsWith('/seller');
+  const isAdminRoute =
+    cleanPath.startsWith('/admin') ||
+    cleanPath.startsWith('/dashboard') ||
+    cleanPath.startsWith('/backoffice');
+  const isOrdersRoute =
+    cleanPath.startsWith('/commandes') ||
+    cleanPath.startsWith('/orders') ||
+    cleanPath.startsWith('/suivi');
+  const isProfileRoute =
+    cleanPath.startsWith('/profil') ||
+    cleanPath.startsWith('/profile') ||
+    cleanPath.startsWith('/compte');
   const isProductRoute =
-    currentPath.startsWith('/produit/') ||
-    currentPath.startsWith('/produits/') ||
-    currentPath.startsWith('/product/') ||
-    currentPath.startsWith('/products/');
+    cleanPath.startsWith('/produit/') ||
+    cleanPath.startsWith('/produits/') ||
+    cleanPath.startsWith('/product/') ||
+    cleanPath.startsWith('/products/');
+  const isCartRoute = cleanPath === '/panier' || cleanPath === '/cart';
+  const isCheckoutRoute = cleanPath === '/commande' || cleanPath === '/checkout';
+  const isAuthRoute =
+    cleanPath === '/connexion' ||
+    cleanPath === '/login' ||
+    cleanPath === '/inscription' ||
+    cleanPath === '/register' ||
+    cleanPath === '/auth';
+  const isCategoryRoute = cleanPath.startsWith('/categorie') || cleanPath.startsWith('/categories');
+  const isSearchRoute = cleanPath.startsWith('/recherche') || cleanPath.startsWith('/search');
+
+  // Gestion des accès directs par URL pour le panier, commande et authentification
+  useEffect(() => {
+    if (isCartRoute) openCart();
+    else if (isCheckoutRoute) setIsCheckoutOpen(true);
+    else if (isAuthRoute) openAuthModal();
+  }, [isCartRoute, isCheckoutRoute, isAuthRoute, openCart, openAuthModal]);
+
+  // Affichage de la bannière exclusivement sur l'accueil public pur (sans filtres, sans modales)
+  const isFiltering = activeCategory !== 'all' || Boolean(searchTerm && searchTerm.trim());
+  const isOverlayOpen =
+    Boolean(isCartOpen) ||
+    Boolean(isCheckoutOpen) ||
+    Boolean(isAuthModalOpen) ||
+    Boolean(isAdminAuthModalOpen) ||
+    Boolean(isAdminViewActive);
+
+  const showAnnouncementBar =
+    isHomePath &&
+    !isProductRoute &&
+    !isOrdersRoute &&
+    !isProfileRoute &&
+    !isSellerRoute &&
+    !isAdminRoute &&
+    !isCartRoute &&
+    !isCheckoutRoute &&
+    !isAuthRoute &&
+    !isCategoryRoute &&
+    !isSearchRoute &&
+    !isFiltering &&
+    !isOverlayOpen;
 
   const currentProductId = useMemo(() => {
     if (!isProductRoute) return null;
@@ -80,34 +140,6 @@ export const App = () => {
     if (currentPath.includes('parametre') || currentPath.includes('setting')) return 'settings';
     return 'dashboard';
   }, [currentPath]);
-
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchProducts();
-      setProducts(data);
-    } catch (err) {
-      setError('Impossible de joindre le serveur API. Veuillez vérifier la connexion.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
-
-  // Synchronisation temps réel du catalogue
-  useEffect(() => {
-    const u1 = onProductCreated((p) => setProducts((prev) => (prev.some((x) => x._id === p._id) ? prev : [p, ...prev])));
-    const u2 = onProductUpdated((p) => setProducts((prev) => prev.map((x) => ((x._id || x.id) === (p._id || p.id) ? p : x))));
-    const u3 = onProductDeleted((id) => setProducts((prev) => prev.filter((x) => (x._id || x.id) !== id)));
-    const u4 = onProductStockUpdated(({ productId, stockQuantity, inStock }) => {
-      setProducts((prev) => prev.map((x) => ((x._id || x.id) === productId ? { ...x, stockQuantity, inStock: inStock ?? stockQuantity > 0 } : x)));
-    });
-    return () => { u1(); u2(); u3(); u4(); };
-  }, []);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -172,7 +204,7 @@ export const App = () => {
   return (
     <div className="app-root">
       <PwaInstallModal />
-      <AnnouncementBar />
+      {showAnnouncementBar && <AnnouncementBar />}
 
       <Header
         onOpenAdmin={() => (getAdminToken() ? setIsAdminViewActive(true) : setIsAdminAuthModalOpen(true))}
@@ -207,7 +239,7 @@ export const App = () => {
           onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')}
           initialTab={profileInitialTab}
         />
-      ) : (
+      ) : isHomePath ? (
         <>
           <HeroSection onExploreClick={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })} />
           <FlashSale
@@ -239,18 +271,12 @@ export const App = () => {
               onResetFilters={() => { setActiveCategory('all'); setSearchTerm(''); }}
             />
           </main>
-          <TestimonialsSection
-            onOpenReviewModal={() => {
-              setReviewTargetProduct(null);
-              setReviewTargetOrderNumber('');
-              setIsReviewModalOpen(true);
-            }}
-            onSelectProduct={handleSelectProduct}
-          />
+          <Footer />
         </>
+      ) : (
+        <NotFound404 onGoHome={() => navigateTo('/')} />
       )}
 
-      <Footer />
       <CartDrawer onOpenCheckout={() => setIsCheckoutOpen(true)} />
       <WishlistDrawer />
       <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />

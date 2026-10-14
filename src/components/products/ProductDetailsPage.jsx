@@ -3,8 +3,8 @@ import { fetchProductById, formatPrice } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useToast } from '../../context/ToastContext';
-import { ProductCard } from './ProductCard';
 import { ProductReviewsSection } from './ProductReviewsSection';
+import { SimilarProductsSection } from './SimilarProductsSection';
 import { ReviewModal } from '../reviews/ReviewModal';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600';
@@ -146,7 +146,6 @@ export const ProductDetailsPage = ({
   };
 
   const sellerName = product.seller?.shopName || product.seller?.name || product.sellerName || 'Vicky-Shop Officiel';
-  const relatedProducts = allProducts.filter((p) => String(p._id || p.id) !== String(product._id || product.id)).slice(0, 4);
 
   return (
     <div className="product-details-container container animate-fade-in">
@@ -295,21 +294,12 @@ export const ProductDetailsPage = ({
       {/* MODALE DE DÉPÔT D'AVIS PRODUIT */}
       <ReviewModal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} initialProduct={product} />
 
-      {/* PRODUITS SIMILAIRES */}
-      {relatedProducts.length > 0 && (
-        <div className="details-related-section">
-          <div className="section-header">
-            <span className="section-subtitle">Découvrez aussi</span>
-            <h3 className="section-title">Produits Similaires</h3>
-            <div className="title-underline"></div>
-          </div>
-          <div className="products-grid">
-            {relatedProducts.map((prod) => (
-              <ProductCard key={prod._id || prod.id} product={prod} onSelectProduct={onSelectProduct} onQuickView={() => onSelectProduct(prod)} />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* PRODUITS SIMILAIRES RECOMMANDÉS */}
+      <SimilarProductsSection
+        currentProduct={product}
+        allProducts={allProducts}
+        onSelectProduct={onSelectProduct}
+      />
     </div>
   );
 };

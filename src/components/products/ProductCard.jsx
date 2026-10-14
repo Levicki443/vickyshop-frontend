@@ -36,21 +36,29 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
   };
 
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || window.matchMedia('(pointer: coarse)').matches) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -7;
-    const rotateY = ((x - centerX) / centerX) * 7;
+    const rotateX = ((y - centerY) / centerY) * -5;
+    const rotateY = ((x - centerX) / centerX) * 5;
 
-    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+    window.requestAnimationFrame(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+      }
+    });
   };
 
   const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+    if (!cardRef.current || window.matchMedia('(pointer: coarse)').matches) return;
+    window.requestAnimationFrame(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      }
+    });
   };
 
   const handleAddToCart = (e) => {
@@ -78,7 +86,7 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
   return (
     <div
       ref={cardRef}
-      className={`product-card ${isOutOfStock ? 'product-card-out-of-stock' : ''}`}
+      className={`product-card animate-card-reveal ${isOutOfStock ? 'product-card-out-of-stock' : ''}`}
       onClick={handleCardClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

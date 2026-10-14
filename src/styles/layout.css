@@ -2024,7 +2024,9 @@
   gap: 0.85rem;
   min-width: 300px;
   cursor: pointer;
-  animation: slideInUp 0.3s ease;
+  animation: toastSpringIn 0.38s var(--ease-out-expo);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  will-change: transform, opacity;
 }
 
 @media (max-width: 600px) {
@@ -2035,9 +2037,9 @@
   }
 }
 
-@keyframes slideInUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes toastSpringIn {
+  0% { transform: translateY(100%) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .toast-success { border-left: 4px solid var(--accent-green); }

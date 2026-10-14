@@ -163,15 +163,6 @@ export const Footer = () => {
                   <i className="fa-solid fa-angle-right"></i> Suivi de Commande 📦
                 </a>
               </li>
-              <li>
-                <button
-                  type="button"
-                  className="footer-link-btn"
-                  onClick={() => document.getElementById('avis-clients')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <i className="fa-solid fa-angle-right"></i> Avis Clients Vérifiés ⭐
-                </button>
-              </li>
             </ul>
           </div>
 
