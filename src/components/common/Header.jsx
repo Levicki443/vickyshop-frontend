@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSecretAdminTrigger } from '../../hooks/useSecretAdminTrigger';
 import { NotificationDropdown } from './NotificationDropdown';
-import { MobileMenuPage } from './MobileMenuPage';
+import { MobileMenuModal } from './MobileMenuModal';
 import logoImg from '../../assets/logo.png';
 
 export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpenSeller, onOpenNotificationCenter, onSelectProduct }) => {
@@ -253,8 +253,8 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
         </div>
       </header>
 
-      {/* Page de navigation mobile plein écran dédiée */}
-      <MobileMenuPage
+      {/* Modale de navigation mobile (Drawer) */}
+      <MobileMenuModal
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         onNavAnchor={handleNavAnchor}
