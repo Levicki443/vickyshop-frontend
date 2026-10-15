@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSecretAdminTrigger } from '../../hooks/useSecretAdminTrigger';
 import { NotificationDropdown } from './NotificationDropdown';
+import { MobileMenuPage } from './MobileMenuPage';
 import logoImg from '../../assets/logo.png';
 
 export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpenSeller, onOpenNotificationCenter, onSelectProduct }) => {
@@ -122,31 +123,21 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
             <span className="logo-text">Vicky<span className="logo-accent">-Shop</span></span>
           </a>
 
-          <nav className={`navbar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <div className="mobile-menu-header">
-              <div className="logo">
-                <img src={logoImg} alt="Vicky-Shop" className="logo-img rounded-logo" />
-                <span className="logo-text">Vicky<span className="logo-accent">-Shop</span></span>
-              </div>
-              <button type="button" className="close-menu-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-
+          <nav className="navbar desktop-navbar">
             <ul className="nav-links">
               <li>
                 <a href="#accueil" onClick={(e) => handleNavAnchor(e, 'accueil')} className="nav-link-item" {...triggerProps}>
-                  <i className="fa-solid fa-house nav-icon-mobile"></i> Accueil
+                  Accueil
                 </a>
               </li>
               <li>
                 <a href="#produits" onClick={(e) => handleNavAnchor(e, 'produits')} className="nav-link-item">
-                  <i className="fa-solid fa-grid-2 nav-icon-mobile"></i> Produits
+                  Produits
                 </a>
               </li>
               <li>
                 <a href="#flash-sale" onClick={(e) => handleNavAnchor(e, 'flash-sale')} className="nav-link-item">
-                  <i className="fa-solid fa-fire nav-icon-mobile"></i> Vente Flash <span className="hot-badge">Hot</span>
+                  Vente Flash <span className="hot-badge">Hot</span>
                 </a>
               </li>
 
@@ -158,56 +149,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                   </button>
                 </li>
               )}
-
-              {isAuthenticated && (
-                <li className="mobile-only-nav-item">
-                  <button type="button" className="nav-link-item nav-link-btn" onClick={handleOpenNotifs}>
-                    <i className="fa-solid fa-bell nav-icon-mobile text-primary"></i> Notifications
-                    {unreadCount > 0 && <span className="badge-count-pill">{unreadCount}</span>}
-                  </button>
-                </li>
-              )}
-
-              <li className="mobile-only-nav-item">
-                <button type="button" className="nav-link-item nav-link-btn" onClick={() => { setMobileMenuOpen(false); openWishlist(); }}>
-                  <i className="fa-solid fa-heart nav-icon-mobile text-danger"></i> Favoris
-                  {wishlistCount > 0 && <span className="badge-count-pill">{wishlistCount}</span>}
-                </button>
-              </li>
-              <li className="mobile-only-nav-item">
-                <button type="button" className="nav-link-item nav-link-btn" onClick={() => handleOrdersClick()}>
-                  <i className="fa-solid fa-box-open nav-icon-mobile text-primary"></i> Vos commandes
-                </button>
-              </li>
             </ul>
-
-            <div className="mobile-menu-footer">
-              <div className="mobile-auth-section">
-                {isAuthenticated ? (
-                  <div className="mobile-user-box">
-                    <div className="mobile-user-card" onClick={() => handleProfileClick('profile')}>
-                      <div className="user-avatar-badge">{getInitials(user?.name)}</div>
-                      <div className="mobile-user-info-col">
-                        <strong>{user?.name}</strong>
-                        <small>{isSeller ? '🏪 Compte Vendeur' : '⚙️ Paramètres & Profil'}</small>
-                      </div>
-                    </div>
-                    {isSeller && (
-                      <button type="button" className="btn btn-primary btn-block mt-2" onClick={handleSellerClick}>
-                        <i className="fa-solid fa-store"></i> <span>Ouvrir Gestion Vendeur</span>
-                      </button>
-                    )}
-                    <button type="button" className="btn btn-block mobile-logout-btn mt-2" onClick={() => { setMobileMenuOpen(false); logout(); }}>
-                      <i className="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
-                    </button>
-                  </div>
-                ) : (
-                  <button type="button" className="btn btn-primary btn-block" onClick={() => { setMobileMenuOpen(false); openAuthModal(); }}>
-                    <i className="fa-solid fa-user"></i> <span>Se connecter / S&apos;inscrire</span>
-                  </button>
-                )}
-              </div>
-            </div>
           </nav>
 
           <div className="header-actions">
@@ -311,9 +253,26 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
         </div>
       </header>
 
-      {mobileMenuOpen && (
-        <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
-      )}
+      {/* Page de navigation mobile plein écran dédiée */}
+      <MobileMenuPage
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onNavAnchor={handleNavAnchor}
+        logoImg={logoImg}
+        triggerProps={triggerProps}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        isSeller={isSeller}
+        unreadCount={unreadCount}
+        wishlistCount={wishlistCount}
+        onOpenAuth={openAuthModal}
+        onLogout={logout}
+        onOpenSeller={handleSellerClick}
+        onOpenProfile={handleProfileClick}
+        onOpenOrders={handleOrdersClick}
+        onOpenWishlist={openWishlist}
+        onOpenNotifs={handleOpenNotifs}
+      />
     </>
   );
 };
