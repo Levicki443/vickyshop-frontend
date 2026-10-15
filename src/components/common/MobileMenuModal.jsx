@@ -177,11 +177,7 @@ export const MobileMenuModal = ({
             <span className="mobile-section-label">Navigation</span>
             <ul className="mobile-nav-list">
               <li>
-                <a
-                  href="#accueil"
-                  className="mobile-nav-card"
-                  onClick={(e) => handleLinkClick(e, 'accueil')}
-                >
+                <a href="#accueil" className="mobile-nav-card" onClick={(e) => handleLinkClick(e, 'accueil')}>
                   <div className="mobile-nav-card-left">
                     <i className="fa-solid fa-house mobile-nav-card-icon"></i>
                     <span>Accueil</span>
@@ -191,13 +187,9 @@ export const MobileMenuModal = ({
               </li>
 
               <li>
-                <a
-                  href="#produits"
-                  className="mobile-nav-card"
-                  onClick={(e) => handleLinkClick(e, 'produits')}
-                >
+                <a href="#produits" className="mobile-nav-card" onClick={(e) => handleLinkClick(e, 'produits')}>
                   <div className="mobile-nav-card-left">
-                    <i className="fa-solid fa-grid-2 mobile-nav-card-icon"></i>
+                    <i className="fa-solid fa-table-cells-large mobile-nav-card-icon"></i>
                     <span>Produits</span>
                   </div>
                   <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
@@ -205,11 +197,7 @@ export const MobileMenuModal = ({
               </li>
 
               <li>
-                <a
-                  href="#flash-sale"
-                  className="mobile-nav-card"
-                  onClick={(e) => handleLinkClick(e, 'flash-sale')}
-                >
+                <a href="#flash-sale" className="mobile-nav-card" onClick={(e) => handleLinkClick(e, 'flash-sale')}>
                   <div className="mobile-nav-card-left">
                     <i className="fa-solid fa-fire mobile-nav-card-icon text-warning"></i>
                     <span>Vente Flash</span>
@@ -222,36 +210,20 @@ export const MobileMenuModal = ({
               </li>
 
               <li>
-                <button
-                  type="button"
-                  className="mobile-nav-card mobile-nav-btn"
-                  onClick={() => {
-                    onClose();
-                    onOpenWishlist();
-                  }}
-                >
+                <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => { onClose(); onOpenWishlist(); }}>
                   <div className="mobile-nav-card-left">
                     <i className="fa-solid fa-heart mobile-nav-card-icon text-danger"></i>
                     <span>Favoris</span>
                   </div>
                   <div className="mobile-nav-card-right">
-                    {wishlistCount > 0 && (
-                      <span className="badge-count-pill">{wishlistCount}</span>
-                    )}
+                    {wishlistCount > 0 && <span className="badge-count-pill">{wishlistCount}</span>}
                     <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
                   </div>
                 </button>
               </li>
 
               <li>
-                <button
-                  type="button"
-                  className="mobile-nav-card mobile-nav-btn"
-                  onClick={() => {
-                    onClose();
-                    onOpenOrders();
-                  }}
-                >
+                <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => { onClose(); onOpenOrders(); }}>
                   <div className="mobile-nav-card-left">
                     <i className="fa-solid fa-box-open mobile-nav-card-icon text-primary"></i>
                     <span>Vos commandes</span>
@@ -262,22 +234,13 @@ export const MobileMenuModal = ({
 
               {isAuthenticated && (
                 <li>
-                  <button
-                    type="button"
-                    className="mobile-nav-card mobile-nav-btn"
-                    onClick={() => {
-                      onClose();
-                      onOpenNotifs();
-                    }}
-                  >
+                  <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => { onClose(); onOpenNotifs(); }}>
                     <div className="mobile-nav-card-left">
                       <i className="fa-solid fa-bell mobile-nav-card-icon text-primary"></i>
                       <span>Notifications</span>
                     </div>
                     <div className="mobile-nav-card-right">
-                      {unreadCount > 0 && (
-                        <span className="badge-count-pill">{unreadCount}</span>
-                      )}
+                      {unreadCount > 0 && <span className="badge-count-pill">{unreadCount}</span>}
                       <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
                     </div>
                   </button>
@@ -286,14 +249,7 @@ export const MobileMenuModal = ({
 
               {isSeller && isAuthenticated && (
                 <li>
-                  <button
-                    type="button"
-                    className="mobile-nav-card mobile-nav-btn mobile-nav-seller"
-                    onClick={() => {
-                      onClose();
-                      onOpenSeller();
-                    }}
-                  >
+                  <button type="button" className="mobile-nav-card mobile-nav-btn mobile-nav-seller" onClick={() => { onClose(); onOpenSeller(); }}>
                     <div className="mobile-nav-card-left">
                       <i className="fa-solid fa-store mobile-nav-card-icon text-primary"></i>
                       <span>Gestion Vendeur</span>
