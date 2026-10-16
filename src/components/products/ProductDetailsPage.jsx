@@ -6,6 +6,8 @@ import { useToast } from '../../context/ToastContext';
 import { ProductReviewsSection } from './ProductReviewsSection';
 import { SimilarProductsSection } from './SimilarProductsSection';
 import { ReviewModal } from '../reviews/ReviewModal';
+import { ProductShareModal } from '../common/ProductShareModal';
+import { useProductSEO } from '../../hooks/useProductSEO';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600';
 
@@ -24,9 +26,12 @@ export const ProductDetailsPage = ({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
 
-  const [product, setProduct] = useState(
-    () => (initialProduct && String(initialProduct._id || initialProduct.id) === String(productId) ? initialProduct : null)
-  );
+  const [product, setProduct] = useState(() => {
+    if (!initialProduct) return null;
+    const matchId = String(initialProduct._id || initialProduct.id) === String(productId);
+    const matchSlug = initialProduct.slug && initialProduct.slug.toLowerCase() === String(productId).toLowerCase();
+    return matchId || matchSlug ? initialProduct : null;
+  });
   const [loading, setLoading] = useState(!product);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -36,6 +41,9 @@ export const ProductDetailsPage = ({
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  useProductSEO(product);
 
   const loadProductData = useCallback(async () => {
     if (!productId) {
@@ -65,7 +73,9 @@ export const ProductDetailsPage = ({
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    if (initialProduct && String(initialProduct._id || initialProduct.id) === String(productId)) {
+    const matchId = initialProduct && String(initialProduct._id || initialProduct.id) === String(productId);
+    const matchSlug = initialProduct?.slug && initialProduct.slug.toLowerCase() === String(productId).toLowerCase();
+    if (matchId || matchSlug) {
       setProduct(initialProduct);
       setLoading(false);
       setNotFound(false);
@@ -284,6 +294,9 @@ export const ProductDetailsPage = ({
             <button type="button" className={`btn-details-fav ${isFavorited ? 'active' : ''}`} onClick={() => toggleWishlist(product)}>
               <i className={isFavorited ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
             </button>
+            <button type="button" className="btn-details-share" title="Partager ce produit" onClick={() => setIsShareModalOpen(true)}>
+              <i className="fa-solid fa-share-nodes"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -293,6 +306,9 @@ export const ProductDetailsPage = ({
 
       {/* MODALE DE DÉPÔT D'AVIS PRODUIT */}
       <ReviewModal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} initialProduct={product} />
+
+      {/* MODALE DE PARTAGE DU PRODUIT */}
+      <ProductShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} product={product} />
 
       {/* PRODUITS SIMILAIRES RECOMMANDÉS */}
       <SimilarProductsSection

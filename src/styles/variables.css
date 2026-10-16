@@ -26,6 +26,8 @@
   /* Mode Sombre (Par Défaut) */
   --bg-main: #0c0f17;
   --bg-surface: #141926;
+  --bg-surface-elevated: #161c2d;
+  --bg-dropdown: #121725;
   --bg-card: rgba(24, 30, 48, 0.75);
   --bg-glass: rgba(20, 25, 38, 0.85);
   --bg-input: #1a2236;
@@ -80,6 +82,8 @@
 [data-theme="light"] {
   --bg-main: #f4f6fb;
   --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-dropdown: #ffffff;
   --bg-card: #ffffff;
   --bg-glass: rgba(255, 255, 255, 0.95);
   --bg-input: #f1f5f9;

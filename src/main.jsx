@@ -16,6 +16,7 @@ import './styles/admin.css';
 import './styles/pwa.css';
 import './styles/notifications.css';
 import './styles/orders.css';
+import './styles/share-modal.css';
 import './styles/responsive.css';
 
 // Enregistrement standard du Service Worker PWA et Web Push

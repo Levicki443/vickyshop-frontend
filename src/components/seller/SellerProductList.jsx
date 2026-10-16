@@ -3,6 +3,7 @@ import { formatPrice } from '../../services/api';
 import { deleteSellerProduct } from '../../services/sellerApi';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { ProductShareModal } from '../common/ProductShareModal';
 
 export const SellerProductList = ({ products, loading, onRefresh, onEditProduct, onOpenCreate }) => {
   const { token } = useAuth();
@@ -14,6 +15,7 @@ export const SellerProductList = ({ products, loading, onRefresh, onEditProduct,
   const [sortBy, setSortBy] = useState('recent'); // 'recent' | 'price_asc' | 'price_desc'
   const [deletingProduct, setDeletingProduct] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sharingProduct, setSharingProduct] = useState(null);
 
   const filteredProducts = useMemo(() => {
     return products
@@ -188,6 +190,9 @@ export const SellerProductList = ({ products, loading, onRefresh, onEditProduct,
                     </td>
                     <td className="text-right">
                       <div className="seller-actions-group">
+                        <button type="button" className="seller-action-btn share-btn" title="Partager ce produit" onClick={() => setSharingProduct(p)}>
+                          <i className="fa-solid fa-share-nodes"></i>
+                        </button>
                         <button type="button" className="seller-action-btn edit-btn" title="Modifier" onClick={() => onEditProduct(p)}>
                           <i className="fa-solid fa-pen"></i>
                         </button>
@@ -220,6 +225,13 @@ export const SellerProductList = ({ products, loading, onRefresh, onEditProduct,
           </div>
         </div>
       )}
+
+      {/* Modale de Partage du Produit */}
+      <ProductShareModal
+        isOpen={Boolean(sharingProduct)}
+        onClose={() => setSharingProduct(null)}
+        product={sharingProduct}
+      />
     </div>
   );
 };

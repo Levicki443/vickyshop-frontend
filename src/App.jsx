@@ -116,7 +116,14 @@ export const App = () => {
 
   const detailedProduct = useMemo(() => {
     if (!currentProductId || products.length === 0) return null;
-    return products.find((p) => String(p._id || p.id) === String(currentProductId)) || null;
+    const cleanId = String(currentProductId).toLowerCase();
+    return (
+      products.find(
+        (p) =>
+          (p.slug && p.slug.toLowerCase() === cleanId) ||
+          String(p._id || p.id).toLowerCase() === cleanId
+      ) || null
+    );
   }, [currentProductId, products]);
 
   const sellerInitialTab = useMemo(() => {
@@ -151,8 +158,9 @@ export const App = () => {
   };
 
   const handleSelectProduct = (prod) => {
-    const id = prod?._id || prod?.id || prod;
-    if (id) navigateTo(`/produit/${id}`);
+    if (!prod) return;
+    const identifier = prod.slug || prod._id || prod.id || (typeof prod === 'string' ? prod : null);
+    if (identifier) navigateTo(`/produit/${identifier}`);
   };
 
   useEffect(() => {

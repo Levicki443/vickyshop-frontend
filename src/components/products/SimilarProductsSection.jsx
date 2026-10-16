@@ -24,20 +24,44 @@ export const SimilarProductsSection = ({ currentProduct, allProducts = [], onSel
     setLoading(true);
 
     const loadRecommendations = async () => {
-      // 1. Calcul optimiste local immédiat pour éviter tout flash blanc
-      const localMatches = computeSimilarProducts(currentProduct, allProducts, 4);
+      // Filtrage strict : seuls les produits authentiques du BackOffice sont admissibles
+      const authenticCatalog = Array.isArray(allProducts)
+        ? allProducts.filter((p) => !p.image?.includes('unsplash.com'))
+        : [];
+
+      // 1. Calcul optimiste local immédiat
+      const localMatches = computeSimilarProducts(currentProduct, authenticCatalog, 4);
 
       try {
         const apiMatches = await fetchSimilarProducts(productId, 4);
         if (isMounted) {
-          if (Array.isArray(apiMatches)) {
-            setSimilarProducts(apiMatches);
-          } else {
+          const authenticApiMatches = Array.isArray(apiMatches)
+            ? apiMatches.filter((p) => !p.image?.includes('unsplash.com'))
+            : [];
+
+          if (authenticApiMatches.length > 0) {
+            setSimilarProducts(authenticApiMatches);
+          } else if (localMatches.length > 0) {
             setSimilarProducts(localMatches);
+          } else {
+            // Repli sur les autres articles réels du BackOffice
+            const fallbackReal = authenticCatalog
+              .filter((p) => String(p._id || p.id) !== String(productId))
+              .slice(0, 4);
+            setSimilarProducts(fallbackReal);
           }
         }
       } catch {
-        if (isMounted) setSimilarProducts(localMatches);
+        if (isMounted) {
+          if (localMatches.length > 0) {
+            setSimilarProducts(localMatches);
+          } else {
+            const fallbackReal = authenticCatalog
+              .filter((p) => String(p._id || p.id) !== String(productId))
+              .slice(0, 4);
+            setSimilarProducts(fallbackReal);
+          }
+        }
       } finally {
         if (isMounted) setLoading(false);
       }

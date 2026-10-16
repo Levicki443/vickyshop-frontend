@@ -28,7 +28,8 @@ export const fetchProducts = async (params = {}) => {
 
 export const fetchProductById = async (id) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`);
+    const encodedId = encodeURIComponent(String(id).trim());
+    const response = await fetch(`${API_BASE_URL}/products/${encodedId}`);
     if (!response.ok) {
       throw new Error(`Produit introuvable (${response.status})`);
     }
@@ -42,7 +43,8 @@ export const fetchProductById = async (id) => {
 
 export const fetchSimilarProducts = async (id, limit = 4) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}/similar?limit=${limit}`);
+    const encodedId = encodeURIComponent(String(id).trim());
+    const response = await fetch(`${API_BASE_URL}/products/${encodedId}/similar?limit=${limit}`);
     if (!response.ok) {
       throw new Error(`Erreur serveur (${response.status})`);
     }
