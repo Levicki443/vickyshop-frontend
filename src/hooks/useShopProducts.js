@@ -21,7 +21,10 @@ export const useShopProducts = () => {
     setError(null);
     try {
       const data = await fetchProducts();
-      setProducts(data);
+      const realProducts = Array.isArray(data)
+        ? data.filter((p) => !p.image?.includes('unsplash.com'))
+        : [];
+      setProducts(realProducts);
     } catch (err) {
       setError('Impossible de joindre le serveur API. Veuillez vérifier la connexion.');
     } finally {
@@ -34,9 +37,10 @@ export const useShopProducts = () => {
   }, [loadProducts]);
 
   useEffect(() => {
-    const u1 = onProductCreated((p) =>
-      setProducts((prev) => (prev.some((x) => x._id === p._id) ? prev : [p, ...prev]))
-    );
+    const u1 = onProductCreated((p) => {
+      if (p.image?.includes('unsplash.com')) return;
+      setProducts((prev) => (prev.some((x) => x._id === p._id) ? prev : [p, ...prev]));
+    });
     const u2 = onProductUpdated((p) =>
       setProducts((prev) =>
         prev.map((x) => ((x._id || x.id) === (p._id || p.id) ? p : x))

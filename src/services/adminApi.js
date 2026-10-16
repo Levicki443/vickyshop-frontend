@@ -9,7 +9,8 @@ const API_BASE_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl : `${rawBaseUrl}/a
 const ADMIN_TOKEN_KEY = 'vicky_admin_token';
 const ADMIN_USER_KEY = 'vicky_admin_user';
 
-export const getAdminToken = () => localStorage.getItem(ADMIN_TOKEN_KEY);
+export const getAdminToken = () =>
+  localStorage.getItem(ADMIN_TOKEN_KEY) || localStorage.getItem('vicky_auth_token');
 
 export const setAdminToken = (token, user) => {
   localStorage.setItem(ADMIN_TOKEN_KEY, token);
@@ -20,7 +21,7 @@ export const setAdminToken = (token, user) => {
 
 export const getAdminUser = () => {
   try {
-    const raw = localStorage.getItem(ADMIN_USER_KEY);
+    const raw = localStorage.getItem(ADMIN_USER_KEY) || localStorage.getItem('vicky_auth_user');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -105,7 +106,12 @@ export const updateOrderStatusApi = async (orderId, orderStatus, paymentStatus, 
 export const fetchAdminProducts = async (params = {}) => {
   const query = new URLSearchParams();
   if (params.category && params.category !== 'all') query.append('category', params.category);
-  if (params.stockStatus && params.stockStatus !== 'all') query.append('stockStatus', params.stockStatus);
+  
+  let stockParam = params.stockStatus;
+  if (stockParam === 'inStock') stockParam = 'in';
+  else if (stockParam === 'outOfStock') stockParam = 'out';
+  if (stockParam && stockParam !== 'all') query.append('stockStatus', stockParam);
+
   if (params.search) query.append('search', params.search);
 
   const response = await fetch(`${API_BASE_URL}/admin/products?${query.toString()}`, { headers: authHeaders() });

@@ -12,6 +12,7 @@ import {
   removeAdminToken,
   getAdminUser,
 } from '../../services/adminApi';
+import { fetchProducts } from '../../services/api';
 import { AdminOrderDetailsModal } from './AdminOrderDetailsModal';
 import { AdminProductModal } from './AdminProductModal';
 import { AdminReviewsTab } from './AdminReviewsTab';
@@ -109,7 +110,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
     }
   }, [orderStatusFilter, orderPaymentFilter, orderSearch]);
 
-  // Chargement des Produits
+  // Chargement des Produits avec résilience et exclusion des démos
   const loadProducts = useCallback(async () => {
     try {
       const data = await fetchAdminProducts({
@@ -117,9 +118,26 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
         stockStatus: productStockFilter,
         search: productSearch,
       });
-      setProducts(data || []);
+      if (Array.isArray(data) && data.length > 0) {
+        const cleanProds = data.filter((p) => !p.image?.includes('unsplash.com'));
+        setProducts(cleanProds);
+        return;
+      }
     } catch (err) {
-      console.error('Erreur chargement produits:', err);
+      console.warn('Endpoint admin/products inaccessible, chargement via catalogue boutique :', err.message);
+    }
+
+    try {
+      const publicData = await fetchProducts({
+        category: productCategoryFilter,
+        search: productSearch,
+      });
+      if (Array.isArray(publicData)) {
+        const realProducts = publicData.filter((p) => !p.image?.includes('unsplash.com'));
+        setProducts(realProducts);
+      }
+    } catch (fallbackErr) {
+      console.error('Erreur chargement catalogue de secours :', fallbackErr);
     }
   }, [productCategoryFilter, productStockFilter, productSearch]);
 
