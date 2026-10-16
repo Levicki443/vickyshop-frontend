@@ -53,7 +53,6 @@ export const SimilarProductsSection = ({ currentProduct, allProducts = [], onSel
   const handleSelect = (prod) => {
     if (onSelectProduct) {
       onSelectProduct(prod);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
