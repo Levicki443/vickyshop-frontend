@@ -291,11 +291,11 @@ export const ProductDetailsPage = ({
             <button type="button" className="btn btn-primary btn-details-buy" onClick={handleBuyNow} disabled={isOutOfStock}>
               <i className="fa-solid fa-bolt"></i> <span>Acheter (Cash)</span>
             </button>
-            <button type="button" className={`btn-details-fav ${isFavorited ? 'active' : ''}`} onClick={() => toggleWishlist(product)}>
+            <button type="button" className={`btn-details-fav ${isFavorited ? 'active' : ''}`} onClick={() => toggleWishlist(product)} title="Ajouter à ma liste de souhaits">
               <i className={isFavorited ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
             </button>
             <button type="button" className="btn-details-share" title="Partager ce produit" onClick={() => setIsShareModalOpen(true)}>
-              <i className="fa-solid fa-share-nodes"></i>
+              <i className="fa-solid fa-share-nodes"></i> <span className="btn-details-share-text">Partager</span>
             </button>
           </div>
         </div>
