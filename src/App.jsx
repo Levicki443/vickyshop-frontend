@@ -14,6 +14,8 @@ import { CartDrawer } from './components/cart/CartDrawer';
 import { WishlistDrawer } from './components/cart/WishlistDrawer';
 import { CheckoutModal } from './components/cart/CheckoutModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { Footer } from './components/common/Footer';
 import { ToastContainer } from './components/common/ToastContainer';
 import { AnnouncementBar } from './components/common/AnnouncementBar';
@@ -81,12 +83,9 @@ export const App = () => {
     cleanPath.startsWith('/products/');
   const isCartRoute = cleanPath === '/panier' || cleanPath === '/cart';
   const isCheckoutRoute = cleanPath === '/commande' || cleanPath === '/checkout';
-  const isAuthRoute =
-    cleanPath === '/connexion' ||
-    cleanPath === '/login' ||
-    cleanPath === '/inscription' ||
-    cleanPath === '/register' ||
-    cleanPath === '/auth';
+  const isAuthRoute = ['/connexion', '/login', '/inscription', '/register', '/auth'].includes(cleanPath);
+  const isForgotPasswordRoute = cleanPath === '/mot-de-passe-oublie' || cleanPath === '/forgot-password';
+  const isResetPasswordRoute = ['/reinitialisation-mot-de-passe', '/reinitialiser-mot-de-passe', '/reset-password'].includes(cleanPath);
   const isCategoryRoute = cleanPath.startsWith('/categorie') || cleanPath.startsWith('/categories');
   const isSearchRoute = cleanPath.startsWith('/recherche') || cleanPath.startsWith('/search');
 
@@ -107,19 +106,7 @@ export const App = () => {
     Boolean(isAdminViewActive);
 
   const showAnnouncementBar =
-    isHomePath &&
-    !isProductRoute &&
-    !isOrdersRoute &&
-    !isProfileRoute &&
-    !isSellerRoute &&
-    !isAdminRoute &&
-    !isCartRoute &&
-    !isCheckoutRoute &&
-    !isAuthRoute &&
-    !isCategoryRoute &&
-    !isSearchRoute &&
-    !isFiltering &&
-    !isOverlayOpen;
+    isHomePath && !isCategoryRoute && !isSearchRoute && !isFiltering && !isOverlayOpen;
 
   const currentProductId = useMemo(() => {
     if (!isProductRoute) return null;
@@ -231,6 +218,10 @@ export const App = () => {
           onOpenCheckout={() => setIsCheckoutOpen(true)}
           onSelectProduct={handleSelectProduct}
         />
+      ) : isForgotPasswordRoute ? (
+        <ForgotPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
+      ) : isResetPasswordRoute ? (
+        <ResetPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
       ) : isOrdersRoute ? (
         <UserOrdersPage onBackToShop={() => navigateTo('/')} initialOrderNumber={selectedOrderNumber} />
       ) : isProfileRoute ? (

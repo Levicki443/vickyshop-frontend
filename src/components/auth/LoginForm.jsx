@@ -9,6 +9,7 @@ export const LoginForm = ({
   onSubmit,
   loading,
   onSwitchToRegister,
+  onForgotPassword,
 }) => {
   return (
     <form className="auth-form" onSubmit={onSubmit}>
@@ -38,6 +39,16 @@ export const LoginForm = ({
           value={loginForm.password}
           onChange={onChange}
         />
+      </div>
+
+      <div className="auth-forgot-row">
+        <button
+          type="button"
+          className="text-link auth-forgot-btn"
+          onClick={onForgotPassword}
+        >
+          Mot de passe oublié ?
+        </button>
       </div>
 
       <button

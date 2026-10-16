@@ -16,16 +16,8 @@ export const AuthModal = () => {
 
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    address: '',
-    city: 'Abidjan',
-    role: ROLES.CLIENT,
-    shopName: '',
-    shopDescription: '',
-    shopPhone: '',
+    name: '', email: '', phone: '', password: '', address: '', city: 'Abidjan',
+    role: ROLES.CLIENT, shopName: '', shopDescription: '', shopPhone: '',
   });
 
   if (!isAuthModalOpen) return null;
@@ -187,6 +179,11 @@ export const AuthModal = () => {
             onSubmit={handleLoginSubmit}
             loading={loading}
             onSwitchToRegister={() => setMode('register')}
+            onForgotPassword={() => {
+              closeAuthModal();
+              window.history.pushState(null, '', '/mot-de-passe-oublie');
+              window.dispatchEvent(new Event('app-navigate'));
+            }}
           />
         ) : (
           <form className="auth-form" onSubmit={handleRegisterSubmit}>
