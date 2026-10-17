@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
   const clearSession = useCallback(() => {
     localStorage.removeItem('vicky_auth_token');
     localStorage.removeItem('vicky_auth_user');
+    localStorage.removeItem('vicky_client_orders');
     setToken(null);
     setUser(null);
     setSellerUnreadCount(0);

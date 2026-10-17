@@ -67,8 +67,15 @@ export const WishlistDrawer = () => {
                 className="btn btn-primary"
                 onClick={() => {
                   closeWishlist();
-                  const target = document.getElementById('produits');
-                  if (target) target.scrollIntoView({ behavior: 'smooth' });
+                  if (window.location.pathname !== '/') {
+                    window.history.pushState(null, '', '/');
+                    window.dispatchEvent(new Event('app-navigate'));
+                    setTimeout(() => {
+                      document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  } else {
+                    document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' });
+                  }
                 }}
               >
                 <i className="fa-solid fa-bag-shopping"></i> Découvrir les produits

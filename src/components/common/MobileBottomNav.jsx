@@ -10,12 +10,20 @@ import { useAuth } from '../../context/AuthContext';
  * avec icônes Font Awesome Free officielles, badges temps réel et gestion de l'état actif.
  */
 export const MobileBottomNav = ({ currentPath, onNavigate }) => {
-  const { totalItems, openCart, isCartOpen } = useCart();
-  const { wishlistCount, openWishlist, isWishlistOpen } = useWishlist();
-  const { unreadCount, openNotificationCenter, isNotificationCenterOpen } = useNotifications();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { totalItems, openCart, closeCart, isCartOpen } = useCart();
+  const { wishlistCount, openWishlist, closeWishlist, isWishlistOpen } = useWishlist();
+  const { unreadCount, openNotificationCenter, closeNotificationCenter, isNotificationCenterOpen } = useNotifications();
+  const { closeAuthModal } = useAuth();
 
   const [activeTab, setActiveTab] = useState('home');
+
+  // Fermeture centralisée de tous les tiroirs et modales de premier plan
+  const closeAllOverlays = () => {
+    closeCart();
+    closeWishlist();
+    closeNotificationCenter();
+    closeAuthModal();
+  };
 
   // Synchronisation de l'onglet actif avec la navigation et les tiroirs ouverts
   useEffect(() => {
@@ -45,7 +53,6 @@ export const MobileBottomNav = ({ currentPath, onNavigate }) => {
       const productsEl = document.getElementById('produits');
       if (productsEl) {
         const rect = productsEl.getBoundingClientRect();
-        // Si la section produits est visible dans le viewport supérieur
         if (rect.top <= 200 && rect.bottom >= 200) {
           setActiveTab('products');
           return;
@@ -62,12 +69,14 @@ export const MobileBottomNav = ({ currentPath, onNavigate }) => {
   }, [isCartOpen, isWishlistOpen, isNotificationCenterOpen]);
 
   const handleHomeClick = () => {
+    closeAllOverlays();
     setActiveTab('home');
     if (onNavigate) onNavigate('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleProductsClick = () => {
+    closeAllOverlays();
     setActiveTab('products');
     if (window.location.pathname !== '/') {
       if (onNavigate) onNavigate('/');
@@ -80,20 +89,25 @@ export const MobileBottomNav = ({ currentPath, onNavigate }) => {
   };
 
   const handleNotifClick = () => {
+    closeCart();
+    closeWishlist();
+    closeAuthModal();
     setActiveTab('alerts');
-    if (!isAuthenticated) {
-      openAuthModal();
-    } else {
-      openNotificationCenter();
-    }
+    openNotificationCenter();
   };
 
   const handleWishlistClick = () => {
+    closeCart();
+    closeNotificationCenter();
+    closeAuthModal();
     setActiveTab('wishlist');
     openWishlist();
   };
 
   const handleCartClick = () => {
+    closeWishlist();
+    closeNotificationCenter();
+    closeAuthModal();
     setActiveTab('cart');
     openCart();
   };

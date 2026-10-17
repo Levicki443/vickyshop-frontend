@@ -93,6 +93,10 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
     setNotifDropdownOpen(false);
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
     if (onOpenOrdersTracking) {
       onOpenOrdersTracking(orderNumber);
     } else {

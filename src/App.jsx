@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getAdminToken } from './services/adminApi';
 import { useShopProducts } from './hooks/useShopProducts';
 import { Header } from './components/common/Header';
@@ -28,12 +28,14 @@ import { NotificationCenterModal } from './components/common/NotificationCenterM
 import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { useAuth } from './context/AuthContext';
 import { useCart } from './context/CartContext';
+import { useWishlist } from './context/WishlistContext';
 import { useNotifications } from './context/NotificationContext';
 import { useToast } from './context/ToastContext';
 
 export const App = () => {
-  const { user, isSeller, openAuthModal, loading: authLoading, isAuthModalOpen } = useAuth();
-  const { isCartOpen, openCart } = useCart();
+  const { user, isSeller, openAuthModal, closeAuthModal, loading: authLoading, isAuthModalOpen } = useAuth();
+  const { isCartOpen, openCart, closeCart } = useCart();
+  const { isWishlistOpen, closeWishlist } = useWishlist();
   const { isNotificationCenterOpen, closeNotificationCenter, openNotificationCenter } = useNotifications();
   const { addToast } = useToast();
   const { products, loading, error, loadProducts } = useShopProducts();
@@ -135,11 +137,20 @@ export const App = () => {
     return 'dashboard';
   }, [currentPath]);
 
+  const closeAllOverlays = useCallback(() => {
+    closeCart();
+    closeWishlist();
+    closeNotificationCenter();
+    closeAuthModal();
+    setIsCheckoutOpen(false);
+    setIsAdminAuthModalOpen(false);
+    setIsReviewModalOpen(false);
+  }, [closeCart, closeWishlist, closeNotificationCenter, closeAuthModal]);
+
   useEffect(() => {
     const handleLocationChange = () => {
+      closeAllOverlays();
       setCurrentPath(window.location.pathname.toLowerCase());
-      if (isCheckoutOpen) setIsCheckoutOpen(false);
-      if (isAdminAuthModalOpen) setIsAdminAuthModalOpen(false);
       if (isAdminViewActive) setIsAdminViewActive(false);
     };
 
@@ -149,9 +160,10 @@ export const App = () => {
       window.removeEventListener('popstate', handleLocationChange);
       window.removeEventListener('app-navigate', handleLocationChange);
     };
-  }, [isCheckoutOpen, isAdminAuthModalOpen, isAdminViewActive]);
+  }, [closeAllOverlays, isAdminViewActive]);
 
   const navigateTo = (path) => {
+    closeAllOverlays();
     window.history.pushState(null, '', path);
     setCurrentPath(path.toLowerCase());
     window.scrollTo({ top: 0, behavior: 'instant' });

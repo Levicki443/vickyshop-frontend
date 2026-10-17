@@ -4,6 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import { formatPrice } from '../../services/api';
 import { onClientOrderUpdate, onOrderUpdated, onOrderStatusUpdated, trackOrderRoom } from '../../services/socket';
 import { OrderTrackingDetails } from '../cart/OrderTrackingDetails';
+import { OrdersAuthGate } from './OrdersAuthGate';
 
 const STATUS_BADGE_MAP = {
   recue: { label: 'Reçue', cls: 'badge-item-pending' },
@@ -19,7 +20,7 @@ const STATUS_BADGE_MAP = {
 };
 
 export const UserOrdersPage = ({ onBackToShop, initialOrderNumber }) => {
-  const { user, token } = useAuth();
+  const { user, token, openAuthModal } = useAuth();
   const { addToast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,29 +30,34 @@ export const UserOrdersPage = ({ onBackToShop, initialOrderNumber }) => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   const loadUserOrders = useCallback(async () => {
+    if (!token || !user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const rawBaseUrl = (import.meta.env.VITE_URL || import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
       const API_BASE_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl : `${rawBaseUrl}/api`;
 
-      if (token) {
-        const res = await fetch(`${API_BASE_URL}/orders/my-orders`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.data?.orders?.length > 0) {
-            const list = data.data.orders;
-            setOrders(list);
-            list.forEach((o) => trackOrderRoom(o.orderNumber));
-            const target = initialOrderNumber ? list.find((o) => o.orderNumber === initialOrderNumber) || list[0] : list[0];
-            setSelectedOrder(target);
-            setLoading(false);
-            return;
-          }
+      const res = await fetch(`${API_BASE_URL}/orders/my-orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data?.orders?.length > 0) {
+          const list = data.data.orders;
+          setOrders(list);
+          list.forEach((o) => trackOrderRoom(o.orderNumber));
+          const target = initialOrderNumber ? list.find((o) => o.orderNumber === initialOrderNumber) || list[0] : list[0];
+          setSelectedOrder(target);
+          setLoading(false);
+          return;
         }
       }
 
+      // Si l'utilisateur est bien connecté, lecture de secours du cache local de sa session
       const saved = localStorage.getItem('vicky_client_orders');
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -67,12 +73,19 @@ export const UserOrdersPage = ({ onBackToShop, initialOrderNumber }) => {
     } finally {
       setLoading(false);
     }
-  }, [token, initialOrderNumber]);
+  }, [token, user, initialOrderNumber]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    loadUserOrders();
-  }, [loadUserOrders]);
+    if (token && user) {
+      loadUserOrders();
+    }
+  }, [token, user, loadUserOrders]);
+
+  // Si l'utilisateur n'est pas connecté, affichage de l'Auth Gate sécurisée
+  if (!user || !token) {
+    return <OrdersAuthGate onBackToShop={onBackToShop} onOpenAuth={openAuthModal} />;
+  }
 
   // Synchronisation temps réel (Socket.IO)
   useEffect(() => {

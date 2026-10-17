@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNotifications } from '../../context/NotificationContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const NotificationCenterModal = ({ isOpen, onClose, onSelectOrder, onSelectProduct, onOpenSettings }) => {
+  const { isAuthenticated, openAuthModal } = useAuth();
   const {
     notifications,
     unreadCount,
@@ -172,7 +174,44 @@ export const NotificationCenterModal = ({ isOpen, onClose, onSelectOrder, onSele
 
         {/* Corps de la liste */}
         <div className="notif-modal-body">
-          {loading && notifications.length === 0 ? (
+          {!isAuthenticated ? (
+            <div className="notif-center-empty" style={{ padding: '2.5rem 1.25rem', textAlign: 'center' }}>
+              <div
+                className="empty-icon-bubble"
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  margin: '0 auto 1.25rem',
+                  background: 'var(--primary-soft)',
+                  borderRadius: 'var(--radius-full)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--primary)',
+                  fontSize: '1.6rem',
+                }}
+              >
+                <i className="fa-solid fa-bell"></i>
+              </div>
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.6rem', color: 'var(--text-primary)' }}>
+                Vos Alertes &amp; Notifications en direct
+              </h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', maxWidth: '360px', margin: '0 auto 1.5rem', lineHeight: '1.5' }}>
+                Connectez-vous pour suivre l&apos;acheminement de vos commandes en temps réel, recevoir vos alertes de prix et profiter de vos offres exclusives.
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  onClose();
+                  openAuthModal();
+                }}
+              >
+                <i className="fa-solid fa-arrow-right-to-bracket"></i>
+                <span>Se connecter ou créer un compte</span>
+              </button>
+            </div>
+          ) : loading && notifications.length === 0 ? (
             <div className="notif-center-loading">
               <i className="fa-solid fa-spinner fa-spin"></i>
               <span>Chargement de votre historique...</span>
