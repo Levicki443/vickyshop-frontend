@@ -27,8 +27,17 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
   const { triggerProps } = useSecretAdminTrigger(onOpenAdmin);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 30);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -199,7 +208,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
 
             <button type="button" className="icon-btn cart-btn-active" onClick={openCart} title="Panier" aria-label="Panier">
               <i className="fa-solid fa-cart-shopping"></i>
-              {totalItems > 0 && <span key={totalItems} className="badge-count badge-pop">{totalItems}</span>}
+              {totalItems > 0 && <span key={totalItems} className="badge-count cart-badge-bounce">{totalItems}</span>}
             </button>
 
             {isAuthenticated ? (

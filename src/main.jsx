@@ -4,6 +4,7 @@ import App from './App';
 
 import './styles/global.css';
 import './styles/products.css';
+import './styles/skeleton.css';
 import './styles/product-details.css';
 import './styles/layout.css';
 import './styles/auth.css';

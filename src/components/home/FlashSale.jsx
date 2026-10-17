@@ -1,19 +1,12 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { formatPrice } from '../../services/api';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
-import { useToast } from '../../context/ToastContext';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { FlashItemCard } from './FlashItemCard';
 
 /**
  * Composant FlashSale :
  * Vitrine carrousel multi-cartes responsive avec articles en vedette,
- * compte à rebours interactif, jauges d'urgence et animations soignées.
+ * compte à rebours interactif, support des squelettes de chargement et animations soignées.
  */
-export const FlashSale = ({ products = [], onShopNow, onQuickView }) => {
-  const { addToCart } = useCart();
-  const { toggleWishlist, isInWishlist } = useWishlist();
-  const { addToast } = useToast();
-
+export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickView }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [itemsPerView, setItemsPerView] = useState(3);
@@ -97,45 +90,13 @@ export const FlashSale = ({ products = [], onShopNow, onQuickView }) => {
 
   // Défilement automatique avec mise en pause au survol
   useEffect(() => {
-    if (featuredList.length <= itemsPerView || isPaused) return;
+    if (loading || featuredList.length <= itemsPerView || isPaused) return;
     const interval = setInterval(() => {
       nextSlide();
     }, 4500);
 
     return () => clearInterval(interval);
-  }, [featuredList.length, itemsPerView, isPaused, nextSlide]);
-
-  const handleAddToCart = (e, product) => {
-    e.stopPropagation();
-    const isOutOfStock =
-      product.inStock === false ||
-      (product.stockQuantity !== undefined && product.stockQuantity <= 0);
-
-    if (isOutOfStock) {
-      addToast(
-        'Produit indisponible',
-        `${product.title} est actuellement en rupture de stock.`,
-        'warning'
-      );
-      return;
-    }
-
-    const defaultColor = product.colors && product.colors.length > 0 ? product.colors[0] : null;
-    const defaultSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
-    addToCart(product, 1, defaultColor, defaultSize);
-    addToast('Article ajouté !', `${product.title} a été ajouté à votre panier.`, 'success');
-  };
-
-  const handleWishlist = (e, product) => {
-    e.stopPropagation();
-    const isFavorited = isInWishlist(product);
-    toggleWishlist(product);
-    addToast(
-      isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris',
-      `${product.title} ${isFavorited ? 'a été retiré de' : 'a été ajouté à'} vos favoris.`,
-      'info'
-    );
-  };
+  }, [featuredList.length, itemsPerView, isPaused, nextSlide, loading]);
 
   const slideWidthPercent = 100 / itemsPerView;
 
@@ -180,8 +141,28 @@ export const FlashSale = ({ products = [], onShopNow, onQuickView }) => {
             </div>
           </div>
 
-          {/* Vitrine des Articles en Vedette */}
-          {featuredList.length > 0 && (
+          {/* Vitrine des Articles en Vedette ou Squelette de chargement */}
+          {loading ? (
+            <div className="flash-showcase-wrapper" style={{ marginTop: '1.5rem' }}>
+              <div className="flash-skeleton-container">
+                {Array.from({ length: itemsPerView }).map((_, idx) => (
+                  <div key={idx} className="product-card skeleton-card">
+                    <div className="skeleton-img skeleton-block" />
+                    <div className="skeleton-meta-row">
+                      <div className="skeleton-pill skeleton-block" />
+                      <div className="skeleton-rating skeleton-block" />
+                    </div>
+                    <div className="skeleton-line-title skeleton-block" style={{ width: '80%' }} />
+                    <div className="skeleton-line skeleton-block" style={{ width: '50%' }} />
+                    <div className="skeleton-price-row">
+                      <div className="skeleton-price skeleton-block" />
+                    </div>
+                    <div className="skeleton-btn skeleton-block" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : featuredList.length > 0 ? (
             <div className="flash-showcase-wrapper">
               <div className="flash-carousel-controls">
                 <span className="flash-controls-title">
@@ -218,143 +199,14 @@ export const FlashSale = ({ products = [], onShopNow, onQuickView }) => {
                     transform: `translateX(-${currentIndex * slideWidthPercent}%)`,
                   }}
                 >
-                  {featuredList.map((product, idx) => {
-                    const discountPercent =
-                      product.originalPrice && product.originalPrice > product.price
-                        ? Math.round((1 - product.price / product.originalPrice) * 100)
-                        : null;
-                    const savingsAmount =
-                      product.originalPrice && product.originalPrice > product.price
-                        ? product.originalPrice - product.price
-                        : null;
-                    const isFavorited = isInWishlist(product);
-                    const isLowStock =
-                      product.stockQuantity !== undefined &&
-                      product.stockQuantity > 0 &&
-                      product.stockQuantity <= 6;
-
-                    return (
-                      <div
-                        className="flash-product-slide"
-                        key={product._id || idx}
-                        style={{ flex: `0 0 ${slideWidthPercent}%`, maxWidth: `${slideWidthPercent}%` }}
-                      >
-                        <div className="flash-item-card">
-                          {/* En-tête de la carte avec Image et Badges */}
-                          <div
-                            className="flash-item-image-wrap"
-                            onClick={() => onQuickView && onQuickView(product)}
-                          >
-                            <img
-                              src={product.image}
-                              alt={product.title}
-                              className="flash-item-image"
-                              loading="lazy"
-                            />
-                            <div className="flash-item-shine"></div>
-
-                            {/* Badges de Réduction & Vedette */}
-                            <div className="flash-item-badges">
-                              {discountPercent ? (
-                                <span className="flash-badge-discount">-{discountPercent}%</span>
-                              ) : (
-                                <span className="flash-badge-hot">VEDETTE</span>
-                              )}
-                            </div>
-
-                            {/* Bouton Favoris */}
-                            <button
-                              type="button"
-                              className={`flash-item-wishlist ${isFavorited ? 'active' : ''}`}
-                              onClick={(e) => handleWishlist(e, product)}
-                              aria-label="Ajouter aux favoris"
-                            >
-                              <i className={isFavorited ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
-                            </button>
-
-                            {/* Bouton Aperçu Rapide */}
-                            <button
-                              type="button"
-                              className="flash-item-quickview-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (onQuickView) onQuickView(product);
-                              }}
-                            >
-                              <i className="fa-solid fa-eye"></i> Aperçu rapide
-                            </button>
-                          </div>
-
-                          {/* Corps de la carte */}
-                          <div className="flash-item-body">
-                            <div className="flash-item-meta">
-                              <span className="flash-item-category">{product.category}</span>
-                              <div className="flash-item-rating">
-                                <i className="fa-solid fa-star"></i>
-                                <span>{product.rating?.toFixed(1) || '5.0'}</span>
-                              </div>
-                            </div>
-
-                            <h3
-                              className="flash-item-title"
-                              onClick={() => onQuickView && onQuickView(product)}
-                              title={product.title}
-                            >
-                              {product.title}
-                            </h3>
-
-                            {/* Prix et Économie */}
-                            <div className="flash-item-pricing">
-                              <span className="flash-item-price">{formatPrice(product.price)}</span>
-                              {product.originalPrice && product.originalPrice > product.price && (
-                                <span className="flash-item-old-price">
-                                  {formatPrice(product.originalPrice)}
-                                </span>
-                              )}
-                            </div>
-
-                            {savingsAmount ? (
-                              <div className="flash-savings-pill">
-                                Économisez {formatPrice(savingsAmount)}
-                              </div>
-                            ) : (
-                              <div className="flash-savings-placeholder"></div>
-                            )}
-
-                            {/* Jauge d'Urgence du Stock */}
-                            <div className="flash-stock-gauge-wrapper">
-                              <div className="flash-stock-gauge-header">
-                                <span className="flash-stock-label">
-                                  <i className="fa-solid fa-bolt"></i> {isLowStock ? 'Vite, stock limité !' : 'Offre éclair'}
-                                </span>
-                                <span className="flash-stock-value">
-                                  {product.stockQuantity > 0 ? `${product.stockQuantity} dispos` : 'Dispo'}
-                                </span>
-                              </div>
-                              <div className="flash-stock-gauge-bar">
-                                <div
-                                  className="flash-stock-gauge-fill"
-                                  style={{
-                                    width: `${Math.min(100, Math.max(25, ((product.stockQuantity || 5) / 10) * 100))}%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Bouton d'Action Panier Direct */}
-                            <button
-                              type="button"
-                              className="btn btn-primary flash-item-add-btn"
-                              onClick={(e) => handleAddToCart(e, product)}
-                            >
-                              <i className="fa-solid fa-cart-shopping"></i>
-                              <span>Ajouter au panier</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {featuredList.map((product, idx) => (
+                    <FlashItemCard
+                      key={product._id || idx}
+                      product={product}
+                      slideWidthPercent={slideWidthPercent}
+                      onQuickView={onQuickView}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -373,7 +225,7 @@ export const FlashSale = ({ products = [], onShopNow, onQuickView }) => {
                 </div>
               )}
             </div>
-          )}
+          ) : null}
 
           {/* Bouton d'accès global au catalogue */}
           <div className="flash-footer-action">

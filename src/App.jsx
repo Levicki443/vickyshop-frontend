@@ -243,6 +243,7 @@ export const App = () => {
           <HeroSection onExploreClick={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })} />
           <FlashSale
             products={products}
+            loading={loading}
             onShopNow={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })}
             onQuickView={handleSelectProduct}
           />
@@ -259,6 +260,7 @@ export const App = () => {
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
               totalCount={filteredProducts.length}
+              loading={loading}
             />
 
             <ProductGrid
@@ -268,6 +270,7 @@ export const App = () => {
               onSelectProduct={handleSelectProduct}
               onQuickView={handleSelectProduct}
               onResetFilters={() => { setActiveCategory('all'); setSearchTerm(''); }}
+              onRetry={loadProducts}
             />
           </main>
           <Footer />

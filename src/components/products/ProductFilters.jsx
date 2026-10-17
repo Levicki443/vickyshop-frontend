@@ -14,7 +14,17 @@ export const ProductFilters = ({
   searchTerm,
   onSearchChange,
   totalCount,
+  loading = false,
 }) => {
+  const handleCategorySelect = (id) => {
+    if ('vibrate' in navigator) {
+      try {
+        navigator.vibrate(8);
+      } catch (_) {}
+    }
+    onCategoryChange(id);
+  };
+
   return (
     <div className="products-toolbar">
       {/* Barre de recherche */}
@@ -46,11 +56,13 @@ export const ProductFilters = ({
             key={cat.id}
             type="button"
             className={`filter-btn ${activeCategory === cat.id ? 'active' : ''}`}
-            onClick={() => onCategoryChange(cat.id)}
+            onClick={() => handleCategorySelect(cat.id)}
           >
             <i className={cat.icon}></i> {cat.label}
-            {cat.id === 'all' && totalCount !== undefined && (
-              <span className="filter-count"> ({totalCount})</span>
+            {cat.id === 'all' && (
+              <span className="filter-count">
+                {loading ? ' (...)' : totalCount !== undefined ? ` (${totalCount})` : ''}
+              </span>
             )}
           </button>
         ))}

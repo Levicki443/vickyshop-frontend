@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { formatPrice } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -9,6 +9,7 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
   const cardRef = useRef(null);
+  const [isJustAdded, setIsJustAdded] = useState(false);
 
   const isFavorited = isInWishlist(product);
 
@@ -70,12 +71,27 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
     const defaultColor = product.colors && product.colors.length > 0 ? product.colors[0] : null;
     const defaultSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
     addToCart(product, 1, defaultColor, defaultSize);
+    
+    // Feedback instantané : bascule immédiate du bouton et vibration haptique mobile
+    setIsJustAdded(true);
+    setTimeout(() => setIsJustAdded(false), 1200);
+    if ('vibrate' in navigator) {
+      try {
+        navigator.vibrate(15);
+      } catch (_) {}
+    }
+
     addToast('Article ajouté !', `${product.title} a été ajouté à votre panier.`, 'success');
   };
 
   const handleWishlistClick = (e) => {
     e.stopPropagation();
     toggleWishlist(product);
+    if ('vibrate' in navigator) {
+      try {
+        navigator.vibrate(10);
+      } catch (_) {}
+    }
     addToast(
       isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris',
       `${product.title} ${isFavorited ? 'a été retiré de' : 'a été ajouté à'} vos favoris.`,
@@ -186,13 +202,17 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
 
         <button
           type="button"
-          className={`btn-add-cart ${isOutOfStock ? 'btn-add-cart-disabled' : ''}`}
+          className={`btn-add-cart ${isOutOfStock ? 'btn-add-cart-disabled' : ''} ${isJustAdded ? 'btn-add-cart-success' : ''}`}
           onClick={handleAddToCart}
           disabled={isOutOfStock}
         >
           {isOutOfStock ? (
             <>
               <i className="fa-solid fa-ban"></i> Rupture de stock
+            </>
+          ) : isJustAdded ? (
+            <>
+              <i className="fa-solid fa-check"></i> Ajouté au panier !
             </>
           ) : (
             <>

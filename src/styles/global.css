@@ -12,6 +12,7 @@
 
 html {
   scroll-behavior: smooth;
+  overscroll-behavior-y: none;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
 }
@@ -266,12 +267,32 @@ img, picture, video, canvas, svg {
   animation: pulse 2s infinite ease-in-out;
 }
 
-.badge-pop {
-  animation: badgePop 0.35s var(--ease-spring);
+.badge-pop, .cart-badge-bounce {
+  animation: badgePop 0.4s var(--ease-spring);
 }
 
-.btn:active, .icon-btn:active {
-  transform: scale(0.97);
+button, .btn, .icon-btn, [role="button"], .filter-btn, .btn-wishlist, .btn-add-cart {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active:not(:disabled), .btn:active:not(:disabled), .icon-btn:active, .filter-btn:active {
+  transform: scale(0.95);
+  transition: transform 0.08s var(--ease-spring);
+}
+
+/* Rendu intelligent hors-écran : fluidifie considérablement le scroll */
+.product-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 390px;
+}
+
+/* Confirmation visuelle immédiate d'ajout au panier */
+.btn-add-cart-success {
+  background: var(--accent-green) !important;
+  border-color: var(--accent-green) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0, 208, 132, 0.4) !important;
 }
 
 /* Accessibilité : Neutralisation fluide des mouvements pour utilisateurs sensibles */
