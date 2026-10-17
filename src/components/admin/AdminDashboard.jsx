@@ -16,6 +16,7 @@ import { fetchProducts } from '../../services/api';
 import { AdminOrderDetailsModal } from './AdminOrderDetailsModal';
 import { AdminProductModal } from './AdminProductModal';
 import { AdminReviewsTab } from './AdminReviewsTab';
+import { AdminClientsTab } from './AdminClientsTab';
 import {
   joinAdminRoom,
   onNewOrder,
@@ -147,7 +148,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
       const data = await fetchAdminUsers({
         search: userSearch,
       });
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setUsers(data);
         return;
       }
@@ -1378,94 +1379,17 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
 
               {/* ONGLET 4 : BASE CLIENTS */}
               {activeTab === 'users' && (
-                <div className="admin-tab-content">
-                  <div className="admin-page-header">
-                    <div>
-                      <h2 className="admin-page-title">Base Clients & Utilisateurs ({users.length})</h2>
-                      <p className="admin-page-desc">Consultez l'historique et l'activite de vos clients</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary admin-btn-sm"
-                      onClick={() => {
-                        loadUsers();
-                        showNotification('Base clients actualisee.');
-                      }}
-                    >
-                      <i className="fa-solid fa-rotate"></i> Actualiser
-                    </button>
-                  </div>
-
-                  <div className="admin-filter-bar">
-                    <div className="admin-search-input-wrap">
-                      <i className="fa-solid fa-magnifying-glass"></i>
-                      <input
-                        type="text"
-                        placeholder="Rechercher un client par nom, email ou telephone..."
-                        value={userSearch}
-                        onChange={(e) => setUserSearch(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-card">
-                    <div className="admin-table-responsive">
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th>Nom & Prenoms</th>
-                            <th>Email</th>
-                            <th>Telephone</th>
-                            <th>Ville</th>
-                            <th>Commandes</th>
-                            <th>Total Depense</th>
-                            <th>Role</th>
-                            <th>Contact</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {users.map((u) => (
-                            <tr key={u._id}>
-                              <td><strong>{u.name}</strong></td>
-                              <td>{u.email}</td>
-                              <td>{u.phone || '-'}</td>
-                              <td>{u.city || 'Abidjan'}</td>
-                              <td><span className="admin-tag">{u.ordersCount ?? u.orderCount ?? 0} cmd</span></td>
-                              <td className="admin-price-highlight">{formatPrice(u.totalSpent || 0)}</td>
-                              <td>
-                                <span className={`admin-badge-${u.role === 'admin' ? 'danger' : (u.role === 'vendeur' || u.role === 'seller') ? 'warning' : u.isRegistered ? 'success' : 'info'}`}>
-                                  {u.role === 'admin' ? 'Administrateur' : (u.role === 'vendeur' || u.role === 'seller') ? 'Vendeur Pro' : u.isRegistered ? 'Client (Inscrit)' : 'Client (Acheteur)'}
-                                </span>
-                              </td>
-                              <td>
-                                {u.phone ? (
-                                  <a
-                                    href={`https://wa.me/${u.phone.replace(/\D/g, '')}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="admin-btn admin-btn-xs admin-btn-whatsapp"
-                                  >
-                                    <i className="fa-brands fa-whatsapp"></i> WhatsApp
-                                  </a>
-                                ) : (
-                                  '-'
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                          {users.length === 0 && (
-                            <tr>
-                              <td colSpan={8} className="admin-empty-text">
-                                Aucun client trouve.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+                <AdminClientsTab
+                  users={users}
+                  userSearch={userSearch}
+                  setUserSearch={setUserSearch}
+                  onRefresh={() => {
+                    loadUsers();
+                    showNotification('Base clients actualisée.');
+                  }}
+                  formatPrice={formatPrice}
+                  loading={loading}
+                />
               )}
 
               {/* ONGLET 5 : PARAMETRES DE LA BOUTIQUE */}
