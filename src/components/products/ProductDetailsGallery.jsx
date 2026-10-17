@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ProductImageLightbox } from './ProductImageLightbox';
+import { useModalHistory } from '../../hooks/useModalHistory';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600';
 
@@ -16,6 +17,9 @@ export const ProductDetailsGallery = ({
   isOutOfStock,
 }) => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  // Fermeture automatique de la visionneuse plein écran lors d'un retour arrière sur smartphone
+  useModalHistory(isLightboxOpen, () => setIsLightboxOpen(false), 'product-lightbox');
 
   return (
     <div className="details-gallery-section">

@@ -5,6 +5,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSecretAdminTrigger } from '../../hooks/useSecretAdminTrigger';
+import { useModalHistory } from '../../hooks/useModalHistory';
 import { NotificationDropdown } from './NotificationDropdown';
 import { MobileMenuModal } from './MobileMenuModal';
 import logoImg from '../../assets/logo.png';
@@ -20,6 +21,9 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+
+  // Fermeture du menu mobile sur retour physique mobile sans quitter l'application
+  useModalHistory(mobileMenuOpen, () => setMobileMenuOpen(false), 'mobile-menu');
 
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);

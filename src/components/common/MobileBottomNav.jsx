@@ -3,17 +3,20 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
+import { useSecretAdminTrigger } from '../../hooks/useSecretAdminTrigger';
 
 /**
  * Composant MobileBottomNav
  * Barre de navigation inférieure mobile (Bottom Navigation Bar)
  * avec icônes Font Awesome Free officielles, badges temps réel et gestion de l'état actif.
  */
-export const MobileBottomNav = ({ currentPath, onNavigate }) => {
+export const MobileBottomNav = ({ currentPath, onNavigate, onOpenAdmin }) => {
   const { totalItems, openCart, closeCart, isCartOpen } = useCart();
   const { wishlistCount, openWishlist, closeWishlist, isWishlistOpen } = useWishlist();
   const { unreadCount, openNotificationCenter, closeNotificationCenter, isNotificationCenterOpen } = useNotifications();
   const { closeAuthModal } = useAuth();
+
+  const { isTriggeredRef, triggerProps } = useSecretAdminTrigger(onOpenAdmin);
 
   const [activeTab, setActiveTab] = useState('home');
 
@@ -68,7 +71,9 @@ export const MobileBottomNav = ({ currentPath, onNavigate }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isCartOpen, isWishlistOpen, isNotificationCenterOpen]);
 
-  const handleHomeClick = () => {
+  const handleHomeClick = (e) => {
+    // Si l'accès secret de 10 secondes vient de se déclencher, on bloque le clic normal
+    if (isTriggeredRef.current) return;
     closeAllOverlays();
     setActiveTab('home');
     if (onNavigate) onNavigate('/');
@@ -119,6 +124,7 @@ export const MobileBottomNav = ({ currentPath, onNavigate }) => {
         type="button"
         className={`mobile-nav-tab ${activeTab === 'home' ? 'active' : ''}`}
         onClick={handleHomeClick}
+        {...triggerProps}
         aria-label="Accueil"
       >
         <div className="mobile-nav-icon-wrap">

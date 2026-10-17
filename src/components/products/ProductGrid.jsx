@@ -38,10 +38,10 @@ export const ProductGrid = ({
             </div>
             <div className="server-wakeup-content">
               <div className="server-wakeup-title">
-                <span>Démarrage du serveur cloud en cours...</span>
+                <span>Démarrage du serveur en cours...</span>
               </div>
               <p className="server-wakeup-desc">
-                Notre serveur gratuit sort de son mode veille. Vos produits s&apos;afficheront automatiquement dans quelques secondes. Merci pour votre patience !
+                Démarrage du serveur. Vos produits s&apos;afficheront automatiquement dans quelques secondes. Merci pour votre patience !
               </p>
             </div>
           </div>

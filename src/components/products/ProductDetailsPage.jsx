@@ -9,6 +9,7 @@ import { ReviewModal } from '../reviews/ReviewModal';
 import { ProductShareModal } from '../common/ProductShareModal';
 import { ProductDetailsGallery } from './ProductDetailsGallery';
 import { useProductSEO } from '../../hooks/useProductSEO';
+import { useModalHistory } from '../../hooks/useModalHistory';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600';
 
@@ -43,6 +44,10 @@ export const ProductDetailsPage = ({
   const [quantity, setQuantity] = useState(1);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  // Interception du retour mobile pour fermer les modales locales sans quitter la page
+  useModalHistory(isShareModalOpen, () => setIsShareModalOpen(false), 'product-share');
+  useModalHistory(isReviewModalOpen, () => setIsReviewModalOpen(false), 'product-review');
 
   useProductSEO(product);
 

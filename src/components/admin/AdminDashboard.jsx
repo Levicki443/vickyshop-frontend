@@ -141,17 +141,99 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
     }
   }, [productCategoryFilter, productStockFilter, productSearch]);
 
-  // Chargement des Utilisateurs
+  // Chargement des Utilisateurs avec résilience
   const loadUsers = useCallback(async () => {
     try {
       const data = await fetchAdminUsers({
         search: userSearch,
       });
-      setUsers(data || []);
+      if (Array.isArray(data) && data.length > 0) {
+        setUsers(data);
+        return;
+      }
     } catch (err) {
-      console.error('Erreur chargement utilisateurs:', err);
+      console.warn('Endpoint admin/users en attente de réponse :', err.message);
     }
-  }, [userSearch]);
+
+    // Repli de secours immédiat : extraction et synthèse des clients depuis les commandes
+    try {
+      const clientsMap = new Map();
+
+      // 1. Inclusion du compte connecté si administrateur / utilisateur inscrit
+      const currentAdmin = getAdminUser();
+      if (currentAdmin && currentAdmin.email) {
+        clientsMap.set(currentAdmin.email.toLowerCase().trim(), {
+          _id: currentAdmin.id || currentAdmin._id || 'admin_ouattara',
+          name: currentAdmin.name || 'Administrateur',
+          email: currentAdmin.email,
+          phone: currentAdmin.phone || '',
+          city: currentAdmin.city || 'Abidjan',
+          address: currentAdmin.address || '',
+          role: currentAdmin.role || 'admin',
+          isRegistered: true,
+          ordersCount: 0,
+          orderCount: 0,
+          totalSpent: 0,
+          createdAt: currentAdmin.createdAt || new Date(),
+        });
+      }
+
+      // 2. Extraction des clients depuis les commandes
+      if (Array.isArray(orders) && orders.length > 0) {
+        orders.forEach((ord) => {
+          const key = (ord.customerPhone && ord.customerPhone.trim()) || (ord.customerEmail && ord.customerEmail.toLowerCase().trim()) || ord.customerName;
+          if (!key) return;
+
+          const existing = clientsMap.get(key);
+          const ordTotal = Number(ord.total) || 0;
+
+          if (existing) {
+            existing.ordersCount = (existing.ordersCount || 0) + 1;
+            existing.orderCount = existing.ordersCount;
+            existing.totalSpent = (existing.totalSpent || 0) + ordTotal;
+            if (ord.createdAt && (!existing.createdAt || new Date(ord.createdAt) > new Date(existing.createdAt))) {
+              existing.createdAt = ord.createdAt;
+              if (ord.city) existing.city = ord.city;
+              if (ord.customerName) existing.name = ord.customerName;
+            }
+          } else {
+            clientsMap.set(key, {
+              _id: `guest_${key}`,
+              name: ord.customerName || 'Client Vicky-Shop',
+              email: ord.customerEmail || 'Non renseigné',
+              phone: ord.customerPhone || '',
+              city: ord.city || 'Abidjan',
+              address: ord.deliveryAddress || '',
+              role: 'client',
+              isRegistered: false,
+              ordersCount: 1,
+              orderCount: 1,
+              totalSpent: ordTotal,
+              createdAt: ord.createdAt || new Date(),
+            });
+          }
+        });
+      }
+
+      let synthesized = Array.from(clientsMap.values());
+      if (userSearch && userSearch.trim()) {
+        const term = userSearch.trim().toLowerCase();
+        synthesized = synthesized.filter(
+          (c) =>
+            (c.name && c.name.toLowerCase().includes(term)) ||
+            (c.email && c.email.toLowerCase().includes(term)) ||
+            (c.phone && c.phone.toLowerCase().includes(term)) ||
+            (c.city && c.city.toLowerCase().includes(term))
+        );
+      }
+
+      synthesized.sort((a, b) => (b.ordersCount || 0) - (a.ordersCount || 0));
+      setUsers(synthesized);
+    } catch (fallbackErr) {
+      console.error('Erreur synthèse de secours des clients :', fallbackErr);
+      setUsers([]);
+    }
+  }, [userSearch, orders]);
 
   // Chargement des Parametres
   const loadSettings = useCallback(async () => {
@@ -1349,11 +1431,11 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
                               <td>{u.email}</td>
                               <td>{u.phone || '-'}</td>
                               <td>{u.city || 'Abidjan'}</td>
-                              <td><span className="admin-tag">{u.orderCount || 0} cmd</span></td>
+                              <td><span className="admin-tag">{u.ordersCount ?? u.orderCount ?? 0} cmd</span></td>
                               <td className="admin-price-highlight">{formatPrice(u.totalSpent || 0)}</td>
                               <td>
-                                <span className={`admin-badge-${u.role === 'admin' ? 'danger' : 'info'}`}>
-                                  {u.role === 'admin' ? 'Administrateur' : 'Client'}
+                                <span className={`admin-badge-${u.role === 'admin' ? 'danger' : (u.role === 'vendeur' || u.role === 'seller') ? 'warning' : u.isRegistered ? 'success' : 'info'}`}>
+                                  {u.role === 'admin' ? 'Administrateur' : (u.role === 'vendeur' || u.role === 'seller') ? 'Vendeur Pro' : u.isRegistered ? 'Client (Inscrit)' : 'Client (Acheteur)'}
                                 </span>
                               </td>
                               <td>

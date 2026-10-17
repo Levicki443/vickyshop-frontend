@@ -2,17 +2,19 @@ import { useRef, useCallback, useEffect } from 'react';
 
 /**
  * Hook d'accès secret pour le Backoffice Administrateur :
- * - Déclenchement silencieux : maintien continu de 10 secondes sur "Accueil" ou le Logo
- *   (aucun indicateur visuel n'est affiché pour préserver la discrétion totale).
- * - Raccourci clavier de secours : Touches [Ctrl] + [Alt] + [A]
- * 
- * @param {Function} onUnlock Callback appelé lorsque le maintien de 10 secondes est atteint
+ * - Déclenchement discret : maintien continu de 10 secondes sur "Accueil" ou le Logo
+ *   sur mobile comme sur desktop avec tolérance aux micro-oscillations tactiles.
+ * - Raccourci clavier de secours pour ordinateur : [Ctrl] + [Alt] + [A]
+ *
+ * @param {Function} onUnlock Callback exécuté lorsque les 10 secondes de maintien sont validées
  */
 export const useSecretAdminTrigger = (onUnlock) => {
-  const REQUIRED_PRESS_DURATION = 10000; // 10 secondes continues
+  const REQUIRED_PRESS_DURATION = 10000; // 10 secondes exactes
+  const MAX_TOUCH_DRIFT_PX = 25; // Tolérance de dérive tactile naturelle du doigt
 
   const pressTimerRef = useRef(null);
   const isTriggeredRef = useRef(false);
+  const startCoordsRef = useRef({ x: 0, y: 0 });
 
   const clearLongPress = useCallback(() => {
     if (pressTimerRef.current) {
@@ -23,22 +25,26 @@ export const useSecretAdminTrigger = (onUnlock) => {
 
   const handlePointerDown = useCallback(
     (e) => {
-      // Uniquement sur clic gauche ou toucher tactile
+      // Uniquement sur clic principal gauche ou toucher tactile
       if (e.button !== undefined && e.button !== 0) return;
 
       clearLongPress();
       isTriggeredRef.current = false;
 
-      // Démarrage du minuteur silencieux de 10 secondes
+      const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+      startCoordsRef.current = { x: clientX, y: clientY };
+
       pressTimerRef.current = setTimeout(() => {
         isTriggeredRef.current = true;
         clearLongPress();
 
+        // Retour haptique discret sur smartphone
         if (typeof navigator !== 'undefined' && navigator.vibrate) {
           try {
-            navigator.vibrate(150);
+            navigator.vibrate([120, 60, 120]);
           } catch {
-            // Ignorer silencieusement si non supporté
+            // Ignorer silencieusement si non disponible
           }
         }
 
@@ -50,15 +56,27 @@ export const useSecretAdminTrigger = (onUnlock) => {
     [onUnlock, clearLongPress]
   );
 
+  const handlePointerMove = useCallback(
+    (e) => {
+      if (!pressTimerRef.current) return;
+      const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+      const deltaX = Math.abs(clientX - startCoordsRef.current.x);
+      const deltaY = Math.abs(clientY - startCoordsRef.current.y);
+
+      // Annuler uniquement si le doigt a nettement glissé pour scroller
+      if (deltaX > MAX_TOUCH_DRIFT_PX || deltaY > MAX_TOUCH_DRIFT_PX) {
+        clearLongPress();
+      }
+    },
+    [clearLongPress]
+  );
+
   const handlePointerUp = useCallback(() => {
     clearLongPress();
   }, [clearLongPress]);
 
-  const handlePointerCancel = useCallback(() => {
-    clearLongPress();
-  }, [clearLongPress]);
-
-  // Nettoyage global sur relâchement ou perte de focus
+  // Nettoyage global en cas de relâchement à l'extérieur
   useEffect(() => {
     const handleGlobalPointerUp = () => {
       clearLongPress();
@@ -67,18 +85,16 @@ export const useSecretAdminTrigger = (onUnlock) => {
     window.addEventListener('pointerup', handleGlobalPointerUp);
     window.addEventListener('mouseup', handleGlobalPointerUp);
     window.addEventListener('touchend', handleGlobalPointerUp);
-    window.addEventListener('touchcancel', handleGlobalPointerUp);
 
     return () => {
       clearLongPress();
       window.removeEventListener('pointerup', handleGlobalPointerUp);
       window.removeEventListener('mouseup', handleGlobalPointerUp);
       window.removeEventListener('touchend', handleGlobalPointerUp);
-      window.removeEventListener('touchcancel', handleGlobalPointerUp);
     };
   }, [clearLongPress]);
 
-  // Raccourci clavier administrateur : [Ctrl] + [Alt] + [A]
+  // Raccourci clavier de secours : [Ctrl] + [Alt] + [A]
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'a' || e.key === 'A')) {
@@ -94,15 +110,39 @@ export const useSecretAdminTrigger = (onUnlock) => {
   }, [onUnlock]);
 
   return {
+    isTriggeredRef,
     triggerProps: {
       onPointerDown: handlePointerDown,
+      onPointerMove: handlePointerMove,
       onPointerUp: handlePointerUp,
-      onPointerCancel: handlePointerCancel,
-      onPointerLeave: handlePointerCancel,
+      onClickCapture: (e) => {
+        // Intercepte et bloque le clic naturel pour ne pas déclencher la navigation ou fermer les modales
+        if (isTriggeredRef.current) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      onClick: (e) => {
+        if (isTriggeredRef.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          setTimeout(() => {
+            isTriggeredRef.current = false;
+          }, 400);
+        }
+      },
       onContextMenu: (e) => {
-        // Évite d'ouvrir le menu contextuel lors d'un long press sur mobile
+        // Empêche l'affichage du menu contextuel mobile lors du maintien
         e.preventDefault();
+      },
+      style: {
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+        touchAction: 'manipulation',
       },
     },
   };
 };
+
+export default useSecretAdminTrigger;

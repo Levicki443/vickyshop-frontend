@@ -1,31 +1,25 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getAdminToken } from './services/adminApi';
 import { useShopProducts } from './hooks/useShopProducts';
+import { useModalHistory } from './hooks/useModalHistory';
+import { initScrollRestoration, saveCatalogScroll, restoreCatalogScroll } from './utils/scrollMemory';
 import { Header } from './components/common/Header';
 import { HeroSection } from './components/home/HeroSection';
 import { FlashSale } from './components/home/FlashSale';
-import { ReviewModal } from './components/reviews/ReviewModal';
 import { ProductFilters } from './components/products/ProductFilters';
 import { ProductGrid } from './components/products/ProductGrid';
 import { ProductDetailsPage } from './components/products/ProductDetailsPage';
 import { UserOrdersPage } from './components/orders/UserOrdersPage';
 import { UserProfilePage } from './components/auth/UserProfilePage';
-import { CartDrawer } from './components/cart/CartDrawer';
-import { WishlistDrawer } from './components/cart/WishlistDrawer';
-import { CheckoutModal } from './components/cart/CheckoutModal';
-import { AuthModal } from './components/auth/AuthModal';
 import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { Footer } from './components/common/Footer';
-import { ToastContainer } from './components/common/ToastContainer';
 import { AnnouncementBar } from './components/common/AnnouncementBar';
 import { AdminDashboard } from './components/admin/AdminDashboard';
-import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { SellerDashboard } from './components/seller/SellerDashboard';
 import { NotFound404 } from './components/common/NotFound404';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
-import { NotificationCenterModal } from './components/common/NotificationCenterModal';
-import { MobileBottomNav } from './components/common/MobileBottomNav';
+import { AppModals } from './components/common/AppModals';
 import { useAuth } from './context/AuthContext';
 import { useCart } from './context/CartContext';
 import { useWishlist } from './context/WishlistContext';
@@ -53,36 +47,26 @@ export const App = () => {
   const [reviewTargetProduct, setReviewTargetProduct] = useState(null);
   const [reviewTargetOrderNumber, setReviewTargetOrderNumber] = useState('');
 
-  // Normalisation rigoureuse de l'URL (exclusion des query params, hash et barres obliques finales)
+  useEffect(() => {
+    initScrollRestoration();
+    if (window.location.pathname !== '/' && window.location.pathname !== '/accueil') {
+      if (!window.history.state?.fromApp && window.history.length <= 1) {
+        window.history.replaceState({ path: '/', fromApp: true }, '', '/');
+        window.history.pushState({ path: window.location.pathname, fromApp: true }, '', window.location.pathname);
+      }
+    }
+  }, []);
+
   const cleanPath = useMemo(() => {
     return currentPath.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
   }, [currentPath]);
 
-  // Détection stricte de la véritable page d'accueil publique (évite le piège startsWith('/'))
-  const isHomePath =
-    cleanPath === '/' ||
-    cleanPath === '/accueil' ||
-    cleanPath === '/home' ||
-    cleanPath === '/index.html';
-
+  const isHomePath = ['/', '/accueil', '/home', '/index.html'].includes(cleanPath);
   const isSellerRoute = cleanPath.startsWith('/vendeur') || cleanPath.startsWith('/seller');
-  const isAdminRoute =
-    cleanPath.startsWith('/admin') ||
-    cleanPath.startsWith('/dashboard') ||
-    cleanPath.startsWith('/backoffice');
-  const isOrdersRoute =
-    cleanPath.startsWith('/commandes') ||
-    cleanPath.startsWith('/orders') ||
-    cleanPath.startsWith('/suivi');
-  const isProfileRoute =
-    cleanPath.startsWith('/profil') ||
-    cleanPath.startsWith('/profile') ||
-    cleanPath.startsWith('/compte');
-  const isProductRoute =
-    cleanPath.startsWith('/produit/') ||
-    cleanPath.startsWith('/produits/') ||
-    cleanPath.startsWith('/product/') ||
-    cleanPath.startsWith('/products/');
+  const isAdminRoute = cleanPath.startsWith('/admin') || cleanPath.startsWith('/dashboard') || cleanPath.startsWith('/backoffice');
+  const isOrdersRoute = cleanPath.startsWith('/commandes') || cleanPath.startsWith('/orders') || cleanPath.startsWith('/suivi');
+  const isProfileRoute = cleanPath.startsWith('/profil') || cleanPath.startsWith('/profile') || cleanPath.startsWith('/compte');
+  const isProductRoute = cleanPath.startsWith('/produit/') || cleanPath.startsWith('/produits/') || cleanPath.startsWith('/product/') || cleanPath.startsWith('/products/');
   const isCartRoute = cleanPath === '/panier' || cleanPath === '/cart';
   const isCheckoutRoute = cleanPath === '/commande' || cleanPath === '/checkout';
   const isAuthRoute = ['/connexion', '/login', '/inscription', '/register', '/auth'].includes(cleanPath);
@@ -91,41 +75,31 @@ export const App = () => {
   const isCategoryRoute = cleanPath.startsWith('/categorie') || cleanPath.startsWith('/categories');
   const isSearchRoute = cleanPath.startsWith('/recherche') || cleanPath.startsWith('/search');
 
-  // Gestion des accès directs par URL pour le panier, commande et authentification
   useEffect(() => {
     if (isCartRoute) openCart();
     else if (isCheckoutRoute) setIsCheckoutOpen(true);
     else if (isAuthRoute) openAuthModal();
   }, [isCartRoute, isCheckoutRoute, isAuthRoute, openCart, openAuthModal]);
 
-  // Affichage de la bannière exclusivement sur l'accueil public pur (sans filtres, sans modales)
   const isFiltering = activeCategory !== 'all' || Boolean(searchTerm && searchTerm.trim());
-  const isOverlayOpen =
-    Boolean(isCartOpen) ||
-    Boolean(isCheckoutOpen) ||
-    Boolean(isAuthModalOpen) ||
-    Boolean(isAdminAuthModalOpen) ||
-    Boolean(isAdminViewActive);
+  const isOverlayOpen = Boolean(
+    isCartOpen || isWishlistOpen || isNotificationCenterOpen ||
+    isAuthModalOpen || isCheckoutOpen || isAdminAuthModalOpen || isReviewModalOpen || isAdminViewActive
+  );
 
-  const showAnnouncementBar =
-    isHomePath && !isCategoryRoute && !isSearchRoute && !isFiltering && !isOverlayOpen;
+  const showAnnouncementBar = isHomePath && !isCategoryRoute && !isSearchRoute && !isFiltering && !isOverlayOpen;
 
   const currentProductId = useMemo(() => {
     if (!isProductRoute) return null;
-    const parts = currentPath.split('/').filter(Boolean);
-    return parts[1] || null;
+    return currentPath.split('/').filter(Boolean)[1] || null;
   }, [isProductRoute, currentPath]);
 
   const detailedProduct = useMemo(() => {
     if (!currentProductId || products.length === 0) return null;
     const cleanId = String(currentProductId).toLowerCase();
-    return (
-      products.find(
-        (p) =>
-          (p.slug && p.slug.toLowerCase() === cleanId) ||
-          String(p._id || p.id).toLowerCase() === cleanId
-      ) || null
-    );
+    return products.find(
+      (p) => (p.slug && p.slug.toLowerCase() === cleanId) || String(p._id || p.id).toLowerCase() === cleanId
+    ) || null;
   }, [currentProductId, products]);
 
   const sellerInitialTab = useMemo(() => {
@@ -147,11 +121,18 @@ export const App = () => {
     setIsReviewModalOpen(false);
   }, [closeCart, closeWishlist, closeNotificationCenter, closeAuthModal]);
 
+  useModalHistory(isOverlayOpen, closeAllOverlays, 'app-overlay');
+
   useEffect(() => {
     const handleLocationChange = () => {
       closeAllOverlays();
-      setCurrentPath(window.location.pathname.toLowerCase());
+      const newPath = window.location.pathname.toLowerCase();
+      setCurrentPath(newPath);
       if (isAdminViewActive) setIsAdminViewActive(false);
+
+      if (['/', '/accueil', '/home', '/index.html'].includes(newPath)) {
+        restoreCatalogScroll();
+      }
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -162,18 +143,41 @@ export const App = () => {
     };
   }, [closeAllOverlays, isAdminViewActive]);
 
-  const navigateTo = (path) => {
+  const navigateTo = useCallback((path, { replace = false } = {}) => {
     closeAllOverlays();
-    window.history.pushState(null, '', path);
+    if (replace) {
+      window.history.replaceState({ path, fromApp: true }, '', path);
+    } else {
+      window.history.pushState({ path, fromApp: true }, '', path);
+    }
     setCurrentPath(path.toLowerCase());
     window.scrollTo({ top: 0, behavior: 'instant' });
-  };
+  }, [closeAllOverlays]);
 
-  const handleSelectProduct = (prod) => {
+  const handleSelectProduct = useCallback((prod) => {
     if (!prod) return;
     const identifier = prod.slug || prod._id || prod.id || (typeof prod === 'string' ? prod : null);
-    if (identifier) navigateTo(`/produit/${identifier}`);
-  };
+    if (identifier) {
+      saveCatalogScroll();
+      navigateTo(`/produit/${identifier}`);
+    }
+  }, [navigateTo]);
+
+  const handleBackFromProduct = useCallback(() => {
+    if (window.history.length > 1 && window.history.state?.fromApp) {
+      window.history.back();
+    } else {
+      navigateTo('/', { replace: true });
+    }
+  }, [navigateTo]);
+
+  const handleOpenAdmin = useCallback(() => {
+    if (getAdminToken()) {
+      setIsAdminViewActive(true);
+    } else {
+      setIsAdminAuthModalOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -214,7 +218,7 @@ export const App = () => {
       {showAnnouncementBar && <AnnouncementBar />}
 
       <Header
-        onOpenAdmin={() => (getAdminToken() ? setIsAdminViewActive(true) : setIsAdminAuthModalOpen(true))}
+        onOpenAdmin={handleOpenAdmin}
         isAdminActive={isAdminViewActive}
         onOpenOrdersTracking={(ordNum) => {
           if (ordNum) setSelectedOrderNumber(ordNum);
@@ -234,7 +238,7 @@ export const App = () => {
           productId={currentProductId}
           initialProduct={detailedProduct}
           allProducts={products}
-          onBack={() => navigateTo('/')}
+          onBack={handleBackFromProduct}
           onOpenCheckout={() => setIsCheckoutOpen(true)}
           onSelectProduct={handleSelectProduct}
         />
@@ -291,36 +295,26 @@ export const App = () => {
         <NotFound404 onGoHome={() => navigateTo('/')} />
       )}
 
-      <CartDrawer onOpenCheckout={() => setIsCheckoutOpen(true)} />
-      <WishlistDrawer />
-      <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
-      <ReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        initialProduct={reviewTargetProduct}
-        initialOrderNumber={reviewTargetOrderNumber}
-      />
-      <AuthModal />
-      <AdminAuthModal
-        isOpen={isAdminAuthModalOpen}
-        onClose={() => setIsAdminAuthModalOpen(false)}
-        onAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
-      />
-      <NotificationCenterModal
-        isOpen={isNotificationCenterOpen}
-        onClose={closeNotificationCenter}
-        onSelectOrder={(ordNum) => {
-          setSelectedOrderNumber(ordNum);
-          navigateTo('/commandes');
-        }}
+      <AppModals
+        isCheckoutOpen={isCheckoutOpen}
+        onCloseCheckout={() => setIsCheckoutOpen(false)}
+        onOpenCheckout={() => setIsCheckoutOpen(true)}
+        isReviewModalOpen={isReviewModalOpen}
+        onCloseReviewModal={() => setIsReviewModalOpen(false)}
+        reviewTargetProduct={reviewTargetProduct}
+        reviewTargetOrderNumber={reviewTargetOrderNumber}
+        isAdminAuthModalOpen={isAdminAuthModalOpen}
+        onCloseAdminAuthModal={() => setIsAdminAuthModalOpen(false)}
+        onAdminAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
+        isNotificationCenterOpen={isNotificationCenterOpen}
+        onCloseNotificationCenter={closeNotificationCenter}
+        onSelectOrder={(ordNum) => { setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
         onSelectProduct={handleSelectProduct}
-        onOpenSettings={() => {
-          setProfileInitialTab('notifications');
-          navigateTo('/profil');
-        }}
+        onOpenProfileTab={(tab) => { setProfileInitialTab(tab); navigateTo('/profil'); }}
+        currentPath={currentPath}
+        onNavigate={navigateTo}
+        onOpenAdmin={handleOpenAdmin}
       />
-      <MobileBottomNav currentPath={currentPath} onNavigate={navigateTo} />
-      <ToastContainer />
     </div>
   );
 };
