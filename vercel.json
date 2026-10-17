@@ -4,18 +4,18 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/produit/:slug*",
+      "source": "/(produit|product|p)/:slug*",
       "has": [
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*([wW]hats[aA]pp|[fF]acebookexternalhit|[fF]acebot|[tT]witterbot|[tT]elegram[bB]ot|[lL]inked[iI]n[bB]ot|[sS]lackbot|[dD]iscordbot|[pP]interest|[aA]pplebot|[gG]ooglebot).*"
+          "value": ".*([wW]hats[aA]pp|[fF]acebookexternalhit|[fF]acebot|[tT]witterbot|[tT]elegram[bB]ot|[lL]inked[iI]n[bB]ot|[sS]lackbot|[dD]iscordbot|[pP]interest|[aA]pplebot|[gG]ooglebot|[iI]nstagram|[sS]napchat|[vV]iber|[sS]kype).*"
         }
       ],
       "destination": "https://vickyshop-backend.onrender.com/api/products/:slug*/preview"
     },
     {
-      "source": "/share/:slug*",
+      "source": "/(share|partage)/:slug*",
       "destination": "https://vickyshop-backend.onrender.com/api/products/:slug*/preview"
     },
     {

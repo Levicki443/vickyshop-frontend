@@ -4,7 +4,6 @@ import { useToast } from '../../context/ToastContext';
 
 /**
  * Calcule l'URL publique canonique d'un produit.
- * Utilise en priorité le slug permanent ou l'ID s'il n'est pas encore migré.
  */
 export const getProductCanonicalUrl = (product) => {
   if (!product) return typeof window !== 'undefined' ? window.location.origin : '';
@@ -14,15 +13,18 @@ export const getProductCanonicalUrl = (product) => {
 };
 
 /**
- * Modale de partage responsive, accessible et sécurisée pour les produits Vicky-Shop.
+ * Modale de partage responsive et accessible pour les produits Vicky-Shop.
+ * Intègre le partage avec image réelle attachée pour WhatsApp et réseaux sociaux.
  */
 export const ProductShareModal = ({ isOpen, onClose, product }) => {
   const { addToast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [sharingWithPhoto, setSharingWithPhoto] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setCopied(false);
+      setSharingWithPhoto(false);
       return;
     }
     const handleKeyDown = (e) => {
@@ -36,11 +38,13 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
 
   if (!isOpen || !product) return null;
 
-  const productTitle = product.title || 'Produit Vicky-Shop';
+  const productTitle = product.title || 'Article Vicky-Shop';
   const formattedPrice = product.price ? formatPrice(product.price) : '';
-  const shareMessage = `Découvrez « ${productTitle} » sur Vicky-Shop ! Consultez les photos, le prix (${formattedPrice}) et tous les détails ici : ${canonicalUrl}`;
+  const imageUrl = product.image || 'https://res.cloudinary.com/l2wj9yzu/image/upload/v1790614748/vickyshop/products/products/aimfwyu6fenuxbipcpek.jpg';
+
+  const shareTextWhatsApp = `🛍️ *${productTitle}*\n💰 Prix : *${formattedPrice}*\n🚚 Paiement cash à la livraison\n\n👉 Voir la photo & commander sur Vicky-Shop :\n${canonicalUrl}`;
+  const encodedTextWhatsApp = encodeURIComponent(shareTextWhatsApp);
   const encodedUrl = encodeURIComponent(canonicalUrl);
-  const encodedText = encodeURIComponent(shareMessage);
 
   const handleCopyLink = async () => {
     try {
@@ -57,28 +61,64 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      addToast('Lien copié !', 'Le lien public du produit a été copié dans votre presse-papiers.', 'success');
+      addToast('Lien copié !', 'Le lien de l\'article a été copié dans votre presse-papiers.', 'success');
       setTimeout(() => setCopied(false), 3000);
     } catch {
       addToast('Erreur de copie', 'Impossible de copier automatiquement le lien.', 'warning');
     }
   };
 
-  const handleNativeShare = async () => {
-    if (navigator.share) {
+  /**
+   * Partage haute fidélité avec pièce jointe photo réelle pour WhatsApp mobile
+   */
+  const handleShareWithPhoto = async () => {
+    setSharingWithPhoto(true);
+    try {
+      let imageFile = null;
+
+      // Téléchargement du blob image pour attachement natif
       try {
+        const res = await fetch(imageUrl, { mode: 'cors' });
+        if (res.ok) {
+          const blob = await res.blob();
+          const ext = blob.type.includes('png') ? 'png' : 'jpg';
+          imageFile = new File([blob], `article-vickyshop.${ext}`, { type: blob.type || 'image/jpeg' });
+        }
+      } catch (fetchErr) {
+        console.warn('Impossible de récupérer l\'image en Blob local:', fetchErr);
+      }
+
+      // Si le navigateur mobile supporte l'envoi de fichier image
+      if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
         await navigator.share({
           title: productTitle,
-          text: `Découvrez cet article sur Vicky-Shop au prix de ${formattedPrice}`,
+          text: `🛍️ ${productTitle} (${formattedPrice})\n👉 Commandez ici : ${canonicalUrl}`,
+          files: [imageFile],
+        });
+        addToast('Partagé !', 'L\'article avec sa photo a été envoyé avec succès.', 'success');
+        onClose();
+        return;
+      }
+
+      // Fallback partage natif sans fichier si non supporté
+      if (navigator.share) {
+        await navigator.share({
+          title: productTitle,
+          text: `🛍️ ${productTitle} (${formattedPrice})\n👉 Voir la photo et commander :`,
           url: canonicalUrl,
         });
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          handleCopyLink();
-        }
+        onClose();
+        return;
       }
-    } else {
-      handleCopyLink();
+
+      // Si desktop sans API Share : ouverture directe de WhatsApp Web
+      window.open(`https://api.whatsapp.com/send?text=${encodedTextWhatsApp}`, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        window.open(`https://api.whatsapp.com/send?text=${encodedTextWhatsApp}`, '_blank', 'noopener,noreferrer');
+      }
+    } finally {
+      setSharingWithPhoto(false);
     }
   };
 
@@ -87,7 +127,7 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
       name: 'WhatsApp',
       icon: 'fa-brands fa-whatsapp',
       className: 'share-btn-whatsapp',
-      action: () => window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank', 'noopener,noreferrer'),
+      action: () => window.open(`https://api.whatsapp.com/send?text=${encodedTextWhatsApp}`, '_blank', 'noopener,noreferrer'),
     },
     {
       name: 'Facebook',
@@ -99,20 +139,15 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
       name: 'Telegram',
       icon: 'fa-brands fa-telegram',
       className: 'share-btn-telegram',
-      action: () => window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(`Découvrez ${productTitle} sur Vicky-Shop`)}`, '_blank', 'noopener,noreferrer'),
+      action: () => window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(`🛍️ ${productTitle} (${formattedPrice}) sur Vicky-Shop`)}`, '_blank', 'noopener,noreferrer'),
     },
     {
-      name: 'E-mail',
-      icon: 'fa-solid fa-envelope',
-      className: 'share-btn-email',
-      action: () => {
-        const subject = encodeURIComponent(`Regarde ce produit sur Vicky-Shop : ${productTitle}`);
-        window.location.href = `mailto:?subject=${subject}&body=${encodedText}`;
-      },
+      name: 'Twitter / X',
+      icon: 'fa-brands fa-x-twitter',
+      className: 'share-btn-twitter',
+      action: () => window.open(`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodeURIComponent(`🛍️ Découvrez « ${productTitle} » (${formattedPrice}) sur Vicky-Shop`)}`, '_blank', 'noopener,noreferrer'),
     },
   ];
-
-  const hasNativeShare = typeof navigator !== 'undefined' && Boolean(navigator.share);
 
   return (
     <div className="modal-overlay share-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
@@ -123,8 +158,8 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
               <i className="fa-solid fa-share-nodes"></i>
             </div>
             <div>
-              <h3 id="share-modal-title" className="share-modal-title">Partager ce produit</h3>
-              <p className="share-modal-subtitle">Lien public permanent pour vos clients et réseaux</p>
+              <h3 id="share-modal-title" className="share-modal-title">Partager cet article</h3>
+              <p className="share-modal-subtitle">La photo et le prix accompagneront automatiquement votre lien</p>
             </div>
           </div>
           <button type="button" className="share-modal-close" onClick={onClose} aria-label="Fermer">
@@ -132,15 +167,39 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
           </button>
         </div>
 
-        {/* Aperçu miniature du produit */}
+        {/* Aperçu en direct de la vignette sociale avec Photo Haute Définition */}
         <div className="share-product-preview-card">
-          <img src={product.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'} alt={productTitle} className="share-preview-thumb" />
+          <img src={imageUrl} alt={productTitle} className="share-preview-thumb" />
           <div className="share-preview-details">
             <span className="share-preview-badge">{product.category || 'Article'}</span>
             <strong className="share-preview-title">{productTitle}</strong>
             <span className="share-preview-price">{formattedPrice}</span>
+            <small style={{ color: 'var(--text-muted)', fontSize: '0.74rem', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <i className="fa-solid fa-image" style={{ color: 'var(--accent-gold)' }}></i>
+              <span>Vignette photo active pour WhatsApp &amp; réseaux</span>
+            </small>
           </div>
         </div>
+
+        {/* Bouton Majeur : Partager avec la photo sur WhatsApp / Mobile */}
+        <button
+          type="button"
+          className="btn btn-primary share-native-btn"
+          onClick={handleShareWithPhoto}
+          disabled={sharingWithPhoto}
+          style={{ width: '100%', marginBottom: '1rem', padding: '0.8rem', background: '#25D366', borderColor: '#25D366', color: '#fff' }}
+        >
+          {sharingWithPhoto ? (
+            <>
+              <i className="fa-solid fa-spinner fa-spin"></i> Préparation de l&apos;image...
+            </>
+          ) : (
+            <>
+              <i className="fa-brands fa-whatsapp" style={{ fontSize: '1.2rem' }}></i>
+              <span>Partager avec la photo sur WhatsApp</span>
+            </>
+          )}
+        </button>
 
         {/* Barre de copie rapide */}
         <div className="share-copy-box">
@@ -151,15 +210,7 @@ export const ProductShareModal = ({ isOpen, onClose, product }) => {
           </button>
         </div>
 
-        {/* Bouton Partage Natif Mobile si supporté */}
-        {hasNativeShare && (
-          <button type="button" className="btn btn-secondary share-native-btn" onClick={handleNativeShare}>
-            <i className="fa-solid fa-arrow-up-from-bracket"></i>
-            <span>Partager via le menu natif du téléphone</span>
-          </button>
-        )}
-
-        {/* Canaux de réseaux sociaux */}
+        {/* Grille des réseaux sociaux */}
         <div className="share-channels-grid">
           {shareChannels.map((ch) => (
             <button key={ch.name} type="button" className={`share-channel-btn ${ch.className}`} onClick={ch.action} title={`Partager sur ${ch.name}`}>

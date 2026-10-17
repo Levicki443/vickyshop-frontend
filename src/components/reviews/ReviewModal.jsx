@@ -30,9 +30,9 @@ export const ReviewModal = ({
       setRating(5);
       setComment('');
       setCustomerName(user?.name || '');
-      setOrderNumber(initialOrderNumber || '');
+      setOrderNumber(initialOrderNumber || initialProduct?.verifiedOrderNumber || '');
     }
-  }, [isOpen, user, initialOrderNumber]);
+  }, [isOpen, user, initialOrderNumber, initialProduct]);
 
   if (!isOpen) return null;
 

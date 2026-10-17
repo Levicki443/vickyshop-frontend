@@ -6,6 +6,7 @@ import './styles/global.css';
 import './styles/products.css';
 import './styles/skeleton.css';
 import './styles/product-details.css';
+import './styles/lightbox.css';
 import './styles/layout.css';
 import './styles/auth.css';
 import './styles/profile-modal.css';

@@ -173,13 +173,25 @@ export const OrderTrackingDetails = ({ order }) => {
 
       {/* 6. Boutons d'Action & Réassurance */}
       <div className="order-tracking-actions-bar">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => setIsReviewModalOpen(true)}
-        >
-          <i className="fa-solid fa-star"></i> Donner mon avis vérifié
-        </button>
+        {order.orderStatus === 'livree' ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setIsReviewModalOpen(true)}
+          >
+            <i className="fa-solid fa-star"></i> Donner mon avis vérifié
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-outline"
+            disabled
+            style={{ opacity: 0.65, cursor: 'not-allowed' }}
+            title="Votre avis sera débloqué dès que votre commande sera marquée comme livrée"
+          >
+            <i className="fa-solid fa-clock"></i> Avis débloqué à la livraison
+          </button>
+        )}
 
         <a
           href={getWhatsAppLink(order)}

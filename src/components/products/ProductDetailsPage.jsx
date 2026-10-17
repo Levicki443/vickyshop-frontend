@@ -7,6 +7,7 @@ import { ProductReviewsSection } from './ProductReviewsSection';
 import { SimilarProductsSection } from './SimilarProductsSection';
 import { ReviewModal } from '../reviews/ReviewModal';
 import { ProductShareModal } from '../common/ProductShareModal';
+import { ProductDetailsGallery } from './ProductDetailsGallery';
 import { useProductSEO } from '../../hooks/useProductSEO';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600';
@@ -173,29 +174,15 @@ export const ProductDetailsPage = ({
       </div>
 
       <div className="product-details-grid">
-        {/* COLONNE GAUCHE : GALERIE */}
-        <div className="details-gallery-section">
-          <div className="main-image-display">
-            <img src={images[selectedImageIndex] || FALLBACK_IMAGE} alt={product.title} className="main-gallery-img" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; }} />
-            {discountPercent && <span className="details-badge-discount">-{discountPercent}%</span>}
-            {isOutOfStock && <div className="details-stock-overlay"><span>Rupture de stock</span></div>}
-            {images.length > 1 && (
-              <>
-                <button type="button" className="gallery-nav-btn btn-prev" onClick={() => setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length)} aria-label="Précédent"><i className="fa-solid fa-chevron-left"></i></button>
-                <button type="button" className="gallery-nav-btn btn-next" onClick={() => setSelectedImageIndex((prev) => (prev + 1) % images.length)} aria-label="Suivant"><i className="fa-solid fa-chevron-right"></i></button>
-              </>
-            )}
-          </div>
-          {images.length > 1 && (
-            <div className="gallery-thumbnails-row">
-              {images.map((img, idx) => (
-                <button key={idx} type="button" className={`thumb-btn ${selectedImageIndex === idx ? 'active' : ''}`} onClick={() => setSelectedImageIndex(idx)}>
-                  <img src={img} alt={`${product.title} ${idx + 1}`} onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; }} />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* COLONNE GAUCHE : GALERIE AVEC ZOOM INTERACTIF */}
+        <ProductDetailsGallery
+          images={images}
+          selectedImageIndex={selectedImageIndex}
+          onSelectImageIndex={setSelectedImageIndex}
+          productTitle={product.title}
+          discountPercent={discountPercent}
+          isOutOfStock={isOutOfStock}
+        />
 
         {/* COLONNE DROITE : INFORMATIONS & ACTIONS */}
         <div className="details-info-section">

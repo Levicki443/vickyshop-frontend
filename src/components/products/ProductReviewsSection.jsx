@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { fetchReviews } from '../../services/reviewApi';
+import { useAuth } from '../../context/AuthContext';
+import { fetchReviews, checkReviewEligibilityApi } from '../../services/reviewApi';
 import { StarRating } from '../reviews/StarRating';
 
 const FALLBACK_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
 
 /**
  * Section d'Évaluation et d'Avis Clients spécifique à un Produit.
- * Affiche la note globale, la ventilation par étoiles (1-5 ⭐) et la liste des avis vérifiés.
+ * Restreint strictement l'accès au dépôt d'avis aux clients ayant commandé ET reçu l'article.
  */
 export const ProductReviewsSection = ({ product, onOpenReviewModal }) => {
+  const { user, token, openAuthModal } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({
     totalReviews: product?.reviewsCount || 0,
@@ -20,6 +22,14 @@ export const ProductReviewsSection = ({ product, onOpenReviewModal }) => {
     oneStar: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [eligibility, setEligibility] = useState({
+    loading: true,
+    eligible: false,
+    reason: 'unauthenticated',
+    orderNumber: null,
+    alreadyReviewed: false,
+    message: '',
+  });
 
   const loadProductReviews = useCallback(async () => {
     const prodId = product?._id || product?.id;
@@ -45,6 +55,55 @@ export const ProductReviewsSection = ({ product, onOpenReviewModal }) => {
     loadProductReviews();
   }, [loadProductReviews]);
 
+  // Vérification de l'éligibilité réelle (Achat + Commande au statut 'livree')
+  useEffect(() => {
+    const prodId = product?._id || product?.id;
+    if (!prodId) return;
+
+    if (!user) {
+      setEligibility({
+        loading: false,
+        eligible: false,
+        reason: 'unauthenticated',
+        orderNumber: null,
+        alreadyReviewed: false,
+        message: 'Connectez-vous pour évaluer cet article si vous l\'avez commandé et reçu.',
+      });
+      return;
+    }
+
+    let isMounted = true;
+    setEligibility((prev) => ({ ...prev, loading: true }));
+
+    checkReviewEligibilityApi(prodId, token)
+      .then((res) => {
+        if (!isMounted) return;
+        setEligibility({
+          loading: false,
+          eligible: !!res.eligible,
+          reason: res.reason || 'unknown',
+          orderNumber: res.orderNumber || null,
+          alreadyReviewed: !!res.alreadyReviewed,
+          message: res.message || '',
+        });
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setEligibility({
+          loading: false,
+          eligible: false,
+          reason: 'error',
+          orderNumber: null,
+          alreadyReviewed: false,
+          message: 'Vérification indisponible.',
+        });
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [product, user, token]);
+
   const total = stats.totalReviews || 1;
   const getPercent = (count) => Math.round(((count || 0) / total) * 100);
 
@@ -55,6 +114,91 @@ export const ProductReviewsSection = ({ product, onOpenReviewModal }) => {
     { stars: 2, count: stats.twoStars || 0 },
     { stars: 1, count: stats.oneStar || 0 },
   ];
+
+  const handleOpenReview = () => {
+    if (!eligibility.eligible) return;
+    onOpenReviewModal({
+      ...product,
+      verifiedOrderNumber: eligibility.orderNumber,
+    });
+  };
+
+  const renderActionArea = () => {
+    if (eligibility.loading) {
+      return (
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '0.4rem' }}></i>
+          <span>Vérification de vos achats...</span>
+        </div>
+      );
+    }
+
+    if (!user) {
+      return (
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
+            <i className="fa-solid fa-shield-halved" style={{ marginRight: '0.35rem' }}></i>
+            Avis réservé aux acheteurs
+          </span>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0, maxWidth: '230px', lineHeight: 1.3 }}>
+            Connectez-vous pour évaluer cet article si vous l&apos;avez déjà commandé et reçu.
+          </p>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={openAuthModal}
+            style={{ width: '100%', maxWidth: '220px', padding: '0.6rem 1rem', fontSize: '0.82rem' }}
+          >
+            <i className="fa-solid fa-user-lock"></i> Se connecter
+          </button>
+        </div>
+      );
+    }
+
+    if (!eligibility.eligible) {
+      const isNotDelivered = eligibility.reason === 'not_delivered';
+      return (
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', color: isNotDelivered ? 'var(--accent-gold)' : 'var(--text-secondary)', fontWeight: 600 }}>
+            <i className={isNotDelivered ? 'fa-solid fa-truck-fast' : 'fa-solid fa-lock'} style={{ marginRight: '0.35rem' }}></i>
+            {isNotDelivered ? 'Commande en acheminement' : 'Achat et livraison requis'}
+          </span>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0, maxWidth: '230px', lineHeight: 1.3 }}>
+            {eligibility.message || 'Seuls les clients ayant commandé et reçu cet article peuvent laisser un avis.'}
+          </p>
+          <button
+            type="button"
+            className="btn btn-outline"
+            disabled
+            style={{ width: '100%', maxWidth: '220px', padding: '0.6rem 1rem', fontSize: '0.82rem', opacity: 0.6, cursor: 'not-allowed' }}
+          >
+            <i className="fa-solid fa-lock"></i> {isNotDelivered ? 'Livraison en attente' : 'Non éligible'}
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--success, #10b981)', fontSize: '0.82rem', fontWeight: 700 }}>
+          <i className="fa-solid fa-circle-check"></i>
+          <span>Achat vérifié &amp; reçu</span>
+        </div>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0, maxWidth: '230px', lineHeight: 1.3 }}>
+          Commande #{eligibility.orderNumber}. Partagez votre retour d&apos;expérience !
+        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleOpenReview}
+          style={{ width: '100%', maxWidth: '220px', padding: '0.65rem 1.25rem' }}
+        >
+          <i className="fa-solid fa-pen-to-square"></i>
+          <span>{eligibility.alreadyReviewed ? 'Modifier mon avis' : 'Évaluer cet article'}</span>
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="product-reviews-section animate-fade-in" id="section-avis-produit" style={{ marginTop: '3.5rem' }}>
@@ -122,21 +266,8 @@ export const ProductReviewsSection = ({ product, onOpenReviewModal }) => {
           })}
         </div>
 
-        {/* Colonne Bouton Appel à Action */}
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0 }}>
-            Vous possédez déjà cet article ?
-          </p>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => onOpenReviewModal(product)}
-            style={{ width: '100%', maxWidth: '240px', padding: '0.75rem 1.25rem' }}
-          >
-            <i className="fa-solid fa-pen-to-square"></i>
-            <span>Évaluer cet article</span>
-          </button>
-        </div>
+        {/* Colonne Bouton Appel à Action avec Éligibilité stricte */}
+        {renderActionArea()}
       </div>
 
       {/* Liste des Avis du Produit */}
@@ -158,11 +289,17 @@ export const ProductReviewsSection = ({ product, onOpenReviewModal }) => {
           <i className="fa-regular fa-comment-dots" style={{ fontSize: '2.5rem', opacity: 0.35, color: 'var(--primary)', marginBottom: '0.75rem' }}></i>
           <h4 style={{ margin: '0 0 0.5rem', color: 'var(--text-primary)' }}>Aucun avis déposé pour le moment</h4>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 1.25rem' }}>
-            Soyez le tout premier client à donner votre avis sur <strong>{product.title}</strong> !
+            Seuls les clients ayant acheté et reçu cet article peuvent laisser une évaluation.
           </p>
-          <button type="button" className="btn btn-primary" onClick={() => onOpenReviewModal(product)}>
-            <i className="fa-solid fa-star"></i> Donner mon avis sur cet article
-          </button>
+          {eligibility.eligible ? (
+            <button type="button" className="btn btn-primary" onClick={handleOpenReview}>
+              <i className="fa-solid fa-star"></i> Donner mon avis sur cet article
+            </button>
+          ) : !user ? (
+            <button type="button" className="btn btn-outline" onClick={openAuthModal}>
+              <i className="fa-solid fa-user-lock"></i> Se connecter pour évaluer
+            </button>
+          ) : null}
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>

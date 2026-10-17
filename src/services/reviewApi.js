@@ -61,6 +61,24 @@ export const submitReview = async (reviewData, token = null) => {
 };
 
 /**
+ * 2b. Vérifier si le client connecté a commandé et reçu cet article
+ */
+export const checkReviewEligibilityApi = async (productId, token = null) => {
+  try {
+    if (!productId) return { eligible: false, reason: 'missing_product' };
+    const response = await fetch(`${API_BASE_URL}/reviews/eligibility/${productId}`, {
+      headers: getAuthHeaders(token),
+    });
+
+    const json = await response.json();
+    return json.data || { eligible: false, reason: 'unknown' };
+  } catch (error) {
+    console.error('[API Reviews] Erreur checkReviewEligibilityApi :', error);
+    return { eligible: false, reason: 'network_error', message: 'Vérification indisponible.' };
+  }
+};
+
+/**
  * 3. Récupérer les avis postés par l'utilisateur connecté
  */
 export const fetchMyReviews = async (token) => {
