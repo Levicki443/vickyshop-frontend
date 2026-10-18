@@ -10,7 +10,7 @@ import { NotificationDropdown } from './NotificationDropdown';
 import { MobileMenuModal } from './MobileMenuModal';
 import logoImg from '../../assets/logo.png';
 
-export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpenSeller, onOpenNotificationCenter, onSelectProduct }) => {
+export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, onOpenProfile, onOpenSeller, onOpenNotificationCenter, onSelectProduct }) => {
   const { theme, toggleTheme } = useTheme();
   const { totalItems, openCart } = useCart();
   const { wishlistCount, openWishlist } = useWishlist();
@@ -131,6 +131,18 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
     }
   };
 
+  const handleAIAssistantClick = () => {
+    setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
+    setNotifDropdownOpen(false);
+    if (onOpenAIAssistant) {
+      onOpenAIAssistant();
+    } else {
+      window.history.pushState(null, '', '/assistant-ia');
+      window.dispatchEvent(new Event('app-navigate'));
+    }
+  };
+
   return (
     <>
       <header className={`main-header ${scrolled ? 'scrolled' : ''}`}>
@@ -157,6 +169,12 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
                   Vente Flash <span className="hot-badge">Hot</span>
                 </a>
               </li>
+              <li>
+                <button type="button" className="nav-link-item nav-link-btn" onClick={handleAIAssistantClick} title="Assistant IA Vicky-Shop">
+                  <i className="fa-solid fa-wand-magic-sparkles" style={{ color: 'var(--primary)' }}></i>
+                  <span>Assistant IA</span>
+                </button>
+              </li>
 
               {isSeller && isAuthenticated && (
                 <li>
@@ -177,6 +195,9 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
               </button>
             )}
 
+            <button type="button" className="icon-btn" onClick={handleAIAssistantClick} title="Assistant IA Vicky-Shop" aria-label="Assistant IA">
+              <i className="fa-solid fa-wand-magic-sparkles" style={{ color: 'var(--primary)' }}></i>
+            </button>
             <button type="button" className="icon-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'} aria-label="Mode">
               <i className={theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'}></i>
             </button>
@@ -289,6 +310,7 @@ export const Header = ({ onOpenAdmin, onOpenOrdersTracking, onOpenProfile, onOpe
         onOpenOrders={handleOrdersClick}
         onOpenWishlist={openWishlist}
         onOpenNotifs={handleOpenNotifs}
+        onOpenAIAssistant={handleAIAssistantClick}
       />
     </>
   );

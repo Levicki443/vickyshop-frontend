@@ -22,7 +22,8 @@ export const MobileMenuModal = ({
   onOpenProfile,
   onOpenOrders,
   onOpenWishlist,
-  onOpenNotifs
+  onOpenNotifs,
+  onOpenAIAssistant
 }) => {
   // Verrouillage du défilement de l'arrière-plan lorsque la modale est ouverte
   useEffect(() => {
@@ -207,6 +208,30 @@ export const MobileMenuModal = ({
                     <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
                   </div>
                 </a>
+              </li>
+
+              <li>
+                <button
+                  type="button"
+                  className="mobile-nav-card mobile-nav-btn"
+                  onClick={() => {
+                    onClose();
+                    if (onOpenAIAssistant) onOpenAIAssistant();
+                    else {
+                      window.history.pushState(null, '', '/assistant-ia');
+                      window.dispatchEvent(new Event('app-navigate'));
+                    }
+                  }}
+                >
+                  <div className="mobile-nav-card-left">
+                    <i className="fa-solid fa-wand-magic-sparkles mobile-nav-card-icon" style={{ color: 'var(--primary)' }}></i>
+                    <span>Assistant IA</span>
+                  </div>
+                  <div className="mobile-nav-card-right">
+                    <span className="hot-badge" style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>Nouveau</span>
+                    <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
+                  </div>
+                </button>
               </li>
 
               <li>

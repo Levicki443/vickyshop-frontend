@@ -13,6 +13,8 @@ import { UserOrdersPage } from './components/orders/UserOrdersPage';
 import { UserProfilePage } from './components/auth/UserProfilePage';
 import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
+import { AIAssistantPage } from './components/ai/AIAssistantPage';
+import { FloatingAIAssistantButton } from './components/common/FloatingAIAssistantButton';
 import { Footer } from './components/common/Footer';
 import { AnnouncementBar } from './components/common/AnnouncementBar';
 import { AdminDashboard } from './components/admin/AdminDashboard';
@@ -74,6 +76,7 @@ export const App = () => {
   const isResetPasswordRoute = ['/reinitialisation-mot-de-passe', '/reinitialiser-mot-de-passe', '/reset-password'].includes(cleanPath);
   const isCategoryRoute = cleanPath.startsWith('/categorie') || cleanPath.startsWith('/categories');
   const isSearchRoute = cleanPath.startsWith('/recherche') || cleanPath.startsWith('/search');
+  const isAIRoute = cleanPath === '/assistant-ia' || cleanPath === '/ia' || cleanPath === '/assistant';
 
   useEffect(() => {
     if (isCartRoute) openCart();
@@ -220,14 +223,9 @@ export const App = () => {
       <Header
         onOpenAdmin={handleOpenAdmin}
         isAdminActive={isAdminViewActive}
-        onOpenOrdersTracking={(ordNum) => {
-          if (ordNum) setSelectedOrderNumber(ordNum);
-          navigateTo('/commandes');
-        }}
-        onOpenProfile={(tab = 'profile') => {
-          setProfileInitialTab(tab);
-          navigateTo('/profil');
-        }}
+        onOpenAIAssistant={() => navigateTo('/assistant-ia')}
+        onOpenOrdersTracking={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+        onOpenProfile={(tab = 'profile') => { setProfileInitialTab(tab); navigateTo('/profil'); }}
         onOpenSeller={() => navigateTo('/vendeur/dashboard')}
         onOpenNotificationCenter={openNotificationCenter}
         onSelectProduct={handleSelectProduct}
@@ -242,6 +240,8 @@ export const App = () => {
           onOpenCheckout={() => setIsCheckoutOpen(true)}
           onSelectProduct={handleSelectProduct}
         />
+      ) : isAIRoute ? (
+        <AIAssistantPage onBackToShop={() => navigateTo('/')} />
       ) : isForgotPasswordRoute ? (
         <ForgotPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
       ) : isResetPasswordRoute ? (
@@ -296,24 +296,20 @@ export const App = () => {
       )}
 
       <AppModals
-        isCheckoutOpen={isCheckoutOpen}
-        onCloseCheckout={() => setIsCheckoutOpen(false)}
-        onOpenCheckout={() => setIsCheckoutOpen(true)}
-        isReviewModalOpen={isReviewModalOpen}
-        onCloseReviewModal={() => setIsReviewModalOpen(false)}
-        reviewTargetProduct={reviewTargetProduct}
-        reviewTargetOrderNumber={reviewTargetOrderNumber}
-        isAdminAuthModalOpen={isAdminAuthModalOpen}
-        onCloseAdminAuthModal={() => setIsAdminAuthModalOpen(false)}
+        isCheckoutOpen={isCheckoutOpen} onCloseCheckout={() => setIsCheckoutOpen(false)} onOpenCheckout={() => setIsCheckoutOpen(true)}
+        isReviewModalOpen={isReviewModalOpen} onCloseReviewModal={() => setIsReviewModalOpen(false)}
+        reviewTargetProduct={reviewTargetProduct} reviewTargetOrderNumber={reviewTargetOrderNumber}
+        isAdminAuthModalOpen={isAdminAuthModalOpen} onCloseAdminAuthModal={() => setIsAdminAuthModalOpen(false)}
         onAdminAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
-        isNotificationCenterOpen={isNotificationCenterOpen}
-        onCloseNotificationCenter={closeNotificationCenter}
-        onSelectOrder={(ordNum) => { setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
-        onSelectProduct={handleSelectProduct}
-        onOpenProfileTab={(tab) => { setProfileInitialTab(tab); navigateTo('/profil'); }}
-        currentPath={currentPath}
-        onNavigate={navigateTo}
-        onOpenAdmin={handleOpenAdmin}
+        isNotificationCenterOpen={isNotificationCenterOpen} onCloseNotificationCenter={closeNotificationCenter}
+        onSelectOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+        onSelectProduct={handleSelectProduct} onOpenProfileTab={(tab) => { setProfileInitialTab(tab); navigateTo('/profil'); }}
+        currentPath={currentPath} onNavigate={navigateTo} onOpenAdmin={handleOpenAdmin}
+      />
+
+      <FloatingAIAssistantButton
+        onClick={() => navigateTo('/assistant-ia')}
+        isVisible={!isAIRoute && !isAdminViewActive && !isSellerRoute}
       />
     </div>
   );

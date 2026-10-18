@@ -1,0 +1,693 @@
+/* ==========================================================================
+   VICKY-SHOP - ASSISTANT IA (VICKY IA)
+   Interface de discussion intelligente, ergonomique et mobile-first
+   ========================================================================== */
+
+/* Conteneur principal plein écran */
+.vicky-ai-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow: hidden;
+  position: relative;
+}
+
+/* En-tête de l'assistant */
+.vicky-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.vicky-ai-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vicky-ai-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vicky-ai-back-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--border-highlight);
+}
+
+.vicky-ai-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.vicky-ai-brand-avatar {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.vicky-ai-status-pulse {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--accent-green);
+  border: 2px solid var(--bg-surface);
+  animation: vickyPulse 2s infinite;
+}
+
+@keyframes vickyPulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.7); }
+  70% { box-shadow: 0 0 0 7px rgba(0, 208, 132, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0); }
+}
+
+.vicky-ai-brand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.vicky-ai-brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vicky-ai-brand-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.vicky-ai-badge-official {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(0, 208, 132, 0.15);
+  color: var(--accent-green);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-full);
+}
+
+.vicky-ai-brand-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.vicky-ai-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.vicky-ai-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.825rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vicky-ai-reset-btn:hover:not(:disabled) {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.vicky-ai-reset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Corps défilant du chat */
+.vicky-ai-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.25rem 1rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vicky-ai-chat-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Bannière de bienvenue discrète */
+.vicky-ai-welcome-banner {
+  text-align: center;
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vicky-ai-welcome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.vicky-ai-welcome-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+/* Suggestions rapides */
+.vicky-ai-suggestions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.vicky-ai-suggestions-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.vicky-ai-suggestions-icon {
+  color: var(--accent-gold);
+}
+
+.vicky-ai-suggestions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vicky-ai-suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: 0.825rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.vicky-ai-suggestion-chip:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.vicky-ai-suggestion-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vicky-ai-chip-icon {
+  color: var(--primary);
+}
+
+/* Liste des bulles de message */
+.vicky-ai-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vicky-ai-message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  max-width: 88%;
+}
+
+.vicky-ai-row-assistant {
+  align-self: flex-start;
+}
+
+.vicky-ai-row-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.vicky-ai-avatar-wrapper {
+  flex-shrink: 0;
+}
+
+.vicky-ai-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vicky-ai-avatar-bot {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: #ffffff;
+}
+
+.vicky-ai-avatar-user {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.vicky-ai-bubble {
+  padding: 0.9rem 1.15rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.925rem;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.vicky-ai-bubble-assistant {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-top-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.vicky-ai-bubble-user {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: #ffffff;
+  border-top-right-radius: 4px;
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.vicky-ai-bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.vicky-ai-sender-name {
+  font-weight: 700;
+}
+
+.vicky-ai-timestamp {
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.vicky-ai-badge-fallback {
+  font-size: 0.65rem;
+  background: rgba(255, 184, 0, 0.2);
+  color: var(--accent-gold);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm);
+}
+
+.vicky-ai-paragraph {
+  margin: 0.25rem 0;
+}
+
+.vicky-ai-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.2rem 0;
+}
+
+.vicky-ai-bullet-dot, .vicky-ai-numbered-prefix {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.vicky-ai-bubble-user .vicky-ai-bullet-dot,
+.vicky-ai-bubble-user .vicky-ai-numbered-prefix {
+  color: #ffffff;
+}
+
+.vicky-ai-strong {
+  font-weight: 700;
+}
+
+.vicky-ai-bubble-spacer {
+  height: 0.4rem;
+}
+
+.vicky-ai-bubble-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.vicky-ai-copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.vicky-ai-copy-button:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+/* Indicateur d'écriture (Typing) */
+.vicky-ai-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.vicky-ai-typing-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.vicky-ai-typing-bubble {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-lg);
+  border-top-left-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.vicky-ai-typing-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.vicky-ai-typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vicky-ai-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  animation: vickyBounce 1.4s infinite ease-in-out both;
+}
+
+.vicky-ai-dot:nth-child(1) { animation-delay: -0.32s; }
+.vicky-ai-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes vickyBounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Pied de page et saisie */
+.vicky-ai-footer {
+  padding: 0.75rem 1rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.vicky-ai-footer-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.vicky-ai-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.vicky-ai-input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 0.45rem 0.65rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.vicky-ai-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.vicky-ai-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.925rem;
+  line-height: 1.45;
+  resize: none;
+  padding: 0.35rem 0.45rem;
+  max-height: 120px;
+  min-height: 38px;
+}
+
+.vicky-ai-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.vicky-ai-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.vicky-ai-send-btn.vicky-ai-send-active {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.vicky-ai-send-btn.vicky-ai-send-active:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.vicky-ai-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vicky-ai-spinner {
+  animation: vickySpin 1s linear infinite;
+}
+
+@keyframes vickySpin {
+  100% { transform: rotate(360deg); }
+}
+
+.vicky-ai-input-footer {
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+.vicky-ai-legal-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Adaptations mobiles */
+@media (max-width: 768px) {
+  .vicky-ai-back-text, .vicky-ai-reset-text {
+    display: none;
+  }
+  .vicky-ai-brand-subtitle {
+    display: none;
+  }
+  .vicky-ai-message-row {
+    max-width: 95%;
+  }
+  .vicky-ai-suggestion-chip {
+    font-size: 0.775rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
+
+/* ==========================================================================
+   BOUTON FLOTTANT D'ACCÈS RAPIDE (FAB ASSISTANT IA)
+   ========================================================================== */
+.vicky-ai-floating-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 990;
+  pointer-events: auto;
+}
+
+.vicky-ai-floating-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.65rem 1.15rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--primary-glow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+}
+
+.vicky-ai-floating-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px var(--primary-glow);
+}
+
+.vicky-ai-floating-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.vicky-ai-floating-icon-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vicky-ai-floating-sparkle-icon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #ffd700;
+  animation: vickyPulse 2s infinite;
+}
+
+.vicky-ai-floating-label {
+  letter-spacing: 0.02em;
+}
+
+.vicky-ai-floating-pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent-green);
+  border: 2px solid var(--bg-surface);
+  animation: vickyPulse 2s infinite;
+}
+
+@media (max-width: 640px) {
+  .vicky-ai-floating-container {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .vicky-ai-floating-label {
+    display: none;
+  }
+
+  .vicky-ai-floating-btn {
+    padding: 0.75rem;
+    border-radius: var(--radius-full);
+  }
+}
+
