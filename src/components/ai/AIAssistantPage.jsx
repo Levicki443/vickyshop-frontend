@@ -11,8 +11,16 @@ import AIChatInput from './AIChatInput';
  *
  * @param {Object} props
  * @param {Function} props.onBackToShop - Callback de retour vers la boutique
+ * @param {Function} [props.onTrackOrder] - Callback de suivi de commande
+ * @param {Function} [props.onViewProduct] - Callback d'ouverture de fiche produit
+ * @param {Function} [props.onOpenSeller] - Callback d'ouverture de l'espace vendeur
  */
-export const AIAssistantPage = ({ onBackToShop }) => {
+export const AIAssistantPage = ({
+  onBackToShop,
+  onTrackOrder,
+  onViewProduct,
+  onOpenSeller,
+}) => {
   const { user } = useAuth();
   const {
     messages,
@@ -112,7 +120,13 @@ export const AIAssistantPage = ({ onBackToShop }) => {
           {/* Liste chronologique des messages */}
           <div className="vicky-ai-messages-list" role="log" aria-live="polite">
             {messages.map((msg) => (
-              <AIMessageBubble key={msg.id} message={msg} />
+              <AIMessageBubble
+                key={msg.id}
+                message={msg}
+                onTrackOrder={onTrackOrder}
+                onViewProduct={onViewProduct}
+                onOpenSeller={onOpenSeller}
+              />
             ))}
 
             {/* Indicateur d'écriture en cours */}

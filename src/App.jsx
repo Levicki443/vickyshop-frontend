@@ -241,7 +241,12 @@ export const App = () => {
           onSelectProduct={handleSelectProduct}
         />
       ) : isAIRoute ? (
-        <AIAssistantPage onBackToShop={() => navigateTo('/')} />
+        <AIAssistantPage
+          onBackToShop={() => navigateTo('/')}
+          onTrackOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+          onViewProduct={(slugOrId) => navigateTo(`/produit/${slugOrId}`)}
+          onOpenSeller={() => navigateTo('/vendeur/dashboard')}
+        />
       ) : isForgotPasswordRoute ? (
         <ForgotPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
       ) : isResetPasswordRoute ? (
