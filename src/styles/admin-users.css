@@ -1,0 +1,490 @@
+/* ==========================================================================
+   VICKY-SHOP - FEUILLE DE STYLE MODULE GESTION DES UTILISATEURS
+   Design sombre et lumineux contrasté, 100% variables CSS du thème (zéro code en dur).
+   Responsive mobile, tablette et desktop.
+   ========================================================================== */
+
+/* 1. Grille des Cartes Statistiques KPIs réelles */
+.admin-user-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-user-kpi-card {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.6rem;
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-user-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--admin-border-focus);
+}
+
+.admin-kpi-card--primary {
+  border-left: 3px solid var(--admin-primary);
+}
+
+.admin-kpi-card--info {
+  border-left: 3px solid var(--admin-info);
+}
+
+.admin-kpi-card--warning {
+  border-left: 3px solid var(--admin-warning);
+}
+
+.admin-kpi-card--success {
+  border-left: 3px solid var(--admin-success);
+}
+
+.admin-kpi-card--danger {
+  border-left: 3px solid var(--admin-danger);
+}
+
+.admin-kpi-card--purple {
+  border-left: 3px solid var(--admin-purple);
+}
+
+.admin-user-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.admin-user-kpi-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-text-muted);
+}
+
+.admin-user-kpi-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-surface);
+  color: var(--admin-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.admin-user-kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-user-kpi-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--admin-text-main);
+  letter-spacing: -0.02em;
+}
+
+.admin-user-kpi-subtext {
+  font-size: 0.72rem;
+  color: var(--admin-text-muted);
+}
+
+/* 2. Barre de filtres et recherche avancée */
+.admin-users-filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.admin-users-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--admin-text-muted);
+  cursor: pointer;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-search-clear:hover {
+  color: var(--admin-text-main);
+}
+
+/* 3. Cellules et Badges du Tableau Utilisateurs */
+.admin-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--admin-surface);
+  color: var(--admin-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  flex-shrink: 0;
+}
+
+.admin-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-user-avatar--lg {
+  width: 52px;
+  height: 52px;
+  font-size: 1.4rem;
+}
+
+.admin-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.admin-user-name {
+  color: var(--admin-text-main);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-user-id {
+  font-size: 0.7rem;
+  color: var(--admin-text-muted);
+  font-family: monospace;
+}
+
+.admin-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.admin-status-pill--active {
+  background: var(--admin-surface);
+  color: var(--admin-success);
+  border: 1px solid var(--admin-success);
+}
+
+.admin-status-pill--suspended {
+  background: var(--admin-surface);
+  color: var(--admin-danger);
+  border: 1px solid var(--admin-danger);
+}
+
+.admin-status-pill--deactivated {
+  background: var(--admin-surface);
+  color: var(--admin-text-muted);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-verification-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-verify-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+}
+
+.admin-verify-badge--ok {
+  background: var(--admin-surface);
+  color: var(--admin-success);
+  border: 1px solid var(--admin-success);
+}
+
+.admin-verify-badge--no {
+  background: var(--admin-surface);
+  color: var(--admin-text-muted);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-surface);
+  color: var(--admin-text-main);
+  border: 1px solid var(--admin-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-btn-icon:hover {
+  background: var(--admin-surface-hover);
+  border-color: var(--admin-border-focus);
+}
+
+.admin-btn-icon--edit:hover {
+  color: var(--admin-warning);
+}
+
+.admin-btn-icon--suspend:hover {
+  color: var(--admin-danger);
+}
+
+.admin-btn-icon--reactivate:hover {
+  color: var(--admin-success);
+}
+
+.admin-row--suspended td {
+  opacity: 0.85;
+}
+
+/* 4. Barre de pagination serveur */
+.admin-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-bottom-left-radius: var(--admin-radius);
+  border-bottom-right-radius: var(--admin-radius);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-pagination-info {
+  font-size: 0.82rem;
+  color: var(--admin-text-muted);
+}
+
+.admin-pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 5. Responsive Desktop vs Mobile */
+.admin-users-mobile-list {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .admin-users-desktop-view {
+    display: none;
+  }
+
+  .admin-users-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.85rem;
+  }
+
+  .admin-user-mobile-card {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .admin-user-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .admin-user-mobile-details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--admin-border);
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  .admin-user-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+}
+
+/* 6. Fiche détaillée et Sections A, B, C */
+.admin-modal-card--lg {
+  max-width: 780px;
+  width: 95%;
+}
+
+.admin-user-detail-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-detail-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.admin-detail-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--admin-text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.admin-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-detail-item--full {
+  grid-column: 1 / -1;
+}
+
+.admin-detail-label {
+  font-size: 0.74rem;
+  color: var(--admin-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.admin-detail-value {
+  font-size: 0.88rem;
+  color: var(--admin-text-main);
+  font-weight: 500;
+}
+
+.admin-detail-alert {
+  padding: 0.5rem 0.75rem;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-danger);
+  border-radius: var(--admin-radius-sm);
+  color: var(--admin-danger);
+  font-size: 0.82rem;
+}
+
+.admin-notes-box {
+  padding: 0.75rem;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  font-size: 0.84rem;
+  color: var(--admin-text-main);
+  line-height: 1.45;
+}
+
+.admin-audit-log-box {
+  margin-top: 0.5rem;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  padding: 0.75rem;
+}
+
+.admin-audit-log-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--admin-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.admin-audit-log-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-audit-log-item {
+  font-size: 0.78rem;
+  color: var(--admin-text-main);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-audit-log-item:last-child {
+  border-bottom: none;
+}
+
+.admin-audit-log-date {
+  color: var(--admin-text-muted);
+  margin-right: 0.4rem;
+}
+
+.admin-audit-log-reason {
+  margin: 0.2rem 0 0 0;
+  color: var(--admin-text-muted);
+  font-style: italic;
+}

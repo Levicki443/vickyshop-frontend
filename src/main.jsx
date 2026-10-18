@@ -15,6 +15,7 @@ import './styles/seller-orders.css';
 import './styles/seller.css';
 import './styles/testimonials.css';
 import './styles/admin.css';
+import './styles/admin-users.css';
 import './styles/pwa.css';
 import './styles/notifications.css';
 import './styles/orders.css';

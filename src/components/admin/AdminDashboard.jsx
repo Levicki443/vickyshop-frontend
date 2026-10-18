@@ -6,7 +6,6 @@ import {
   seedAdminProductsApi,
   deleteProductApi,
   toggleProductStockApi,
-  fetchAdminUsers,
   fetchAdminSettings,
   updateAdminSettingsApi,
   removeAdminToken,
@@ -16,7 +15,7 @@ import { fetchProducts } from '../../services/api';
 import { AdminOrderDetailsModal } from './AdminOrderDetailsModal';
 import { AdminProductModal } from './AdminProductModal';
 import { AdminReviewsTab } from './AdminReviewsTab';
-import { AdminClientsTab } from './AdminClientsTab';
+import { AdminUsersTab } from './AdminUsersTab';
 import {
   joinAdminRoom,
   onNewOrder,
@@ -51,7 +50,6 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
   const [kpis, setKpis] = useState(null);
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
-  const [users, setUsers] = useState([]);
   const [settings, setSettings] = useState({
     shopName: 'Vicky-Shop',
     currency: 'FCFA',
@@ -68,6 +66,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
 
   const [loading, setLoading] = useState(true);
   const [actionFeedback, setActionFeedback] = useState(null);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   // Filtres
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
@@ -77,8 +76,6 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
   const [productCategoryFilter, setProductCategoryFilter] = useState('all');
   const [productStockFilter, setProductStockFilter] = useState('all');
   const [productSearch, setProductSearch] = useState('');
-
-  const [userSearch, setUserSearch] = useState('');
 
   // Modales
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -142,100 +139,6 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
     }
   }, [productCategoryFilter, productStockFilter, productSearch]);
 
-  // Chargement des Utilisateurs avec résilience
-  const loadUsers = useCallback(async () => {
-    try {
-      const data = await fetchAdminUsers({
-        search: userSearch,
-      });
-      if (Array.isArray(data)) {
-        setUsers(data);
-        return;
-      }
-    } catch (err) {
-      console.warn('Endpoint admin/users en attente de réponse :', err.message);
-    }
-
-    // Repli de secours immédiat : extraction et synthèse des clients depuis les commandes
-    try {
-      const clientsMap = new Map();
-
-      // 1. Inclusion du compte connecté si administrateur / utilisateur inscrit
-      const currentAdmin = getAdminUser();
-      if (currentAdmin && currentAdmin.email) {
-        clientsMap.set(currentAdmin.email.toLowerCase().trim(), {
-          _id: currentAdmin.id || currentAdmin._id || 'admin_ouattara',
-          name: currentAdmin.name || 'Administrateur',
-          email: currentAdmin.email,
-          phone: currentAdmin.phone || '',
-          city: currentAdmin.city || 'Abidjan',
-          address: currentAdmin.address || '',
-          role: currentAdmin.role || 'admin',
-          isRegistered: true,
-          ordersCount: 0,
-          orderCount: 0,
-          totalSpent: 0,
-          createdAt: currentAdmin.createdAt || new Date(),
-        });
-      }
-
-      // 2. Extraction des clients depuis les commandes
-      if (Array.isArray(orders) && orders.length > 0) {
-        orders.forEach((ord) => {
-          const key = (ord.customerPhone && ord.customerPhone.trim()) || (ord.customerEmail && ord.customerEmail.toLowerCase().trim()) || ord.customerName;
-          if (!key) return;
-
-          const existing = clientsMap.get(key);
-          const ordTotal = Number(ord.total) || 0;
-
-          if (existing) {
-            existing.ordersCount = (existing.ordersCount || 0) + 1;
-            existing.orderCount = existing.ordersCount;
-            existing.totalSpent = (existing.totalSpent || 0) + ordTotal;
-            if (ord.createdAt && (!existing.createdAt || new Date(ord.createdAt) > new Date(existing.createdAt))) {
-              existing.createdAt = ord.createdAt;
-              if (ord.city) existing.city = ord.city;
-              if (ord.customerName) existing.name = ord.customerName;
-            }
-          } else {
-            clientsMap.set(key, {
-              _id: `guest_${key}`,
-              name: ord.customerName || 'Client Vicky-Shop',
-              email: ord.customerEmail || 'Non renseigné',
-              phone: ord.customerPhone || '',
-              city: ord.city || 'Abidjan',
-              address: ord.deliveryAddress || '',
-              role: 'client',
-              isRegistered: false,
-              ordersCount: 1,
-              orderCount: 1,
-              totalSpent: ordTotal,
-              createdAt: ord.createdAt || new Date(),
-            });
-          }
-        });
-      }
-
-      let synthesized = Array.from(clientsMap.values());
-      if (userSearch && userSearch.trim()) {
-        const term = userSearch.trim().toLowerCase();
-        synthesized = synthesized.filter(
-          (c) =>
-            (c.name && c.name.toLowerCase().includes(term)) ||
-            (c.email && c.email.toLowerCase().includes(term)) ||
-            (c.phone && c.phone.toLowerCase().includes(term)) ||
-            (c.city && c.city.toLowerCase().includes(term))
-        );
-      }
-
-      synthesized.sort((a, b) => (b.ordersCount || 0) - (a.ordersCount || 0));
-      setUsers(synthesized);
-    } catch (fallbackErr) {
-      console.error('Erreur synthèse de secours des clients :', fallbackErr);
-      setUsers([]);
-    }
-  }, [userSearch, orders]);
-
   // Chargement des Parametres
   const loadSettings = useCallback(async () => {
     try {
@@ -246,24 +149,52 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
     }
   }, []);
 
-  // Chargement initial
+  // Chargement initial stable (exécuté une seule fois au montage)
   useEffect(() => {
+    let isMounted = true;
     const init = async () => {
       setLoading(true);
-      await Promise.all([loadKPIs(), loadOrders(), loadProducts(), loadUsers(), loadSettings()]);
-      setLoading(false);
+      try {
+        await Promise.all([
+          fetchDashboardKPIs().then((data) => { if (isMounted && data) setKpis(data); }).catch(() => {}),
+          fetchAdminOrders().then((data) => { if (isMounted && data?.orders) setOrders(data.orders); }).catch(() => {}),
+          fetchAdminProducts().then((data) => {
+            if (isMounted && Array.isArray(data)) {
+              setProducts(data.filter((p) => !p.image?.includes('unsplash.com')));
+            }
+          }).catch(() => {}),
+          fetchAdminSettings().then((data) => { if (isMounted && data) setSettings(data); }).catch(() => {}),
+        ]);
+      } catch (err) {
+        console.warn('Erreur lors du chargement initial :', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
     init();
-  }, [loadKPIs, loadOrders, loadProducts, loadUsers, loadSettings]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  // Rafraichissement specifique selon l'onglet actif
+  // Rafraichissement specifique selon l'onglet actif sans boucle de dépendance
   useEffect(() => {
     if (activeTab === 'overview') loadKPIs();
-    if (activeTab === 'orders') loadOrders();
-    if (activeTab === 'products') loadProducts();
-    if (activeTab === 'users') loadUsers();
-    if (activeTab === 'settings') loadSettings();
-  }, [activeTab, loadKPIs, loadOrders, loadProducts, loadUsers, loadSettings]);
+    else if (activeTab === 'orders') loadOrders();
+    else if (activeTab === 'products') loadProducts();
+    else if (activeTab === 'settings') loadSettings();
+  }, [activeTab]);
+
+  // Écoute de l'expiration automatique de session (interception HTTP 401)
+  useEffect(() => {
+    const handleExpired = () => {
+      setIsSessionExpired(true);
+    };
+    window.addEventListener('vicky:admin-session-expired', handleExpired);
+    return () => window.removeEventListener('vicky:admin-session-expired', handleExpired);
+  }, []);
 
   // États notifications temps réel
   const [notifPermission, setNotifPermission] = useState(() =>
@@ -576,6 +507,39 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
         <div className={`admin-toast-banner admin-toast-${actionFeedback.type}`}>
           <i className={`fa-solid fa-${actionFeedback.type === 'success' ? 'circle-check' : 'circle-exclamation'}`}></i>
           <span>{actionFeedback.message}</span>
+          {actionFeedback.message && actionFeedback.message.toLowerCase().includes('jeton') && (
+            <button
+              type="button"
+              className="admin-toast-reconnect-btn"
+              onClick={handleLogout}
+            >
+              Se reconnecter
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Dialogue plein écran de reconnexion en cas de session expirée */}
+      {isSessionExpired && (
+        <div className="admin-modal-overlay" style={{ zIndex: 1000 }} role="dialog" aria-modal="true">
+          <div className="admin-modal-card admin-modal-card--sm" style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
+            <div style={{ fontSize: '3rem', color: 'var(--admin-warning)', marginBottom: '1rem' }}>
+              <i className="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h3 className="admin-modal-title" style={{ marginBottom: '0.75rem' }}>Session administrateur expirée</h3>
+            <p className="admin-modal-desc" style={{ marginBottom: '1.5rem' }}>
+              Votre jeton d&apos;authentification a expiré pour des raisons de sécurité. Veuillez vous reconnecter pour actualiser vos données.
+            </p>
+            <button
+              type="button"
+              className="admin-btn admin-btn-primary"
+              style={{ width: '100%', justifyContent: 'center' }}
+              onClick={handleLogout}
+            >
+              <i className="fa-solid fa-right-to-bracket"></i>
+              <span>Se reconnecter à l&apos;administration</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -620,7 +584,7 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
               onClick={() => setActiveTab('users')}
             >
               <i className="fa-solid fa-users"></i>
-              <span>Base Clients</span>
+              <span>Gestion des utilisateurs</span>
             </button>
 
             <button
@@ -1377,18 +1341,11 @@ export const AdminDashboard = ({ onExitToShop, onClose, onLogout, onProductsUpda
                 </div>
               )}
 
-              {/* ONGLET 4 : BASE CLIENTS */}
+              {/* ONGLET 4 : GESTION DES UTILISATEURS */}
               {activeTab === 'users' && (
-                <AdminClientsTab
-                  users={users}
-                  userSearch={userSearch}
-                  setUserSearch={setUserSearch}
-                  onRefresh={() => {
-                    loadUsers();
-                    showNotification('Base clients actualisée.');
-                  }}
+                <AdminUsersTab
                   formatPrice={formatPrice}
-                  loading={loading}
+                  currentAdminId={adminUser?._id || adminUser?.id}
                 />
               )}
 

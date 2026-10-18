@@ -121,15 +121,38 @@
 }
 
 .admin-toast-success {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.4);
+  background: var(--admin-surface);
+  color: var(--admin-success);
+  border-bottom: 2px solid var(--admin-success);
 }
 
 .admin-toast-danger {
-  background: rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  border-bottom: 1px solid rgba(239, 68, 68, 0.4);
+  background: var(--admin-surface);
+  color: var(--admin-text-main);
+  border-bottom: 2px solid var(--admin-danger);
+  box-shadow: var(--admin-shadow);
+}
+
+.admin-toast-danger i {
+  color: var(--admin-danger);
+  font-size: 1.1rem;
+}
+
+.admin-toast-reconnect-btn {
+  margin-left: 0.85rem;
+  padding: 0.3rem 0.75rem;
+  background: var(--admin-danger);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--admin-radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.admin-toast-reconnect-btn:hover {
+  opacity: 0.9;
 }
 
 @keyframes slideDown {

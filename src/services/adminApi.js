@@ -1,6 +1,7 @@
 /**
  * Service API pour le Backoffice Administrateur de Vicky-Shop.
  * Gère les requêtes authentifiées JWT pour les KPIs, Commandes, Produits, Clients et Paramètres.
+ * Intègre un intercepteur automatique des expirations de session (HTTP 401).
  */
 
 const rawBaseUrl = (import.meta.env.VITE_URL || import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
@@ -41,6 +42,39 @@ const authHeaders = () => {
   };
 };
 
+/**
+ * Wrapper de requête HTTP sécurisé avec interception centralisée des expirations de session (401).
+ */
+export const adminRequest = async (path, options = {}) => {
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...authHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+
+  const json = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    removeAdminToken();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('vicky:admin-session-expired', {
+          detail: { message: json.message || 'Session administrateur expirée.' },
+        })
+      );
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(json.message || `Erreur serveur (${response.status})`);
+  }
+
+  return json;
+};
+
 export const adminLogin = async (email, password) => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
@@ -69,9 +103,7 @@ export const adminRegister = async ({ name, email, phone, password, adminSecretK
 };
 
 export const fetchDashboardKPIs = async () => {
-  const response = await fetch(`${API_BASE_URL}/admin/kpis`, { headers: authHeaders() });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur chargement KPIs.');
+  const json = await adminRequest('/admin/kpis');
   return json.data;
 };
 
@@ -82,9 +114,7 @@ export const fetchAdminOrders = async (params = {}) => {
   if (params.page) query.append('page', params.page);
   if (params.limit) query.append('limit', params.limit);
 
-  const response = await fetch(`${API_BASE_URL}/admin/orders?${query.toString()}`, { headers: authHeaders() });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur chargement commandes.');
+  const json = await adminRequest(`/admin/orders?${query.toString()}`);
   return json.data;
 };
 
@@ -93,13 +123,10 @@ export const updateOrderStatusApi = async (orderId, orderStatus, paymentStatus, 
   if (paymentStatus) body.paymentStatus = paymentStatus;
   if (comment) body.comment = comment;
 
-  const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}/status`, {
+  const json = await adminRequest(`/admin/orders/${orderId}/status`, {
     method: 'PATCH',
-    headers: authHeaders(),
     body: JSON.stringify(body),
   });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur mise à jour statut.');
   return json.data.order;
 };
 
@@ -111,12 +138,9 @@ export const fetchAdminProducts = async (params = {}) => {
   if (stockParam === 'inStock') stockParam = 'in';
   else if (stockParam === 'outOfStock') stockParam = 'out';
   if (stockParam && stockParam !== 'all') query.append('stockStatus', stockParam);
-
   if (params.search) query.append('search', params.search);
 
-  const response = await fetch(`${API_BASE_URL}/admin/products?${query.toString()}`, { headers: authHeaders() });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur chargement produits.');
+  const json = await adminRequest(`/admin/products?${query.toString()}`);
   return json.data.products;
 };
 
@@ -131,91 +155,104 @@ export const uploadProductImageApi = async (file) => {
     body: formData,
   });
   const json = await response.json();
+  if (response.status === 401) {
+    removeAdminToken();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vicky:admin-session-expired', { detail: { message: json.message } }));
+    }
+  }
   if (!response.ok) throw new Error(json.message || 'Erreur téléversement image.');
   return json.data;
 };
 
 export const createProductApi = async (productData) => {
-  const response = await fetch(`${API_BASE_URL}/admin/products`, {
+  const json = await adminRequest('/admin/products', {
     method: 'POST',
-    headers: authHeaders(),
     body: JSON.stringify(productData),
   });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur création produit.');
   return json.data.product;
 };
 
 export const seedAdminProductsApi = async () => {
-  const response = await fetch(`${API_BASE_URL}/admin/products/seed`, {
-    method: 'POST',
-    headers: authHeaders(),
-  });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur lors de la restauration du catalogue.');
+  const json = await adminRequest('/admin/products/seed', { method: 'POST' });
   return json.data?.products || [];
 };
 
 export const updateProductApi = async (productId, productData) => {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
+  const json = await adminRequest(`/admin/products/${productId}`, {
     method: 'PUT',
-    headers: authHeaders(),
     body: JSON.stringify(productData),
   });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur mise à jour produit.');
   return json.data.product;
 };
 
 export const deleteProductApi = async (productId) => {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
-    method: 'DELETE',
-    headers: authHeaders(),
-  });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur suppression produit.');
-  return json;
+  return await adminRequest(`/admin/products/${productId}`, { method: 'DELETE' });
 };
 
 export const toggleProductStockApi = async (productId) => {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${productId}/toggle-stock`, {
-    method: 'PATCH',
-    headers: authHeaders(),
-  });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur bascule stock.');
+  const json = await adminRequest(`/admin/products/${productId}/toggle-stock`, { method: 'PATCH' });
   return json.data.product;
+};
+
+export const fetchAdminUserStats = async () => {
+  const json = await adminRequest('/admin/users/stats');
+  return json.data.stats;
 };
 
 export const fetchAdminUsers = async (params = {}) => {
   const query = new URLSearchParams();
   if (params.search) query.append('search', params.search);
+  if (params.page) query.append('page', params.page);
+  if (params.limit) query.append('limit', params.limit);
+  if (params.role && params.role !== 'all') query.append('role', params.role);
+  if (params.status && params.status !== 'all') query.append('status', params.status);
+  if (params.verified && params.verified !== 'all') query.append('verified', params.verified);
+  if (params.sortBy) query.append('sortBy', params.sortBy);
+  if (params.sortOrder) query.append('sortOrder', params.sortOrder);
 
-  const response = await fetch(`${API_BASE_URL}/admin/users?${query.toString()}`, { headers: authHeaders() });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur chargement utilisateurs.');
-  return json.data.users;
+  const json = await adminRequest(`/admin/users?${query.toString()}`);
+  return json.data;
+};
+
+export const fetchAdminUserDetails = async (userId) => {
+  const json = await adminRequest(`/admin/users/${userId}`);
+  return json.data;
+};
+
+export const updateAdminUserApi = async (userId, userData) => {
+  const json = await adminRequest(`/admin/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(userData),
+  });
+  return json.data.user;
+};
+
+export const updateAdminUserStatusApi = async (userId, status, reason = '') => {
+  const json = await adminRequest(`/admin/users/${userId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, reason }),
+  });
+  return json.data.user;
+};
+
+export const deleteAdminUserApi = async (userId) => {
+  return await adminRequest(`/admin/users/${userId}`, { method: 'DELETE' });
 };
 
 export const fetchAdminSettings = async () => {
-  const response = await fetch(`${API_BASE_URL}/admin/settings`, { headers: authHeaders() });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur chargement paramètres.');
+  const json = await adminRequest('/admin/settings');
   return json.data.settings;
 };
 
 export const updateAdminSettingsApi = async (settingsData) => {
-  const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+  const json = await adminRequest('/admin/settings', {
     method: 'PUT',
-    headers: authHeaders(),
     body: JSON.stringify(settingsData),
   });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.message || 'Erreur mise à jour paramètres.');
   return json.data.settings;
 };
 
-// Exports pour la gestion des avis clients et témoignages
 export {
   fetchAdminReviews,
   updateReviewStatusApi,
@@ -223,4 +260,3 @@ export {
   updateReviewAdminApi,
   deleteReviewAdminApi,
 } from './reviewApi';
-

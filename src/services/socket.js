@@ -222,6 +222,39 @@ export const onSettingsUpdated = (callback) => {
 };
 
 /**
+ * Écoute l'inscription d'un nouvel utilisateur en temps réel.
+ */
+export const onUserRegistered = (callback) => {
+  const s = getSocket();
+  s.on('user:registered', callback);
+  return () => {
+    s.off('user:registered', callback);
+  };
+};
+
+/**
+ * Écoute la modification de statut d'un utilisateur en temps réel.
+ */
+export const onUserStatusChanged = (callback) => {
+  const s = getSocket();
+  s.on('user:status_changed', callback);
+  return () => {
+    s.off('user:status_changed', callback);
+  };
+};
+
+/**
+ * Écoute la mise à jour d'un profil utilisateur en temps réel.
+ */
+export const onUserUpdated = (callback) => {
+  const s = getSocket();
+  s.on('user:updated', callback);
+  return () => {
+    s.off('user:updated', callback);
+  };
+};
+
+/**
  * Déconnecte proprement le client Socket.IO.
  */
 export const disconnectSocket = () => {

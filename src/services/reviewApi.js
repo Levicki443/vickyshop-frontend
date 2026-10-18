@@ -116,6 +116,17 @@ export const fetchAdminReviews = async ({ page = 1, limit = 20, status = 'all', 
     });
 
     const json = await response.json();
+
+    if (response.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('vicky_admin_token');
+        localStorage.removeItem('vicky_admin_user');
+        window.dispatchEvent(new CustomEvent('vicky:admin-session-expired', {
+          detail: { message: json.message || 'Session administrateur expirée.' },
+        }));
+      }
+    }
+
     if (!response.ok) {
       throw new Error(json.message || 'Erreur lors du chargement des avis pour l\'administration.');
     }
