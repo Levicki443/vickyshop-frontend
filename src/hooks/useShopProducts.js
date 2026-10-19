@@ -7,17 +7,46 @@ import {
   onProductStockUpdated,
 } from '../services/socket';
 
+const CACHE_KEY = 'vicky_catalog_cache_v1';
+
 /**
  * Hook personnalisé gérant le chargement et la synchronisation temps réel du catalogue produit.
- * Réduit la charge cognitive et respecte le principe de responsabilité unique (SOLID).
+ * Implémente la stratégie Stale-While-Revalidate pour un affichage instantané (0 ms).
  */
 export const useShopProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Lecture synchrone instantanée depuis le cache de session
+  const [products, setProducts] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
+
+  // Si des produits sont déjà en cache, l'écran de chargement n'est pas bloquant
+  const [loading, setLoading] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      return !cached;
+    } catch (_) {
+      return true;
+    }
+  });
+
   const [error, setError] = useState(null);
 
+  const saveToCache = (data) => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch (_) {}
+  };
+
   const loadProducts = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
       const data = await fetchProducts();
@@ -25,12 +54,16 @@ export const useShopProducts = () => {
         ? data.filter((p) => !p.image?.includes('unsplash.com'))
         : [];
       setProducts(realProducts);
+      saveToCache(realProducts);
     } catch (err) {
-      setError('Impossible de joindre le serveur API. Veuillez vérifier la connexion.');
+      // Préserve les données en cache en cas d'échec réseau ponctuel
+      if (products.length === 0) {
+        setError('Impossible de joindre le serveur API. Veuillez vérifier la connexion.');
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [products.length]);
 
   useEffect(() => {
     loadProducts();
@@ -39,24 +72,39 @@ export const useShopProducts = () => {
   useEffect(() => {
     const u1 = onProductCreated((p) => {
       if (p.image?.includes('unsplash.com')) return;
-      setProducts((prev) => (prev.some((x) => x._id === p._id) ? prev : [p, ...prev]));
+      setProducts((prev) => {
+        const next = prev.some((x) => x._id === p._id) ? prev : [p, ...prev];
+        saveToCache(next);
+        return next;
+      });
     });
+
     const u2 = onProductUpdated((p) =>
-      setProducts((prev) =>
-        prev.map((x) => ((x._id || x.id) === (p._id || p.id) ? p : x))
-      )
+      setProducts((prev) => {
+        const next = prev.map((x) => ((x._id || x.id) === (p._id || p.id) ? p : x));
+        saveToCache(next);
+        return next;
+      })
     );
+
     const u3 = onProductDeleted((id) =>
-      setProducts((prev) => prev.filter((x) => (x._id || x.id) !== id))
+      setProducts((prev) => {
+        const next = prev.filter((x) => (x._id || x.id) !== id);
+        saveToCache(next);
+        return next;
+      })
     );
+
     const u4 = onProductStockUpdated(({ productId, stockQuantity, inStock }) => {
-      setProducts((prev) =>
-        prev.map((x) =>
+      setProducts((prev) => {
+        const next = prev.map((x) =>
           (x._id || x.id) === productId
             ? { ...x, stockQuantity, inStock: inStock ?? stockQuantity > 0 }
             : x
-        )
-      );
+        );
+        saveToCache(next);
+        return next;
+      });
     });
 
     return () => {
@@ -69,3 +117,5 @@ export const useShopProducts = () => {
 
   return { products, loading, error, loadProducts };
 };
+
+export default useShopProducts;

@@ -3,8 +3,9 @@ import { formatPrice } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useToast } from '../../context/ToastContext';
+import { getOptimizedImageUrl } from '../../utils/imageOptimizer';
 
-export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
+const ProductCardComponent = ({ product, onSelectProduct, onQuickView }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
@@ -102,7 +103,7 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
   return (
     <div
       ref={cardRef}
-      className={`product-card animate-card-reveal ${isOutOfStock ? 'product-card-out-of-stock' : ''}`}
+      className={`product-card animate-card-reveal motion-lift ${isOutOfStock ? 'product-card-out-of-stock' : ''}`}
       onClick={handleCardClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -129,7 +130,7 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
 
       <button
         type="button"
-        className={`btn-wishlist ${isFavorited ? 'active' : ''}`}
+        className={`btn-wishlist motion-press ${isFavorited ? 'active' : ''}`}
         onClick={handleWishlistClick}
         aria-label={isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
       >
@@ -137,7 +138,12 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
       </button>
 
       <div className="img-wrapper">
-        <img src={product.image} alt={product.title} loading="lazy" />
+        <img
+          src={getOptimizedImageUrl(product.image, { width: 440 })}
+          alt={product.title}
+          loading="lazy"
+          decoding="async"
+        />
         {isOutOfStock && (
           <div className="out-of-stock-overlay">
             <span>Épuisé</span>
@@ -145,7 +151,7 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
         )}
         <button
           type="button"
-          className="btn-quickview"
+          className="btn-quickview motion-press"
           onClick={(e) => {
             e.stopPropagation();
             if (onQuickView) onQuickView(product);
@@ -202,7 +208,7 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
 
         <button
           type="button"
-          className={`btn-add-cart ${isOutOfStock ? 'btn-add-cart-disabled' : ''} ${isJustAdded ? 'btn-add-cart-success' : ''}`}
+          className={`btn-add-cart motion-press ${isOutOfStock ? 'btn-add-cart-disabled' : ''} ${isJustAdded ? 'btn-add-cart-success' : ''}`}
           onClick={handleAddToCart}
           disabled={isOutOfStock}
         >
@@ -225,4 +231,5 @@ export const ProductCard = ({ product, onSelectProduct, onQuickView }) => {
   );
 };
 
+export const ProductCard = React.memo(ProductCardComponent);
 export default ProductCard;

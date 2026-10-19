@@ -8,9 +8,11 @@ import { AdminAuthModal } from '../admin/AdminAuthModal';
 import { NotificationCenterModal } from './NotificationCenterModal';
 import { MobileBottomNav } from './MobileBottomNav';
 import { ToastContainer } from './ToastContainer';
+import { AIChatDrawer } from '../ai/AIChatDrawer';
 
 /**
- * Conteneur modulaire regroupant tous les tiroirs, modales globales et la barre mobile inférieure.
+ * Conteneur modulaire regroupant tous les tiroirs, modales globales,
+ * le tiroir conversationnel Vicky IA et la barre mobile inférieure.
  */
 export const AppModals = ({
   isCheckoutOpen,
@@ -31,6 +33,13 @@ export const AppModals = ({
   currentPath,
   onNavigate,
   onOpenAdmin,
+  isAIDrawerOpen,
+  onCloseAIDrawer,
+  onAddToCart,
+  onOpenCart,
+  onOpenAuth,
+  onOpenSeller,
+  recentlyViewedIds = [],
 }) => {
   return (
     <>
@@ -55,6 +64,18 @@ export const AppModals = ({
         onSelectOrder={onSelectOrder}
         onSelectProduct={onSelectProduct}
         onOpenSettings={() => onOpenProfileTab('notifications')}
+      />
+      <AIChatDrawer
+        isOpen={Boolean(isAIDrawerOpen)}
+        onClose={onCloseAIDrawer}
+        onTrackOrder={onSelectOrder}
+        onViewProduct={onSelectProduct}
+        onAddToCart={onAddToCart}
+        onOpenCart={onOpenCart}
+        onOpenCheckout={onOpenCheckout}
+        onOpenAuth={onOpenAuth}
+        onOpenSeller={onOpenSeller}
+        recentlyViewedIds={recentlyViewedIds}
       />
       <MobileBottomNav currentPath={currentPath} onNavigate={onNavigate} onOpenAdmin={onOpenAdmin} />
       <ToastContainer />

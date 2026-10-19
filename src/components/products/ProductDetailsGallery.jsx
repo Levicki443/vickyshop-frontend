@@ -24,19 +24,21 @@ export const ProductDetailsGallery = ({
   return (
     <div className="details-gallery-section">
       <div
-        className="main-image-display"
+        className="main-image-display motion-lift"
         onClick={() => setIsLightboxOpen(true)}
-        title="Cliquez pour agrandir l'image et zoomer"
+        title="Cliquez pour agrandir l&apos;image et zoomer"
       >
         <img
+          key={selectedImageIndex}
           src={images[selectedImageIndex] || FALLBACK_IMAGE}
           alt={productTitle}
           className="main-gallery-img"
+          style={{ animation: 'scaleIn 0.3s var(--ease-out-expo)' }}
           onError={(e) => {
             e.currentTarget.src = FALLBACK_IMAGE;
           }}
         />
-        {discountPercent && <span className="details-badge-discount">-{discountPercent}%</span>}
+        {discountPercent && <span className="details-badge-discount motion-badge-bump">-{discountPercent}%</span>}
         {isOutOfStock && (
           <div className="details-stock-overlay">
             <span>Rupture de stock</span>
@@ -44,7 +46,7 @@ export const ProductDetailsGallery = ({
         )}
 
         {/* Badge invitant au zoom plein écran */}
-        <div className="zoom-hint-badge">
+        <div className="zoom-hint-badge motion-press">
           <i className="fa-solid fa-magnifying-glass-plus"></i>
           <span>Agrandir</span>
         </div>
@@ -53,7 +55,7 @@ export const ProductDetailsGallery = ({
           <>
             <button
               type="button"
-              className="gallery-nav-btn btn-prev"
+              className="gallery-nav-btn btn-prev motion-press"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectImageIndex((selectedImageIndex - 1 + images.length) % images.length);
@@ -64,7 +66,7 @@ export const ProductDetailsGallery = ({
             </button>
             <button
               type="button"
-              className="gallery-nav-btn btn-next"
+              className="gallery-nav-btn btn-next motion-press"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectImageIndex((selectedImageIndex + 1) % images.length);
@@ -78,12 +80,12 @@ export const ProductDetailsGallery = ({
       </div>
 
       {images.length > 1 && (
-        <div className="gallery-thumbnails-row">
+        <div className="gallery-thumbnails-row stagger-cascade">
           {images.map((img, idx) => (
             <button
               key={idx}
               type="button"
-              className={`thumb-btn ${selectedImageIndex === idx ? 'active' : ''}`}
+              className={`thumb-btn motion-press ${selectedImageIndex === idx ? 'active' : ''}`}
               onClick={() => onSelectImageIndex(idx)}
               aria-label={`Miniature ${idx + 1}`}
             >

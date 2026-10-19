@@ -34,9 +34,9 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
 
   return (
     <div className="seller-stats-section">
-      <div className="seller-stats-grid">
+      <div className="seller-stats-grid stagger-cascade">
         {/* 1. Total Produits */}
-        <div className="seller-stat-card" onClick={onGoToProducts} style={{ cursor: 'pointer' }}>
+        <div className="seller-stat-card motion-lift motion-press" onClick={onGoToProducts} style={{ cursor: 'pointer' }}>
           <div className="stat-card-icon bg-primary-soft">
             <i className="fa-solid fa-shirt"></i>
           </div>
@@ -50,8 +50,8 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
         </div>
 
         {/* 2. Nouvelles Commandes Non Traitées */}
-        <div className="seller-stat-card" onClick={onGoToOrders} style={{ cursor: 'pointer' }}>
-          <div className="stat-card-icon bg-warning-soft">
+        <div className="seller-stat-card motion-lift motion-press" onClick={onGoToOrders} style={{ cursor: 'pointer' }}>
+          <div className={`stat-card-icon bg-warning-soft ${s.newOrdersCount > 0 ? 'motion-pulse' : ''}`}>
             <i className="fa-solid fa-bell"></i>
           </div>
           <div className="stat-card-body">
@@ -62,7 +62,7 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
         </div>
 
         {/* 3. Commandes en Préparation / Livraison */}
-        <div className="seller-stat-card" onClick={onGoToOrders} style={{ cursor: 'pointer' }}>
+        <div className="seller-stat-card motion-lift motion-press" onClick={onGoToOrders} style={{ cursor: 'pointer' }}>
           <div className="stat-card-icon bg-gold-soft">
             <i className="fa-solid fa-truck-fast"></i>
           </div>
@@ -74,7 +74,7 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
         </div>
 
         {/* 4. Commandes Validées & Livrées */}
-        <div className="seller-stat-card" onClick={onGoToOrders} style={{ cursor: 'pointer' }}>
+        <div className="seller-stat-card motion-lift motion-press" onClick={onGoToOrders} style={{ cursor: 'pointer' }}>
           <div className="stat-card-icon bg-success-soft">
             <i className="fa-solid fa-circle-check"></i>
           </div>
@@ -86,7 +86,7 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
         </div>
 
         {/* 5. Espèces à Collecter (COD) */}
-        <div className="seller-stat-card stat-card-financial">
+        <div className="seller-stat-card stat-card-financial motion-lift">
           <div className="stat-card-icon bg-gold-soft">
             <i className="fa-solid fa-hand-holding-dollar"></i>
           </div>
@@ -98,7 +98,7 @@ export const SellerStatsCards = ({ stats, loading, onGoToOrders, onGoToProducts 
         </div>
 
         {/* 6. Chiffre d'Affaires Total */}
-        <div className="seller-stat-card stat-card-financial">
+        <div className="seller-stat-card stat-card-financial motion-lift">
           <div className="stat-card-icon bg-success-soft">
             <i className="fa-solid fa-sack-dollar"></i>
           </div>

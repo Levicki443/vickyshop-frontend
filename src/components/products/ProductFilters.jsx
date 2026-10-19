@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const CATEGORIES = [
   { id: 'all', label: 'Tous', icon: 'fa-solid fa-layer-group' },
@@ -16,6 +16,24 @@ export const ProductFilters = ({
   totalCount,
   loading = false,
 }) => {
+  const [localSearch, setLocalSearch] = useState(searchTerm || '');
+
+  // Synchronisation si les filtres sont réinitialisés depuis l'extérieur
+  useEffect(() => {
+    setLocalSearch(searchTerm || '');
+  }, [searchTerm]);
+
+  // Débouncing doux (180ms) pour éviter les re-rendus massifs lors de la frappe
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localSearch !== searchTerm) {
+        onSearchChange(localSearch);
+      }
+    }, 180);
+
+    return () => clearTimeout(handler);
+  }, [localSearch, onSearchChange, searchTerm]);
+
   const handleCategorySelect = (id) => {
     if ('vibrate' in navigator) {
       try {
@@ -25,23 +43,28 @@ export const ProductFilters = ({
     onCategoryChange(id);
   };
 
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    onSearchChange('');
+  };
+
   return (
     <div className="products-toolbar">
-      {/* Barre de recherche */}
+      {/* Barre de recherche avec temporisation intelligente */}
       <div className="search-box">
         <i className="fa-solid fa-magnifying-glass search-icon"></i>
         <input
           type="text"
           id="product-search"
           placeholder="Rechercher un habit, un téléphone, une montre..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
         />
-        {searchTerm && (
+        {localSearch && (
           <button
             type="button"
-            className="clear-search-btn"
-            onClick={() => onSearchChange('')}
+            className="clear-search-btn motion-press"
+            onClick={handleClearSearch}
             title="Effacer la recherche"
           >
             <i className="fa-solid fa-xmark"></i>

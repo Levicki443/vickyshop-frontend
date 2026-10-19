@@ -9,38 +9,50 @@ import {
   ShoppingBag,
   Store,
   MessageCircle,
+  LogIn,
   ThumbsUp,
   ThumbsDown,
 } from 'lucide-react';
+import AIProductCard from './AIProductCard';
 
-const ACTION_REGEX = /\[ACTION:(TRACK_ORDER|VIEW_PRODUCT|SELLER_DASHBOARD|WHATSAPP_SUPPORT)(?::([^\]]+))?\]/g;
+const ACTION_REGEX = /\[ACTION:(TRACK_ORDER|VIEW_PRODUCT|ADD_TO_CART|OPEN_CART|OPEN_CHECKOUT|AUTH_MODAL|SELLER_DASHBOARD|WHATSAPP_SUPPORT)(?::([^\]]+))?\]/g;
 
-/**
- * Extrait les balises d'actions et retourne le texte nettoyé ainsi que la liste des actions à afficher.
- */
-const extractActions = (content) => {
-  if (!content || typeof content !== 'string') return { cleanContent: '', actions: [] };
+const extractActions = (content, propActions = []) => {
+  if (!content || typeof content !== 'string') return { cleanContent: '', actions: propActions || [] };
 
-  const actions = [];
+  const actions = [...(propActions || [])];
   let match;
 
   while ((match = ACTION_REGEX.exec(content)) !== null) {
-    actions.push({
-      type: match[1],
-      param: match[2] ? match[2].trim() : '',
-    });
+    const type = match[1];
+    const param = match[2] ? match[2].trim() : '';
+    if (!actions.some((a) => a.type === type && a.param === param)) {
+      actions.push({ type, param });
+    }
   }
 
   const cleanContent = content.replace(ACTION_REGEX, '').trim();
   return { cleanContent, actions };
 };
 
-/**
- * Formate le texte brut de l'IA avec support des listes et du gras sans dépendance externe lourde.
- */
+const parseInlineStyles = (text) => {
+  if (!text) return '';
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={index} className="vicky-ai-strong">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 const formatMessageContent = (content) => {
   if (!content) return null;
-
   const lines = content.split('\n');
 
   return lines.map((line, lineIndex) => {
@@ -76,29 +88,10 @@ const formatMessageContent = (content) => {
   });
 };
 
-const parseInlineStyles = (text) => {
-  if (!text) return '';
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-
-  return parts.map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return (
-        <strong key={index} className="vicky-ai-strong">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    return part;
-  });
-};
-
 const formatTime = (dateString) => {
   try {
     const date = dateString ? new Date(dateString) : new Date();
-    return date.toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   } catch {
     return '';
   }
@@ -111,17 +104,22 @@ const AIMessageBubble = ({
   message,
   onTrackOrder,
   onViewProduct,
+  onAddToCart,
+  onOpenCart,
+  onOpenCheckout,
+  onOpenAuth,
   onOpenSeller,
 }) => {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const isAssistant = message.role === 'assistant';
   const isError = !!message.isError;
+  const products = Array.isArray(message.products) ? message.products : [];
 
   const { cleanContent, actions } = useMemo(() => {
     if (!isAssistant) return { cleanContent: message.content, actions: [] };
-    return extractActions(message.content);
-  }, [message.content, isAssistant]);
+    return extractActions(message.content, message.actions);
+  }, [message.content, message.actions, isAssistant]);
 
   const handleCopy = async () => {
     if (!cleanContent) return;
@@ -141,6 +139,18 @@ const AIMessageBubble = ({
         break;
       case 'VIEW_PRODUCT':
         if (onViewProduct) onViewProduct(action.param);
+        break;
+      case 'ADD_TO_CART':
+        if (onAddToCart) onAddToCart({ slug: action.param, _id: action.param });
+        break;
+      case 'OPEN_CART':
+        if (onOpenCart) onOpenCart();
+        break;
+      case 'OPEN_CHECKOUT':
+        if (onOpenCheckout) onOpenCheckout();
+        break;
+      case 'AUTH_MODAL':
+        if (onOpenAuth) onOpenAuth();
         break;
       case 'SELLER_DASHBOARD':
         if (onOpenSeller) onOpenSeller();
@@ -194,6 +204,20 @@ const AIMessageBubble = ({
             </div>
           )}
           {formatMessageContent(cleanContent)}
+
+          {/* Cartes produits interactives intégrées */}
+          {products.length > 0 && (
+            <div className="vicky-ai-products-grid" role="region" aria-label="Articles recommandés">
+              {products.map((prod) => (
+                <AIProductCard
+                  key={prod._id || prod.slug}
+                  product={prod}
+                  onViewProduct={onViewProduct}
+                  onAddToCart={onAddToCart}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Boutons d'actions contextuels interactifs */}
@@ -204,15 +228,23 @@ const AIMessageBubble = ({
                 key={`${act.type}-${idx}`}
                 type="button"
                 onClick={() => handleActionClick(act)}
-                className={`vicky-ai-action-btn vicky-ai-action-${act.type.toLowerCase()}`}
+                className={`vicky-ai-action-btn vicky-ai-action-${act.type.toLowerCase().replace(/_/g, '-')}`}
               >
                 {act.type === 'TRACK_ORDER' && <Truck size={14} />}
                 {act.type === 'VIEW_PRODUCT' && <ShoppingBag size={14} />}
+                {act.type === 'ADD_TO_CART' && <ShoppingBag size={14} />}
+                {act.type === 'OPEN_CART' && <ShoppingBag size={14} />}
+                {act.type === 'OPEN_CHECKOUT' && <Truck size={14} />}
+                {act.type === 'AUTH_MODAL' && <LogIn size={14} />}
                 {act.type === 'SELLER_DASHBOARD' && <Store size={14} />}
                 {act.type === 'WHATSAPP_SUPPORT' && <MessageCircle size={14} />}
                 <span>
                   {act.type === 'TRACK_ORDER' && `Suivre la commande ${act.param || ''}`}
-                  {act.type === 'VIEW_PRODUCT' && 'Voir la fiche de l\'article'}
+                  {act.type === 'VIEW_PRODUCT' && 'Voir la fiche'}
+                  {act.type === 'ADD_TO_CART' && 'Ajouter au panier'}
+                  {act.type === 'OPEN_CART' && 'Ouvrir mon panier'}
+                  {act.type === 'OPEN_CHECKOUT' && 'Passer à la caisse'}
+                  {act.type === 'AUTH_MODAL' && 'Se connecter / S\'inscrire'}
                   {act.type === 'SELLER_DASHBOARD' && 'Ouvrir mon Espace Vendeur'}
                   {act.type === 'WHATSAPP_SUPPORT' && 'Contacter le support WhatsApp (+225)'}
                 </span>
@@ -221,7 +253,7 @@ const AIMessageBubble = ({
           </div>
         )}
 
-        {/* Barre d'outils inférieure : Copie et Évaluation (Feedback) */}
+        {/* Barre d'outils inférieure : Copie et Évaluation */}
         {isAssistant && !isError && message.id !== 'welcome-msg' && (
           <div className="vicky-ai-bubble-actions">
             <div className="vicky-ai-feedback-group">

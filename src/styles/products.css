@@ -209,6 +209,11 @@
 .product-card:hover {
   border-color: var(--border-highlight);
   box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.product-card:active {
+  transform: scale(0.99);
 }
 
 .card-badge {
@@ -271,6 +276,10 @@
 .btn-wishlist.active, .btn-wishlist:hover {
   color: var(--accent-red);
   transform: scale(1.1);
+}
+
+.btn-wishlist.active i {
+  animation: heartPop 0.42s var(--ease-spring);
 }
 
 .img-wrapper {
@@ -483,8 +492,20 @@
 .btn-add-cart:hover {
   background: var(--primary);
   border-color: var(--primary);
-  color: #ffffff;
+  color: var(--text-primary);
   box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.btn-add-cart:active {
+  transform: scale(0.96);
+}
+
+.btn-add-cart.btn-add-cart-success {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: var(--bg-main);
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(0, 208, 132, 0.4);
 }
 
 /* -----------------------------

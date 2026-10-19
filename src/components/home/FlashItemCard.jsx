@@ -3,12 +3,13 @@ import { formatPrice } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useToast } from '../../context/ToastContext';
+import { getOptimizedImageUrl } from '../../utils/imageOptimizer';
 
 /**
  * Sous-composant modulaire pour une carte individuelle de la Vente Flash.
  * Réduit la taille du fichier parent et respecte le principe de modularité (SOLID).
  */
-export const FlashItemCard = ({ product, slideWidthPercent, onQuickView }) => {
+const FlashItemCardComponent = ({ product, slideWidthPercent, onQuickView }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
@@ -65,7 +66,13 @@ export const FlashItemCard = ({ product, slideWidthPercent, onQuickView }) => {
       <div className="flash-item-card">
         {/* En-tête de la carte avec Image et Badges */}
         <div className="flash-item-image-wrap" onClick={() => onQuickView && onQuickView(product)}>
-          <img src={product.image} alt={product.title} className="flash-item-image" loading="lazy" />
+          <img
+            src={getOptimizedImageUrl(product.image, { width: 440 })}
+            alt={product.title}
+            className="flash-item-image"
+            loading="lazy"
+            decoding="async"
+          />
           <div className="flash-item-shine"></div>
 
           <div className="flash-item-badges">
@@ -161,3 +168,6 @@ export const FlashItemCard = ({ product, slideWidthPercent, onQuickView }) => {
     </div>
   );
 };
+
+export const FlashItemCard = React.memo(FlashItemCardComponent);
+export default FlashItemCard;

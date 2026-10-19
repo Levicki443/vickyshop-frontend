@@ -8,20 +8,22 @@ import { HeroSection } from './components/home/HeroSection';
 import { FlashSale } from './components/home/FlashSale';
 import { ProductFilters } from './components/products/ProductFilters';
 import { ProductGrid } from './components/products/ProductGrid';
-import { ProductDetailsPage } from './components/products/ProductDetailsPage';
-import { UserOrdersPage } from './components/orders/UserOrdersPage';
-import { UserProfilePage } from './components/auth/UserProfilePage';
-import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
-import { AIAssistantPage } from './components/ai/AIAssistantPage';
 import { FloatingAIAssistantButton } from './components/common/FloatingAIAssistantButton';
 import { Footer } from './components/common/Footer';
 import { AnnouncementBar } from './components/common/AnnouncementBar';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { SellerDashboard } from './components/seller/SellerDashboard';
 import { NotFound404 } from './components/common/NotFound404';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
-import { AppModals } from './components/common/AppModals';
+
+// Chargement différé (Code-Splitting) des pages et modales volumineuses
+const ProductDetailsPage = React.lazy(() => import('./components/products/ProductDetailsPage'));
+const UserOrdersPage = React.lazy(() => import('./components/orders/UserOrdersPage'));
+const UserProfilePage = React.lazy(() => import('./components/auth/UserProfilePage'));
+const ForgotPasswordPage = React.lazy(() => import('./components/auth/ForgotPasswordPage'));
+const ResetPasswordPage = React.lazy(() => import('./components/auth/ResetPasswordPage'));
+const AIAssistantPage = React.lazy(() => import('./components/ai/AIAssistantPage'));
+const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+const SellerDashboard = React.lazy(() => import('./components/seller/SellerDashboard').then((m) => ({ default: m.SellerDashboard })));
+const AppModals = React.lazy(() => import('./components/common/AppModals'));
 import { useAuth } from './context/AuthContext';
 import { useCart } from './context/CartContext';
 import { useWishlist } from './context/WishlistContext';
@@ -30,7 +32,7 @@ import { useToast } from './context/ToastContext';
 
 export const App = () => {
   const { user, isSeller, openAuthModal, closeAuthModal, loading: authLoading, isAuthModalOpen } = useAuth();
-  const { isCartOpen, openCart, closeCart } = useCart();
+  const { isCartOpen, openCart, closeCart, addToCart } = useCart();
   const { isWishlistOpen, closeWishlist } = useWishlist();
   const { isNotificationCenterOpen, closeNotificationCenter, openNotificationCenter } = useNotifications();
   const { addToast } = useToast();
@@ -41,6 +43,8 @@ export const App = () => {
   const [isAdminViewActive, setIsAdminViewActive] = useState(false);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
   const [profileInitialTab, setProfileInitialTab] = useState('profile');
+  const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState([]);
 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,10 +63,7 @@ export const App = () => {
     }
   }, []);
 
-  const cleanPath = useMemo(() => {
-    return currentPath.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
-  }, [currentPath]);
-
+  const cleanPath = useMemo(() => currentPath.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/', [currentPath]);
   const isHomePath = ['/', '/accueil', '/home', '/index.html'].includes(cleanPath);
   const isSellerRoute = cleanPath.startsWith('/vendeur') || cleanPath.startsWith('/seller');
   const isAdminRoute = cleanPath.startsWith('/admin') || cleanPath.startsWith('/dashboard') || cleanPath.startsWith('/backoffice');
@@ -76,7 +77,7 @@ export const App = () => {
   const isResetPasswordRoute = ['/reinitialisation-mot-de-passe', '/reinitialiser-mot-de-passe', '/reset-password'].includes(cleanPath);
   const isCategoryRoute = cleanPath.startsWith('/categorie') || cleanPath.startsWith('/categories');
   const isSearchRoute = cleanPath.startsWith('/recherche') || cleanPath.startsWith('/search');
-  const isAIRoute = cleanPath === '/assistant-ia' || cleanPath === '/ia' || cleanPath === '/assistant';
+  const isAIRoute = ['/assistant-ia', '/ia', '/assistant'].includes(cleanPath);
 
   useEffect(() => {
     if (isCartRoute) openCart();
@@ -87,9 +88,8 @@ export const App = () => {
   const isFiltering = activeCategory !== 'all' || Boolean(searchTerm && searchTerm.trim());
   const isOverlayOpen = Boolean(
     isCartOpen || isWishlistOpen || isNotificationCenterOpen ||
-    isAuthModalOpen || isCheckoutOpen || isAdminAuthModalOpen || isReviewModalOpen || isAdminViewActive
+    isAuthModalOpen || isCheckoutOpen || isAdminAuthModalOpen || isReviewModalOpen || isAdminViewActive || isAIDrawerOpen
   );
-
   const showAnnouncementBar = isHomePath && !isCategoryRoute && !isSearchRoute && !isFiltering && !isOverlayOpen;
 
   const currentProductId = useMemo(() => {
@@ -122,6 +122,7 @@ export const App = () => {
     setIsCheckoutOpen(false);
     setIsAdminAuthModalOpen(false);
     setIsReviewModalOpen(false);
+    setIsAIDrawerOpen(false);
   }, [closeCart, closeWishlist, closeNotificationCenter, closeAuthModal]);
 
   useModalHistory(isOverlayOpen, closeAllOverlays, 'app-overlay');
@@ -132,12 +133,8 @@ export const App = () => {
       const newPath = window.location.pathname.toLowerCase();
       setCurrentPath(newPath);
       if (isAdminViewActive) setIsAdminViewActive(false);
-
-      if (['/', '/accueil', '/home', '/index.html'].includes(newPath)) {
-        restoreCatalogScroll();
-      }
+      if (['/', '/accueil', '/home', '/index.html'].includes(newPath)) restoreCatalogScroll();
     };
-
     window.addEventListener('popstate', handleLocationChange);
     window.addEventListener('app-navigate', handleLocationChange);
     return () => {
@@ -148,38 +145,30 @@ export const App = () => {
 
   const navigateTo = useCallback((path, { replace = false } = {}) => {
     closeAllOverlays();
-    if (replace) {
-      window.history.replaceState({ path, fromApp: true }, '', path);
-    } else {
-      window.history.pushState({ path, fromApp: true }, '', path);
-    }
+    if (replace) window.history.replaceState({ path, fromApp: true }, '', path);
+    else window.history.pushState({ path, fromApp: true }, '', path);
     setCurrentPath(path.toLowerCase());
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [closeAllOverlays]);
 
   const handleSelectProduct = useCallback((prod) => {
     if (!prod) return;
-    const identifier = prod.slug || prod._id || prod.id || (typeof prod === 'string' ? prod : null);
-    if (identifier) {
+    const id = prod.slug || prod._id || prod.id || (typeof prod === 'string' ? prod : null);
+    if (id) {
+      setRecentlyViewedIds((prev) => [String(id), ...prev.filter((x) => x !== String(id))].slice(0, 5));
       saveCatalogScroll();
-      navigateTo(`/produit/${identifier}`);
+      navigateTo(`/produit/${id}`);
     }
   }, [navigateTo]);
 
   const handleBackFromProduct = useCallback(() => {
-    if (window.history.length > 1 && window.history.state?.fromApp) {
-      window.history.back();
-    } else {
-      navigateTo('/', { replace: true });
-    }
+    if (window.history.length > 1 && window.history.state?.fromApp) window.history.back();
+    else navigateTo('/', { replace: true });
   }, [navigateTo]);
 
   const handleOpenAdmin = useCallback(() => {
-    if (getAdminToken()) {
-      setIsAdminViewActive(true);
-    } else {
-      setIsAdminAuthModalOpen(true);
-    }
+    if (getAdminToken()) setIsAdminViewActive(true);
+    else setIsAdminAuthModalOpen(true);
   }, []);
 
   useEffect(() => {
@@ -198,21 +187,25 @@ export const App = () => {
     });
   }, [products, activeCategory, searchTerm]);
 
-  if (isAdminRoute && !isAdminViewActive) {
-    return <NotFound404 onGoHome={() => navigateTo('/')} />;
-  }
+  if (isAdminRoute && !isAdminViewActive) return <NotFound404 onGoHome={() => navigateTo('/')} />;
   if (isAdminViewActive) {
     return (
-      <AdminDashboard
-        onClose={() => { setIsAdminViewActive(false); navigateTo('/'); }}
-        onExitToShop={() => { setIsAdminViewActive(false); navigateTo('/'); }}
-        onLogout={() => { setIsAdminViewActive(false); navigateTo('/'); }}
-        onProductsUpdated={loadProducts}
-      />
+      <React.Suspense fallback={null}>
+        <AdminDashboard
+          onClose={() => { setIsAdminViewActive(false); navigateTo('/'); }}
+          onExitToShop={() => { setIsAdminViewActive(false); navigateTo('/'); }}
+          onLogout={() => { setIsAdminViewActive(false); navigateTo('/'); }}
+          onProductsUpdated={loadProducts}
+        />
+      </React.Suspense>
     );
   }
   if (isSellerRoute && isSeller) {
-    return <SellerDashboard onClose={() => navigateTo('/')} initialTab={sellerInitialTab} />;
+    return (
+      <React.Suspense fallback={null}>
+        <SellerDashboard onClose={() => navigateTo('/')} initialTab={sellerInitialTab} />
+      </React.Suspense>
+    );
   }
 
   return (
@@ -223,7 +216,7 @@ export const App = () => {
       <Header
         onOpenAdmin={handleOpenAdmin}
         isAdminActive={isAdminViewActive}
-        onOpenAIAssistant={() => navigateTo('/assistant-ia')}
+        onOpenAIAssistant={() => setIsAIDrawerOpen(true)}
         onOpenOrdersTracking={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
         onOpenProfile={(tab = 'profile') => { setProfileInitialTab(tab); navigateTo('/profil'); }}
         onOpenSeller={() => navigateTo('/vendeur/dashboard')}
@@ -231,89 +224,93 @@ export const App = () => {
         onSelectProduct={handleSelectProduct}
       />
 
-      {isProductRoute ? (
-        <ProductDetailsPage
-          productId={currentProductId}
-          initialProduct={detailedProduct}
-          allProducts={products}
-          onBack={handleBackFromProduct}
-          onOpenCheckout={() => setIsCheckoutOpen(true)}
-          onSelectProduct={handleSelectProduct}
-        />
-      ) : isAIRoute ? (
-        <AIAssistantPage
-          onBackToShop={() => navigateTo('/')}
-          onTrackOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
-          onViewProduct={(slugOrId) => navigateTo(`/produit/${slugOrId}`)}
-          onOpenSeller={() => navigateTo('/vendeur/dashboard')}
-        />
-      ) : isForgotPasswordRoute ? (
-        <ForgotPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
-      ) : isResetPasswordRoute ? (
-        <ResetPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
-      ) : isOrdersRoute ? (
-        <UserOrdersPage onBackToShop={() => navigateTo('/')} initialOrderNumber={selectedOrderNumber} />
-      ) : isProfileRoute ? (
-        <UserProfilePage
-          onBackToShop={() => navigateTo('/')}
-          onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')}
-          initialTab={profileInitialTab}
-        />
-      ) : isHomePath ? (
-        <>
-          <HeroSection onExploreClick={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })} />
-          <FlashSale
-            products={products}
-            loading={loading}
-            onShopNow={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })}
-            onQuickView={handleSelectProduct}
+      <React.Suspense fallback={null}>
+        {isProductRoute ? (
+          <ProductDetailsPage
+            productId={currentProductId}
+            initialProduct={detailedProduct}
+            allProducts={products}
+            onBack={handleBackFromProduct}
+            onOpenCheckout={() => setIsCheckoutOpen(true)}
+            onSelectProduct={handleSelectProduct}
           />
-          <main className="container products" id="produits">
-            <div className="section-header">
-              <span className="section-subtitle">Notre Catalogue Marketplace</span>
-              <h2 className="section-title">Nos Produits Tendance</h2>
-              <div className="title-underline" />
-            </div>
-
-            <ProductFilters
-              activeCategory={activeCategory}
-              onCategoryChange={setActiveCategory}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              totalCount={filteredProducts.length}
-              loading={loading}
-            />
-
-            <ProductGrid
-              products={filteredProducts}
-              loading={loading}
-              error={error}
-              onSelectProduct={handleSelectProduct}
+        ) : isAIRoute ? (
+          <AIAssistantPage
+            onBackToShop={() => navigateTo('/')}
+            onTrackOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+            onViewProduct={(slugOrId) => navigateTo(`/produit/${slugOrId}`)}
+            onAddToCart={(p) => addToCart(p, 1)}
+            onOpenCart={openCart}
+            onOpenCheckout={() => setIsCheckoutOpen(true)}
+            onOpenAuth={openAuthModal}
+            onOpenSeller={() => navigateTo('/vendeur/dashboard')}
+            recentlyViewedIds={recentlyViewedIds}
+          />
+        ) : isForgotPasswordRoute ? (
+          <ForgotPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
+        ) : isResetPasswordRoute ? (
+          <ResetPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
+        ) : isOrdersRoute ? (
+          <UserOrdersPage onBackToShop={() => navigateTo('/')} initialOrderNumber={selectedOrderNumber} />
+        ) : isProfileRoute ? (
+          <UserProfilePage
+            onBackToShop={() => navigateTo('/')}
+            onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')}
+            initialTab={profileInitialTab}
+          />
+        ) : isHomePath ? (
+          <>
+            <HeroSection onExploreClick={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })} />
+            <FlashSale
+              products={products} loading={loading}
+              onShopNow={() => document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' })}
               onQuickView={handleSelectProduct}
-              onResetFilters={() => { setActiveCategory('all'); setSearchTerm(''); }}
-              onRetry={loadProducts}
             />
-          </main>
-          <Footer />
-        </>
-      ) : (
-        <NotFound404 onGoHome={() => navigateTo('/')} />
-      )}
+            <main className="container products" id="produits">
+              <div className="section-header">
+                <span className="section-subtitle">Notre Catalogue Marketplace</span>
+                <h2 className="section-title">Nos Produits Tendance</h2>
+                <div className="title-underline" />
+              </div>
 
-      <AppModals
-        isCheckoutOpen={isCheckoutOpen} onCloseCheckout={() => setIsCheckoutOpen(false)} onOpenCheckout={() => setIsCheckoutOpen(true)}
-        isReviewModalOpen={isReviewModalOpen} onCloseReviewModal={() => setIsReviewModalOpen(false)}
-        reviewTargetProduct={reviewTargetProduct} reviewTargetOrderNumber={reviewTargetOrderNumber}
-        isAdminAuthModalOpen={isAdminAuthModalOpen} onCloseAdminAuthModal={() => setIsAdminAuthModalOpen(false)}
-        onAdminAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
-        isNotificationCenterOpen={isNotificationCenterOpen} onCloseNotificationCenter={closeNotificationCenter}
-        onSelectOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
-        onSelectProduct={handleSelectProduct} onOpenProfileTab={(tab) => { setProfileInitialTab(tab); navigateTo('/profil'); }}
-        currentPath={currentPath} onNavigate={navigateTo} onOpenAdmin={handleOpenAdmin}
-      />
+              <ProductFilters
+                activeCategory={activeCategory} onCategoryChange={setActiveCategory}
+                searchTerm={searchTerm} onSearchChange={setSearchTerm}
+                totalCount={filteredProducts.length} loading={loading}
+              />
+
+              <ProductGrid
+                products={filteredProducts} loading={loading} error={error}
+                onSelectProduct={handleSelectProduct} onQuickView={handleSelectProduct}
+                onResetFilters={() => { setActiveCategory('all'); setSearchTerm(''); }}
+                onRetry={loadProducts}
+              />
+            </main>
+            <Footer />
+          </>
+        ) : (
+          <NotFound404 onGoHome={() => navigateTo('/')} />
+        )}
+
+        <AppModals
+          isCheckoutOpen={isCheckoutOpen} onCloseCheckout={() => setIsCheckoutOpen(false)} onOpenCheckout={() => setIsCheckoutOpen(true)}
+          isReviewModalOpen={isReviewModalOpen} onCloseReviewModal={() => setIsReviewModalOpen(false)}
+          reviewTargetProduct={reviewTargetProduct} reviewTargetOrderNumber={reviewTargetOrderNumber}
+          isAdminAuthModalOpen={isAdminAuthModalOpen} onCloseAdminAuthModal={() => setIsAdminAuthModalOpen(false)}
+          onAdminAuthSuccess={() => { setIsAdminAuthModalOpen(false); setIsAdminViewActive(true); }}
+          isNotificationCenterOpen={isNotificationCenterOpen} onCloseNotificationCenter={closeNotificationCenter}
+          onSelectOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+          onSelectProduct={handleSelectProduct} onOpenProfileTab={(tab) => { setProfileInitialTab(tab); navigateTo('/profil'); }}
+          currentPath={currentPath} onNavigate={navigateTo} onOpenAdmin={handleOpenAdmin}
+          isAIDrawerOpen={isAIDrawerOpen} onCloseAIDrawer={() => setIsAIDrawerOpen(false)}
+          onAddToCart={(p) => addToCart(p, 1)} onOpenCart={openCart} onOpenAuth={openAuthModal}
+          onOpenSeller={() => navigateTo('/vendeur/dashboard')} recentlyViewedIds={recentlyViewedIds}
+        />
+      </React.Suspense>
 
       <FloatingAIAssistantButton
-        onClick={() => navigateTo('/assistant-ia')}
+        onClick={() => setIsAIDrawerOpen((prev) => !prev)}
+        isOpen={isAIDrawerOpen}
         isVisible={!isAIRoute && !isAdminViewActive && !isSellerRoute}
       />
     </div>

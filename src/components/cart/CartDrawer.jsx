@@ -57,7 +57,7 @@ export const CartDrawer = ({ onOpenCheckout }) => {
           </h3>
           <button
             type="button"
-            className="drawer-close"
+            className="drawer-close motion-press"
             onClick={closeCart}
             aria-label="Fermer le panier"
           >
@@ -95,23 +95,23 @@ export const CartDrawer = ({ onOpenCheckout }) => {
               <p>Découvrez notre sélection exclusive et faites-vous plaisir !</p>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary motion-press"
                 onClick={closeCart}
               >
                 Explorer la boutique
               </button>
             </div>
           ) : (
-            <div className="cart-items-list">
+            <div className="cart-items-list stagger-cascade">
               {cart.map((item) => {
                 const key = item.itemKey || item.id;
                 return (
-                  <div key={key} className="cart-item">
+                  <div key={key} className="cart-item motion-lift">
                     <img src={item.image} alt={item.title} className="cart-item-img" />
                     <div className="cart-item-details">
                       <h4 className="cart-item-title">{item.title}</h4>
                       {(item.selectedColor || item.selectedSize) && (
-                        <div className="cart-item-variants" style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '4px' }}>
+                        <div className="cart-item-variants" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
                           {item.selectedColor && (
                             <span style={{ marginRight: '8px' }}>
                               <i className="fa-solid fa-palette" style={{ fontSize: '10px' }}></i> {item.selectedColor}
@@ -128,6 +128,7 @@ export const CartDrawer = ({ onOpenCheckout }) => {
                       <div className="cart-item-qty">
                         <button
                           type="button"
+                          className="motion-press"
                           onClick={() => updateQuantity(key, item.quantity - 1)}
                         >
                           -
@@ -135,6 +136,7 @@ export const CartDrawer = ({ onOpenCheckout }) => {
                         <span>{item.quantity}</span>
                         <button
                           type="button"
+                          className="motion-press"
                           onClick={() => updateQuantity(key, item.quantity + 1)}
                         >
                           +
@@ -143,7 +145,7 @@ export const CartDrawer = ({ onOpenCheckout }) => {
                     </div>
                     <button
                       type="button"
-                      className="btn-remove-item"
+                      className="btn-remove-item motion-press"
                       onClick={() => removeFromCart(key)}
                       title="Supprimer l'article"
                     >
@@ -209,7 +211,7 @@ export const CartDrawer = ({ onOpenCheckout }) => {
 
             <button
               type="button"
-              className="btn btn-primary btn-block checkout-btn"
+              className="btn btn-primary btn-block checkout-btn motion-press"
               onClick={() => {
                 closeCart();
                 onOpenCheckout();

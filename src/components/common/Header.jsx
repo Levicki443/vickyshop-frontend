@@ -195,10 +195,10 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
               </button>
             )}
 
-            <button type="button" className="icon-btn" onClick={handleAIAssistantClick} title="Assistant IA Vicky-Shop" aria-label="Assistant IA">
+            <button type="button" className="icon-btn motion-press" onClick={handleAIAssistantClick} title="Assistant IA Vicky-Shop" aria-label="Assistant IA">
               <i className="fa-solid fa-wand-magic-sparkles" style={{ color: 'var(--primary)' }}></i>
             </button>
-            <button type="button" className="icon-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'} aria-label="Mode">
+            <button type="button" className="icon-btn motion-press" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'} aria-label="Mode">
               <i className={theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'}></i>
             </button>
 
@@ -207,13 +207,13 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
               <div className="header-notif-wrapper" ref={notifRef}>
                 <button
                   type="button"
-                  className={`icon-btn header-notif-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
+                  className={`icon-btn motion-press header-notif-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
                   onClick={() => setNotifDropdownOpen((prev) => !prev)}
                   title="Notifications"
                   aria-label="Notifications"
                 >
                   <i className="fa-solid fa-bell"></i>
-                  {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
+                  {unreadCount > 0 && <span className="notif-badge-count motion-badge-bump">{unreadCount}</span>}
                 </button>
 
                 <NotificationDropdown
@@ -226,18 +226,18 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
               </div>
             )}
 
-            <button type="button" className="icon-btn desktop-only-action" onClick={openWishlist} title="Favoris" aria-label="Favoris">
+            <button type="button" className="icon-btn motion-press desktop-only-action" onClick={openWishlist} title="Favoris" aria-label="Favoris">
               <i className="fa-solid fa-heart"></i>
-              {wishlistCount > 0 && <span key={wishlistCount} className="badge-count badge-pop">{wishlistCount}</span>}
+              {wishlistCount > 0 && <span key={wishlistCount} className="badge-count motion-badge-bump">{wishlistCount}</span>}
             </button>
 
-            <button type="button" className="icon-btn orders-tracking-btn desktop-only-action" onClick={() => handleOrdersClick()} title="Vos commandes" aria-label="Commandes">
+            <button type="button" className="icon-btn motion-press orders-tracking-btn desktop-only-action" onClick={() => handleOrdersClick()} title="Vos commandes" aria-label="Commandes">
               <i className="fa-solid fa-box-open"></i>
             </button>
 
-            <button type="button" className="icon-btn cart-btn-active" onClick={openCart} title="Panier" aria-label="Panier">
+            <button type="button" className="icon-btn motion-press cart-btn-active" onClick={openCart} title="Panier" aria-label="Panier">
               <i className="fa-solid fa-cart-shopping"></i>
-              {totalItems > 0 && <span key={totalItems} className="badge-count cart-badge-bounce">{totalItems}</span>}
+              {totalItems > 0 && <span key={totalItems} className="badge-count motion-badge-bump">{totalItems}</span>}
             </button>
 
             {isAuthenticated ? (

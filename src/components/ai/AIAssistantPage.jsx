@@ -13,13 +13,23 @@ import AIChatInput from './AIChatInput';
  * @param {Function} props.onBackToShop - Callback de retour vers la boutique
  * @param {Function} [props.onTrackOrder] - Callback de suivi de commande
  * @param {Function} [props.onViewProduct] - Callback d'ouverture de fiche produit
+ * @param {Function} [props.onAddToCart] - Callback d'ajout direct au panier
+ * @param {Function} [props.onOpenCart] - Callback d'ouverture du panier
+ * @param {Function} [props.onOpenCheckout] - Callback d'ouverture de la commande
+ * @param {Function} [props.onOpenAuth] - Callback d'ouverture de l'authentification
  * @param {Function} [props.onOpenSeller] - Callback d'ouverture de l'espace vendeur
+ * @param {Array<string>} [props.recentlyViewedIds] - Identifiants des articles vus
  */
 export const AIAssistantPage = ({
   onBackToShop,
   onTrackOrder,
   onViewProduct,
+  onAddToCart,
+  onOpenCart,
+  onOpenCheckout,
+  onOpenAuth,
   onOpenSeller,
+  recentlyViewedIds = [],
 }) => {
   const { user } = useAuth();
   const {
@@ -28,7 +38,7 @@ export const AIAssistantPage = ({
     isLoading,
     sendMessage,
     resetSession,
-  } = useAIChat(user);
+  } = useAIChat(user, recentlyViewedIds);
 
   const messagesEndRef = useRef(null);
 
@@ -70,7 +80,7 @@ export const AIAssistantPage = ({
                 </span>
               </div>
               <p className="vicky-ai-brand-subtitle">
-                Conseiller expert Vicky-Shop • En direct
+                Conseillère experte Vicky-Shop • En direct
               </p>
             </div>
           </div>
@@ -94,15 +104,15 @@ export const AIAssistantPage = ({
       {/* Corps principal : Zone de messages défilante */}
       <div className="vicky-ai-chat-body">
         <div className="vicky-ai-chat-inner">
-          {/* Bannière de présentation discrète au sommet */}
+          {/* Bannière de présentation au sommet */}
           <div className="vicky-ai-welcome-banner">
             <div className="vicky-ai-welcome-badge">
               <Sparkles size={14} />
-              <span>Intelligence Artificielle Dédiée</span>
+              <span>Assistant E-Commerce Intelligent</span>
             </div>
             <p className="vicky-ai-welcome-text">
-              Posez toutes vos questions sur les articles, tarifs de livraison en Côte d'Ivoire,
-              le paiement en espèces à la réception ou l'inscription comme vendeur certifié.
+              Posez toutes vos questions sur les articles, tarifs de livraison en Côte d&apos;Ivoire,
+              le paiement en espèces à la réception ou l&apos;Espace Vendeur.
             </p>
           </div>
 
@@ -125,6 +135,10 @@ export const AIAssistantPage = ({
                 message={msg}
                 onTrackOrder={onTrackOrder}
                 onViewProduct={onViewProduct}
+                onAddToCart={onAddToCart}
+                onOpenCart={onOpenCart}
+                onOpenCheckout={onOpenCheckout}
+                onOpenAuth={onOpenAuth}
                 onOpenSeller={onOpenSeller}
               />
             ))}

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 
 import './styles/global.css';
+import './styles/motion.css';
 import './styles/products.css';
 import './styles/skeleton.css';
 import './styles/product-details.css';
@@ -21,6 +22,9 @@ import './styles/notifications.css';
 import './styles/orders.css';
 import './styles/share-modal.css';
 import './styles/ai-assistant.css';
+import './styles/ai-chat-messages.css';
+import './styles/ai-drawer.css';
+import './styles/ai-fab.css';
 import './styles/responsive.css';
 
 // Enregistrement standard du Service Worker PWA et Web Push

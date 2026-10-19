@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { FlashItemCard } from './FlashItemCard';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 /**
  * Composant FlashSale :
@@ -7,6 +8,7 @@ import { FlashItemCard } from './FlashItemCard';
  * compte à rebours interactif, support des squelettes de chargement et animations soignées.
  */
 export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickView }) => {
+  const sectionRef = useScrollReveal();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [itemsPerView, setItemsPerView] = useState(3);
@@ -101,10 +103,10 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
   const slideWidthPercent = 100 / itemsPerView;
 
   return (
-    <section className="flash-sale-section" id="flash-sale">
+    <section className="flash-sale-section" id="flash-sale" ref={sectionRef}>
       <div className="container">
         <div
-          className="flash-sale-card"
+          className="flash-sale-card reveal-on-scroll reveal-scale"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -113,7 +115,7 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
           {/* En-tête avec Compte à Rebours */}
           <div className="flash-header-row">
             <div className="flash-header-text">
-              <div className="flash-tag">
+              <div className="flash-tag motion-pulse">
                 <i className="fa-solid fa-bolt-lightning flash-bolt-icon"></i>
                 <span>OFFRE DU JOUR • VENTE FLASH</span>
               </div>
@@ -124,18 +126,18 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
             </div>
 
             <div className="countdown-container">
-              <div className="timer-box">
+              <div className="timer-box motion-lift">
                 <span className="timer-num">{pad(timeLeft.hours)}</span>
                 <span className="timer-label">Heures</span>
               </div>
               <span className="timer-colon">:</span>
-              <div className="timer-box">
+              <div className="timer-box motion-lift">
                 <span className="timer-num">{pad(timeLeft.minutes)}</span>
                 <span className="timer-label">Minutes</span>
               </div>
               <span className="timer-colon">:</span>
-              <div className="timer-box">
-                <span className="timer-num">{pad(timeLeft.seconds)}</span>
+              <div className="timer-box motion-lift">
+                <span className="timer-num" key={timeLeft.seconds}>{pad(timeLeft.seconds)}</span>
                 <span className="timer-label">Secondes</span>
               </div>
             </div>
@@ -166,13 +168,13 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
             <div className="flash-showcase-wrapper">
               <div className="flash-carousel-controls">
                 <span className="flash-controls-title">
-                  <i className="fa-solid fa-fire" style={{ color: 'var(--accent-gold, #f59e0b)' }}></i>
+                  <i className="fa-solid fa-fire" style={{ color: 'var(--accent-gold)' }}></i>
                   <span>Articles en Vedette ({featuredList.length})</span>
                 </span>
                 <div className="flash-arrows-group">
                   <button
                     type="button"
-                    className="flash-arrow-btn"
+                    className="flash-arrow-btn motion-press"
                     onClick={prevSlide}
                     aria-label="Articles précédents"
                     title="Précédent"
@@ -181,7 +183,7 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
                   </button>
                   <button
                     type="button"
-                    className="flash-arrow-btn"
+                    className="flash-arrow-btn motion-press"
                     onClick={nextSlide}
                     aria-label="Articles suivants"
                     title="Suivant"
@@ -217,7 +219,7 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
                     <button
                       key={dotIdx}
                       type="button"
-                      className={`flash-dot ${dotIdx === currentIndex ? 'active' : ''}`}
+                      className={`flash-dot motion-press ${dotIdx === currentIndex ? 'active' : ''}`}
                       onClick={() => setCurrentIndex(dotIdx)}
                       aria-label={`Aller au groupe ${dotIdx + 1}`}
                     />
@@ -231,7 +233,7 @@ export const FlashSale = ({ products = [], loading = false, onShopNow, onQuickVi
           <div className="flash-footer-action">
             <button
               type="button"
-              className="btn btn-secondary flash-explore-btn"
+              className="btn btn-secondary flash-explore-btn motion-press"
               onClick={onShopNow}
             >
               <span>Voir Tous les Produits en Promotion</span>

@@ -1,0 +1,268 @@
+/* ==========================================================================
+   VICKY-SHOP - STYLES DES BULLES DE MESSAGES ET ACTIONS RAPIDES VICKY IA
+   Design System 100 % variables, zéro couleur en dur, strictly <= 325 lignes
+   ========================================================================== */
+
+/* Liste des messages et disposition */
+.vicky-ai-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.vicky-ai-message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  max-width: 85%;
+  animation: vickyMsgFadeIn var(--transition-fast);
+}
+
+@keyframes vickyMsgFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.vicky-ai-row-assistant { align-self: flex-start; }
+.vicky-ai-row-user { align-self: flex-end; flex-direction: row-reverse; }
+
+.vicky-ai-avatar-wrapper { flex-shrink: 0; margin-top: 2px; }
+
+.vicky-ai-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.vicky-ai-avatar-bot {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: var(--text-primary);
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.vicky-ai-avatar-user {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+/* Bulles de conversation avec effet verre dépoli */
+.vicky-ai-bubble {
+  padding: 1rem 1.35rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.935rem;
+  line-height: 1.6;
+  word-break: break-word;
+  position: relative;
+}
+
+.vicky-ai-bubble-assistant {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-top-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.vicky-ai-bubble-user {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: var(--text-primary);
+  border-top-right-radius: 4px;
+  box-shadow: 0 4px 18px var(--primary-glow);
+}
+
+.vicky-ai-bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.vicky-ai-sender-name {
+  font-weight: 700;
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+.vicky-ai-timestamp {
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.vicky-ai-badge-fallback {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.vicky-ai-error-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--accent-red);
+  background: var(--accent-red-soft);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.vicky-ai-paragraph { margin: 0.35rem 0; }
+.vicky-ai-bullet-item { display: flex; align-items: flex-start; gap: 0.45rem; margin: 0.25rem 0; }
+.vicky-ai-bullet-dot, .vicky-ai-numbered-prefix { color: var(--primary); font-weight: 700; }
+.vicky-ai-bubble-user .vicky-ai-bullet-dot,
+.vicky-ai-bubble-user .vicky-ai-numbered-prefix { color: var(--text-primary); }
+.vicky-ai-strong { font-weight: 700; color: var(--text-primary); }
+.vicky-ai-bubble-spacer { height: 0.45rem; }
+
+/* Indicateur d'écriture élégant */
+.vicky-ai-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: vickyMsgFadeIn var(--transition-fast);
+}
+
+.vicky-ai-typing-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  box-shadow: 0 4px 10px var(--primary-glow);
+}
+
+.vicky-ai-typing-bubble {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-lg);
+  border-top-left-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.vicky-ai-typing-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+.vicky-ai-typing-dots { display: flex; align-items: center; gap: 5px; }
+
+.vicky-ai-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  animation: vickyBounce 1.4s infinite ease-in-out both;
+}
+.vicky-ai-dot:nth-child(1) { animation-delay: -0.32s; }
+.vicky-ai-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes vickyBounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Actions rapides et feedback */
+.vicky-ai-actions-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.95rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.vicky-ai-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 0.95rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.vicky-ai-action-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--border-highlight);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.vicky-ai-action-whatsapp-support {
+  background: var(--primary-soft);
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.vicky-ai-bubble-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.65rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.vicky-ai-feedback-group { display: inline-flex; align-items: center; gap: 0.4rem; }
+.vicky-ai-feedback-hint { font-size: 0.72rem; color: var(--text-muted); }
+
+.vicky-ai-feedback-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.vicky-ai-feedback-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-elevated);
+}
+
+.vicky-ai-feedback-btn.active-helpful { color: var(--accent-green); }
+.vicky-ai-feedback-btn.active-unhelpful { color: var(--accent-red); }
+.vicky-ai-feedback-ack { font-size: 0.72rem; color: var(--text-secondary); }
+
+.vicky-ai-copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.vicky-ai-copy-button:hover { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .vicky-ai-message-row { max-width: 95%; }
+}

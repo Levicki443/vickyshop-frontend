@@ -23,9 +23,10 @@ const getAuthHeaders = () => {
  * @param {string} params.sessionId - Identifiant unique de session
  * @param {string} params.message - Question ou message de l'utilisateur
  * @param {string} [params.userName] - Prénom ou nom affiché de l'utilisateur
- * @returns {Promise<{ reply: string, sessionId: string, isSafe: boolean, isFallback: boolean, createdAt: string }>}
+ * @param {Array<string>} [params.recentlyViewedIds] - Identifiants des derniers articles consultés
+ * @returns {Promise<{ reply: string, products: Array, actions: Array, sessionId: string, isSafe: boolean, isFallback: boolean, createdAt: string }>}
  */
-export const sendChatMessage = async ({ sessionId, message, userName }) => {
+export const sendChatMessage = async ({ sessionId, message, userName, recentlyViewedIds = [] }) => {
   try {
     const response = await fetch(`${API_BASE_URL}/ai/chat`, {
       method: 'POST',
@@ -34,6 +35,7 @@ export const sendChatMessage = async ({ sessionId, message, userName }) => {
         sessionId,
         message: message.trim(),
         userName: userName ? userName.trim() : undefined,
+        recentlyViewedIds,
       }),
     });
 
@@ -93,12 +95,14 @@ export const resetChatSession = async (sessionId) => {
 };
 
 /**
- * Récupère les questions et thèmes suggérés par défaut.
+ * Récupère les questions et thèmes suggérés adaptés au profil.
+ * @param {string} [role] - Rôle ('client', 'vendeur', etc.)
  * @returns {Promise<Array>}
  */
-export const fetchChatSuggestions = async () => {
+export const fetchChatSuggestions = async (role = '') => {
   try {
-    const response = await fetch(`${API_BASE_URL}/ai/suggestions`);
+    const url = role ? `${API_BASE_URL}/ai/suggestions?role=${encodeURIComponent(role)}` : `${API_BASE_URL}/ai/suggestions`;
+    const response = await fetch(url);
     const json = await response.json().catch(() => ({}));
     if (response.ok && json.data?.suggestions) {
       return json.data.suggestions;
@@ -106,27 +110,6 @@ export const fetchChatSuggestions = async () => {
     return [];
   } catch (error) {
     console.warn('[aiApi] Erreur fetchChatSuggestions, utilisation du fallback local :', error);
-    return [
-      {
-        id: 'sug-1',
-        label: 'Livraison & Frais',
-        prompt: 'Quels sont vos tarifs et délais de livraison à Abidjan et à l\'intérieur ?',
-      },
-      {
-        id: 'sug-2',
-        label: 'Paiement à la livraison',
-        prompt: 'Comment fonctionne le paiement en espèces à la livraison (Cash on Delivery) ?',
-      },
-      {
-        id: 'sug-3',
-        label: 'Devenir Vendeur',
-        prompt: 'Comment puis-je m\'inscrire et vendre mes produits sur Vicky-Shop ?',
-      },
-      {
-        id: 'sug-4',
-        label: 'Échange & Tailles',
-        prompt: 'Que faire si la taille d\'un vêtement ou d\'une paire de chaussures ne me convient pas ?',
-      },
-    ];
+    return [];
   }
 };

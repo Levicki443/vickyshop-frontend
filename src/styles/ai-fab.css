@@ -1,0 +1,70 @@
+/* ==========================================================================
+   VICKY-SHOP - BOUTON FLOTTANT CONVERSATIONNEL (FAB ASSISTANT IA)
+   Styles 100 % variables du Design System, strictement <= 325 lignes
+   ========================================================================== */
+
+.vicky-ai-floating-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 990;
+  pointer-events: auto;
+}
+
+.vicky-ai-floating-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.65rem 1.15rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--primary-glow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+}
+
+.vicky-ai-floating-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px var(--primary-glow);
+}
+
+.vicky-ai-floating-btn.is-active {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+  box-shadow: 0 0 20px var(--secondary-glow);
+}
+
+.vicky-ai-floating-icon-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vicky-ai-floating-sparkle-icon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: var(--accent-gold);
+}
+
+.vicky-ai-floating-pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent-green);
+  border: 2px solid var(--bg-surface);
+}
+
+@media (max-width: 768px) {
+  .vicky-ai-floating-label { display: none; }
+  .vicky-ai-floating-btn { padding: 0.75rem; }
+}
