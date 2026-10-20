@@ -193,6 +193,10 @@
   .vicky-ai-brand-group { gap: 0.5rem; }
 }
 
+@media (max-width: 480px) {
+  .vicky-ai-badge-official { display: none !important; }
+}
+
 @media (min-width: 769px) {
   .vicky-ai-back-btn { width: auto; padding: 0.45rem 0.85rem; border-radius: var(--radius-full); }
   .vicky-ai-back-text { display: inline; }

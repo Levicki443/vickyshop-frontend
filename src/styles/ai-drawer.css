@@ -239,9 +239,21 @@
     z-index: 1005;
   }
 
-  .vicky-ai-drawer-header {
-    padding: 0.65rem 0.85rem;
-  }
-
+  .vicky-ai-drawer-header { padding: 0.65rem 0.75rem; gap: 0.5rem; }
+  .vicky-ai-drawer-header-brand { gap: 0.55rem; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .vicky-ai-brand-avatar-wrap { width: 38px; height: 38px; flex-shrink: 0; }
+  .vicky-ai-drawer-title-row { gap: 0.35rem; min-width: 0; }
+  .vicky-ai-drawer-title { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vicky-ai-drawer-badge { display: none !important; }
+  .vicky-ai-drawer-status { font-size: 0.68rem; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vicky-ai-drawer-actions { gap: 0.35rem; flex-shrink: 0; }
+  .vicky-ai-drawer-exit-btn { padding: 0.32rem 0.65rem; min-height: 34px; height: 34px; font-size: 0.78rem; gap: 0.3rem; }
+  .vicky-ai-drawer-icon-btn { width: 34px; height: 34px; min-width: 34px; min-height: 34px; }
   .vicky-ai-drawer-icon-btn.is-desktop-only { display: none; }
+}
+
+@media (max-width: 360px) {
+  .vicky-ai-drawer-header { padding: 0.5rem 0.6rem; gap: 0.3rem; }
+  .vicky-ai-drawer-exit-btn .vicky-ai-exit-text { display: none; }
+  .vicky-ai-drawer-exit-btn { width: 34px; height: 34px; min-width: 34px; padding: 0; justify-content: center; }
 }

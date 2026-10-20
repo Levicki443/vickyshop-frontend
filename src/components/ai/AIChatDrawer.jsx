@@ -115,7 +115,7 @@ export const AIChatDrawer = ({
             aria-label="Quitter la discussion et aller à l'accueil"
           >
             <Home size={15} />
-            <span>Quitter</span>
+            <span className="vicky-ai-exit-text">Quitter</span>
           </button>
 
           <button
