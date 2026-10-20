@@ -311,7 +311,7 @@ export const App = () => {
       <FloatingAIAssistantButton
         onClick={() => setIsAIDrawerOpen((prev) => !prev)}
         isOpen={isAIDrawerOpen}
-        isVisible={!isAIRoute && !isAdminViewActive && !isSellerRoute}
+        isVisible={!isAIRoute && !isAdminViewActive && !isSellerRoute && !isAIDrawerOpen}
       />
     </div>
   );

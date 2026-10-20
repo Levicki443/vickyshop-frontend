@@ -1852,7 +1852,8 @@
 .footer-trust-banner {
   background: var(--bg-main);
   border-bottom: 1px solid var(--border-color);
-  padding: 2.25rem 0;
+  padding: 2.25rem 1.5rem;
+  box-sizing: border-box;
 }
 
 .footer-trust-grid {
@@ -1911,7 +1912,8 @@
 
 /* 2. Grille Principale du Footer */
 .footer-main-content {
-  padding: 4rem 0 3rem;
+  padding: 4rem 1.5rem 3rem;
+  box-sizing: border-box;
 }
 
 .footer-grid {
@@ -1920,17 +1922,23 @@
   gap: 3rem;
 }
 
+.footer-grid > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 @media (max-width: 1024px) {
   .footer-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2.5rem;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.25rem;
   }
 }
 
@@ -2198,8 +2206,9 @@
 /* 3. Barre Inférieure (Bottom Bar) */
 .footer-bottom-bar {
   border-top: 1px solid var(--border-color);
-  padding: 1.5rem 0;
+  padding: 1.5rem 1.5rem;
   background: var(--bg-main);
+  box-sizing: border-box;
 }
 
 .footer-bottom-flex {

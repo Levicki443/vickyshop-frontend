@@ -10,6 +10,7 @@ import {
   Truck,
   Banknote,
   RotateCw,
+  Home,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAIChat } from '../../hooks/useAIChat';
@@ -24,6 +25,7 @@ import AIChatInput from './AIChatInput';
 export const AIChatDrawer = ({
   isOpen,
   onClose,
+  onGoHome,
   onTrackOrder,
   onViewProduct,
   onAddToCart,
@@ -66,6 +68,14 @@ export const AIChatDrawer = ({
     }
   };
 
+  const handleExitToHome = () => {
+    if (onGoHome) {
+      onGoHome();
+    } else {
+      onClose();
+    }
+  };
+
   return (
     <aside
       className={`vicky-ai-drawer-root ${isFullscreen ? 'is-fullscreen' : ''}`}
@@ -94,6 +104,17 @@ export const AIChatDrawer = ({
         </div>
 
         <div className="vicky-ai-drawer-actions">
+          <button
+            type="button"
+            onClick={handleExitToHome}
+            className="vicky-ai-drawer-exit-btn motion-press"
+            title="Quitter la discussion et revenir à l'accueil"
+            aria-label="Quitter la discussion et aller à l'accueil"
+          >
+            <Home size={15} />
+            <span>Quitter</span>
+          </button>
+
           <button
             type="button"
             onClick={resetSession}

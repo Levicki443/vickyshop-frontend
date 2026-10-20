@@ -84,14 +84,15 @@
   /* ========================================================================
      FOOTER, CONTACT & PAIEMENTS MOBILE (POSITIONNEMENT HARMONIEUX)
      ======================================================================== */
-  .footer-main-content { padding: 2.25rem 0 1.5rem !important; }
+  .footer-main-content { padding: 2.5rem 1.25rem 2rem !important; box-sizing: border-box; }
   .footer-trust-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.65rem !important; }
   .footer-trust-item { padding: 0.75rem 0.65rem !important; gap: 0.65rem !important; }
   .trust-icon-box { width: 36px !important; height: 36px !important; font-size: 1rem !important; }
   .trust-text-box strong { font-size: 0.8rem !important; }
   .trust-text-box span { font-size: 0.68rem !important; }
 
-  .footer-grid { grid-template-columns: 1fr !important; gap: 1.65rem !important; text-align: left; }
+  .footer-grid { grid-template-columns: 1fr !important; gap: 2rem !important; text-align: left; }
+  .footer-grid > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
   .footer-col-title { font-size: 1rem !important; margin-bottom: 0.85rem !important; }
   .footer-col-subtext { font-size: 0.84rem !important; margin-bottom: 0.85rem !important; line-height: 1.45 !important; }
   .footer-brand-desc { font-size: 0.85rem !important; line-height: 1.5 !important; margin-bottom: 0.9rem !important; }
@@ -171,14 +172,16 @@
   .flash-product-slide { flex: 0 0 50% !important; max-width: 50% !important; }
   .product-details-grid { grid-template-columns: 1fr; gap: 2rem; }
   .stats-grid, .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .footer-grid { grid-template-columns: 1fr !important; gap: 2.25rem !important; }
+  .footer-main-content { padding: 2.5rem 1.25rem 2rem !important; }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .products-grid, .product-container { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1.25rem; }
   .flash-product-slide { flex: 0 0 33.333% !important; max-width: 33.333% !important; }
   .stats-grid, .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-  .footer-grid { grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 2.5rem !important; }
+  .footer-main-content { padding: 3rem 1.5rem 2.5rem; }
 }
 
 /* 3. GRANDS ÉCRANS (>= 1280px & 1920px) */

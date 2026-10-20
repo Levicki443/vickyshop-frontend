@@ -1,16 +1,44 @@
 /* ==========================================================================
    VICKY-SHOP - BOUTON FLOTTANT CONVERSATIONNEL (FAB ASSISTANT IA)
-   Styles 100 % variables du Design System, strictement <= 325 lignes
+   Système rétractable & masquable au défilement (60 FPS, 0 couleur en dur)
    ========================================================================== */
 
 .vicky-ai-floating-container {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  z-index: 990;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   pointer-events: auto;
+  transition: transform var(--transition-smooth), opacity var(--transition-fast);
+  will-change: transform;
 }
 
+/* Languette / Flèche de rangement rétractable */
+.vicky-ai-dock-toggle {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.vicky-ai-dock-toggle:hover {
+  color: var(--primary);
+  border-color: var(--border-highlight);
+  background: var(--bg-surface-elevated);
+}
+
+/* Bouton principal de discussion avec dégradé Vicky */
 .vicky-ai-floating-btn {
   display: inline-flex;
   align-items: center;
@@ -64,29 +92,52 @@
   border: 2px solid var(--bg-surface);
 }
 
+/* État masqué / rangé sur le bord droit lors du scroll */
+.vicky-ai-floating-container.is-docked {
+  transform: translateX(calc(100% - 38px));
+  opacity: 0.92;
+}
+
+.vicky-ai-floating-container.is-docked:hover {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.vicky-ai-floating-container.is-docked .vicky-ai-dock-toggle {
+  background: var(--primary);
+  color: var(--bg-main);
+  border-color: var(--primary);
+}
+
+/* Optimisation mobile : au-dessus de la barre inférieure avec masquage fluide */
 @media (max-width: 768px) {
   .vicky-ai-floating-container {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
-    right: 1.1rem;
-    z-index: 1050;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    right: 0.75rem;
+  }
+
+  .vicky-ai-floating-container.is-docked {
+    transform: translateX(calc(100% - 32px));
+    right: 0;
   }
 
   .vicky-ai-floating-btn {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-full);
-    box-shadow: 0 6px 22px var(--primary-glow);
+    box-shadow: 0 4px 18px var(--primary-glow);
   }
 
   .vicky-ai-floating-label {
     display: none;
   }
 
-  .vicky-ai-floating-btn:active {
-    transform: scale(0.94);
+  .vicky-ai-dock-toggle {
+    width: 26px;
+    height: 26px;
   }
 }

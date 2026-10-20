@@ -68,6 +68,11 @@ export const AppModals = ({
       <AIChatDrawer
         isOpen={Boolean(isAIDrawerOpen)}
         onClose={onCloseAIDrawer}
+        onGoHome={() => {
+          onCloseAIDrawer();
+          if (onNavigate) onNavigate('/');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         onTrackOrder={onSelectOrder}
         onViewProduct={onSelectProduct}
         onAddToCart={onAddToCart}
@@ -77,7 +82,9 @@ export const AppModals = ({
         onOpenSeller={onOpenSeller}
         recentlyViewedIds={recentlyViewedIds}
       />
-      <MobileBottomNav currentPath={currentPath} onNavigate={onNavigate} onOpenAdmin={onOpenAdmin} />
+      {!isAIDrawerOpen && (
+        <MobileBottomNav currentPath={currentPath} onNavigate={onNavigate} onOpenAdmin={onOpenAdmin} />
+      )}
       <ToastContainer />
     </>
   );

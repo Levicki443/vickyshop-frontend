@@ -195,9 +195,6 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
               </button>
             )}
 
-            <button type="button" className="icon-btn motion-press" onClick={handleAIAssistantClick} title="Assistant IA Vicky-Shop" aria-label="Assistant IA">
-              <i className="fa-solid fa-wand-magic-sparkles" style={{ color: 'var(--primary)' }}></i>
-            </button>
             <button type="button" className="icon-btn motion-press" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'} aria-label="Mode">
               <i className={theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'}></i>
             </button>

@@ -128,6 +128,27 @@
   gap: 0.4rem;
 }
 
+.vicky-ai-drawer-exit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vicky-ai-drawer-exit-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--border-highlight);
+}
+
 .vicky-ai-drawer-icon-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -464,6 +485,7 @@
     max-height: 100dvh;
     border-radius: 0;
     border: none;
+    z-index: 1005;
   }
 
   .vicky-ai-drawer-icon-btn.is-desktop-only { display: none; }
