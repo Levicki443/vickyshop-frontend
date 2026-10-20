@@ -106,7 +106,7 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTa
   const roleIcon = getRoleIcon(user?.role);
 
   return (
-    <div className="container user-profile-page-root animate-fade-in" style={{ padding: '2rem 1rem 4rem' }}>
+    <div className="container user-profile-page-root animate-fade-in">
       <div className="details-top-bar" style={{ marginBottom: '1.5rem' }}>
         <button type="button" className="btn-back-shop" onClick={onBackToShop}>
           <i className="fa-solid fa-arrow-left"></i>
@@ -119,15 +119,15 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTa
         </div>
       </div>
 
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800 }}>
+      <div className="profile-vip-card">
+        <div className="profile-vip-user-group">
+          <div className="profile-avatar-circle">
             {user?.name ? user.name.substring(0, 2).toUpperCase() : 'U'}
           </div>
-          <div>
-            <h2 style={{ margin: '0 0 0.3rem', fontSize: '1.4rem', color: 'var(--text-primary)' }}>{user?.name}</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              <span><i className="fa-solid fa-envelope"></i> {user?.email}</span>
+          <div className="profile-vip-details">
+            <h2 className="profile-vip-name">{user?.name}</h2>
+            <div className="profile-vip-meta">
+              <span className="profile-vip-email"><i className="fa-solid fa-envelope"></i> {user?.email}</span>
               <span>•</span>
               <span className={`profile-role-pill ${roleBadgeClass}`}>
                 <i className={roleIcon}></i> {roleLabel}
@@ -136,59 +136,56 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTa
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+        <div className="profile-vip-actions">
           {isSeller && (
-            <button type="button" className="btn btn-primary" onClick={onOpenSellerDashboard}>
+            <button type="button" className="btn btn-primary motion-press" onClick={onOpenSellerDashboard}>
               <i className="fa-solid fa-store"></i> <span>Espace Vendeur Pro</span>
             </button>
           )}
-          <button type="button" className="btn btn-secondary text-danger" onClick={logout}>
+          <button type="button" className="btn-profile-logout motion-press" onClick={logout}>
             <i className="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'start' }}>
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+      <div className="profile-main-grid">
+        <div className="profile-tabs-sidebar">
           <button
             type="button"
-            className={`profile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
+            className={`profile-tab-item ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
-            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
           >
             <i className="fa-solid fa-user-pen"></i> <span>Informations Personnelles</span>
           </button>
           <button
             type="button"
-            className={`profile-tab-btn ${activeTab === 'notifications' ? 'active' : ''}`}
+            className={`profile-tab-item ${activeTab === 'notifications' ? 'active' : ''}`}
             onClick={() => setActiveTab('notifications')}
-            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
           >
             <i className="fa-solid fa-bell"></i> <span>Paramètres de Notifications</span>
           </button>
           <button
             type="button"
-            className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`}
+            className={`profile-tab-item ${activeTab === 'password' ? 'active' : ''}`}
             onClick={() => setActiveTab('password')}
-            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
           >
             <i className="fa-solid fa-lock"></i> <span>Sécurité &amp; Mot de passe</span>
           </button>
           <button
             type="button"
-            className={`profile-tab-btn ${activeTab === 'account' ? 'active' : ''}`}
+            className={`profile-tab-item ${activeTab === 'account' ? 'active' : ''}`}
             onClick={() => setActiveTab('account')}
-            style={{ width: '100%', textAlign: 'left', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)' }}
           >
             <i className="fa-solid fa-shield-halved"></i> <span>Statut &amp; Rôle du Compte</span>
           </button>
         </div>
 
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1.75rem' }}>
+        <div className="profile-content-card">
           {activeTab === 'profile' && (
             <form onSubmit={handleProfileSubmit} className="profile-form">
-              <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
-                Modifier vos coordonnées de livraison
+              <h3 className="profile-section-title">
+                <i className="fa-solid fa-truck-ramp-box text-primary"></i>
+                <span>Modifier vos coordonnées de livraison</span>
               </h3>
               <div className="profile-form-group">
                 <label><i className="fa-solid fa-user"></i> Nom complet *</label>
@@ -221,8 +218,9 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTa
 
           {activeTab === 'password' && (
             <form onSubmit={handlePasswordSubmit} className="profile-form">
-              <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
-                Mettre à jour votre mot de passe
+              <h3 className="profile-section-title">
+                <i className="fa-solid fa-lock text-primary"></i>
+                <span>Mettre à jour votre mot de passe</span>
               </h3>
               <div className="profile-form-group">
                 <label><i className="fa-solid fa-key"></i> Mot de passe actuel *</label>
@@ -245,8 +243,9 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTa
 
           {activeTab === 'account' && (
             <div className="profile-form">
-              <h3 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.15rem' }}>
-                Détails du compte
+              <h3 className="profile-section-title">
+                <i className="fa-solid fa-shield-halved text-primary"></i>
+                <span>Détails &amp; Sécurité du compte</span>
               </h3>
               <div className="account-details-card">
                 <div className="account-info-row">

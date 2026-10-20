@@ -53,23 +53,25 @@ export const NotificationSettingsTab = () => {
 
       {/* Bannière Push Notifications Navigateur */}
       <div className={`notif-push-card ${isPushActive ? 'active' : ''}`}>
-        <div className="notif-push-card-icon">
-          <i className={`fa-solid ${isPushActive ? 'fa-bell text-success' : 'fa-bell-slash text-secondary'}`}></i>
-        </div>
-        <div className="notif-push-card-text">
-          <strong>Notifications Push du Navigateur</strong>
-          <p>
-            {isPushActive
-              ? 'Actif : Vous recevez les alertes instantanées même lorsque l\'onglet est fermé.'
-              : pushAvailable
-              ? 'Recevez des notifications natives sur votre téléphone ou ordinateur sans recharger la page.'
-              : 'Les notifications push ne sont pas supportées par ce navigateur.'}
-          </p>
+        <div className="notif-push-card-left">
+          <div className="notif-push-card-icon">
+            <i className={`fa-solid ${isPushActive ? 'fa-bell text-success' : 'fa-bell-slash text-secondary'}`}></i>
+          </div>
+          <div className="notif-push-card-text">
+            <strong>Notifications Push du Navigateur</strong>
+            <p>
+              {isPushActive
+                ? 'Actif : Vous recevez les alertes instantanées même lorsque l\'onglet est fermé.'
+                : pushAvailable
+                ? 'Recevez des notifications natives sur votre téléphone ou ordinateur sans recharger la page.'
+                : 'Les notifications push ne sont pas supportées par ce navigateur.'}
+            </p>
+          </div>
         </div>
         {pushAvailable && (
           <button
             type="button"
-            className={`btn btn-sm ${isPushActive ? 'btn-secondary text-danger' : 'btn-primary'}`}
+            className={`btn notif-push-btn motion-press ${isPushActive ? 'btn-secondary text-danger' : 'btn-primary'}`}
             onClick={toggleWebPush}
           >
             <i className={`fa-solid ${isPushActive ? 'fa-toggle-on' : 'fa-toggle-off'}`}></i>
@@ -238,7 +240,7 @@ export const NotificationSettingsTab = () => {
         </div>
 
         <div className="notif-form-footer">
-          <button type="submit" className="btn btn-primary btn-save-prefs" disabled={saving}>
+          <button type="submit" className="btn btn-primary btn-save-prefs motion-press" disabled={saving}>
             {saving ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-floppy-disk"></i>}
             <span>Enregistrer les préférences</span>
           </button>

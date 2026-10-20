@@ -11,6 +11,7 @@ import './styles/lightbox.css';
 import './styles/layout.css';
 import './styles/auth.css';
 import './styles/profile-modal.css';
+import './styles/user-profile-page.css';
 import './styles/seller-dashboard.css';
 import './styles/seller-orders.css';
 import './styles/seller.css';
