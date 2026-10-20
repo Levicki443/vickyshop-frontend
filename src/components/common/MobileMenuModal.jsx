@@ -50,6 +50,13 @@ export const MobileMenuModal = ({
     }
   };
 
+  const handleAction = (callback) => {
+    onClose();
+    if (typeof callback === 'function') {
+      setTimeout(callback, 60);
+    }
+  };
+
   return (
     <>
       {/* Arrière-plan assombri (Backdrop) */}
@@ -98,10 +105,7 @@ export const MobileMenuModal = ({
               <div className="mobile-user-authenticated-box">
                 <div
                   className="mobile-user-profile-row"
-                  onClick={() => {
-                    onClose();
-                    onOpenProfile('profile');
-                  }}
+                  onClick={() => handleAction(() => onOpenProfile('profile'))}
                 >
                   <div className="user-avatar-badge mobile-user-avatar">
                     {getInitials(user?.name)}
@@ -119,10 +123,7 @@ export const MobileMenuModal = ({
                   <button
                     type="button"
                     className="btn btn-secondary mobile-quick-btn"
-                    onClick={() => {
-                      onClose();
-                      onOpenProfile('profile');
-                    }}
+                    onClick={() => handleAction(() => onOpenProfile('profile'))}
                   >
                     <i className="fa-solid fa-user-gear"></i>
                     <span>Mon Profil</span>
@@ -132,10 +133,7 @@ export const MobileMenuModal = ({
                     <button
                       type="button"
                       className="btn btn-primary mobile-quick-btn"
-                      onClick={() => {
-                        onClose();
-                        onOpenSeller();
-                      }}
+                      onClick={() => handleAction(onOpenSeller)}
                     >
                       <i className="fa-solid fa-store"></i>
                       <span>Vendeur</span>
@@ -161,10 +159,7 @@ export const MobileMenuModal = ({
                 <button
                   type="button"
                   className="btn btn-primary mobile-login-hero-btn"
-                  onClick={() => {
-                    onClose();
-                    onOpenAuth();
-                  }}
+                  onClick={() => handleAction(onOpenAuth)}
                 >
                   <i className="fa-solid fa-arrow-right-to-bracket"></i>
                   <span>Se connecter / S&apos;inscrire</span>
@@ -215,12 +210,13 @@ export const MobileMenuModal = ({
                   type="button"
                   className="mobile-nav-card mobile-nav-btn"
                   onClick={() => {
-                    onClose();
-                    if (onOpenAIAssistant) onOpenAIAssistant();
-                    else {
-                      window.history.pushState(null, '', '/assistant-ia');
-                      window.dispatchEvent(new Event('app-navigate'));
-                    }
+                    handleAction(() => {
+                      if (onOpenAIAssistant) onOpenAIAssistant();
+                      else {
+                        window.history.pushState(null, '', '/assistant-ia');
+                        window.dispatchEvent(new Event('app-navigate'));
+                      }
+                    });
                   }}
                 >
                   <div className="mobile-nav-card-left">
@@ -235,7 +231,7 @@ export const MobileMenuModal = ({
               </li>
 
               <li>
-                <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => { onClose(); onOpenWishlist(); }}>
+                <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => handleAction(onOpenWishlist)}>
                   <div className="mobile-nav-card-left">
                     <i className="fa-solid fa-heart mobile-nav-card-icon text-danger"></i>
                     <span>Favoris</span>
@@ -248,7 +244,7 @@ export const MobileMenuModal = ({
               </li>
 
               <li>
-                <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => { onClose(); onOpenOrders(); }}>
+                <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => handleAction(onOpenOrders)}>
                   <div className="mobile-nav-card-left">
                     <i className="fa-solid fa-box-open mobile-nav-card-icon text-primary"></i>
                     <span>Vos commandes</span>
@@ -259,7 +255,7 @@ export const MobileMenuModal = ({
 
               {isAuthenticated && (
                 <li>
-                  <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => { onClose(); onOpenNotifs(); }}>
+                  <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => handleAction(onOpenNotifs)}>
                     <div className="mobile-nav-card-left">
                       <i className="fa-solid fa-bell mobile-nav-card-icon text-primary"></i>
                       <span>Notifications</span>
@@ -274,7 +270,7 @@ export const MobileMenuModal = ({
 
               {isSeller && isAuthenticated && (
                 <li>
-                  <button type="button" className="mobile-nav-card mobile-nav-btn mobile-nav-seller" onClick={() => { onClose(); onOpenSeller(); }}>
+                  <button type="button" className="mobile-nav-card mobile-nav-btn mobile-nav-seller" onClick={() => handleAction(onOpenSeller)}>
                     <div className="mobile-nav-card-left">
                       <i className="fa-solid fa-store mobile-nav-card-icon text-primary"></i>
                       <span>Gestion Vendeur</span>
@@ -292,10 +288,7 @@ export const MobileMenuModal = ({
               <button
                 type="button"
                 className="btn btn-block mobile-logout-btn"
-                onClick={() => {
-                  onClose();
-                  onLogout();
-                }}
+                onClick={() => handleAction(onLogout)}
               >
                 <i className="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Déconnexion</span>

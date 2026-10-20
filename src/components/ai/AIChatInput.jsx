@@ -78,7 +78,7 @@ const AIChatInput = ({ onSend, isLoading = false, disabled = false }) => {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
-          placeholder="Posez votre question à Vicky IA (articles, budget, livraison, vendeur...)..."
+          placeholder="Posez votre question à Vicky IA..."
           rows={1}
           maxLength={2000}
           disabled={disabled || isLoading}
@@ -90,7 +90,7 @@ const AIChatInput = ({ onSend, isLoading = false, disabled = false }) => {
         <button
           type="submit"
           disabled={!hasContent || isLoading || disabled}
-          className={`vicky-ai-send-btn ${hasContent ? 'vicky-ai-send-active' : ''}`}
+          className={`vicky-ai-send-btn motion-press ${hasContent ? 'vicky-ai-send-active' : ''}`}
           aria-label="Envoyer le message"
           title="Envoyer votre message (Entrée)"
         >

@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react';
-import { ArrowLeft, RotateCcw, Bot, Sparkles, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Sparkles, ShieldCheck, Truck, Banknote, RotateCw, Bot } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAIChat } from '../../hooks/useAIChat';
 import AIMessageBubble from './AIMessageBubble';
 import AIPromptSuggestions from './AIPromptSuggestions';
 import AIChatInput from './AIChatInput';
+import logoImg from '../../assets/logo.png';
 
 /**
  * Page dédiée plein écran pour l'assistant IA intelligent Vicky-Shop.
@@ -52,14 +53,14 @@ export const AIAssistantPage = ({
   };
 
   return (
-    <div className="vicky-ai-page" role="main" aria-label="Assistant IA Vicky-Shop">
-      {/* Barre d'en-tête supérieure */}
+    <div className="vicky-ai-page vicky-ai-page-root" role="main" aria-label="Assistant IA Vicky-Shop">
+      {/* Barre d'en-tête supérieure avec identité de marque haute fidélité */}
       <header className="vicky-ai-header">
         <div className="vicky-ai-header-left">
           <button
             type="button"
             onClick={onBackToShop}
-            className="vicky-ai-back-btn"
+            className="vicky-ai-back-btn motion-press"
             aria-label="Retourner à la boutique"
             title="Retour à la boutique"
           >
@@ -68,19 +69,21 @@ export const AIAssistantPage = ({
           </button>
 
           <div className="vicky-ai-brand-group">
-            <div className="vicky-ai-brand-avatar">
-              <Bot size={22} className="vicky-ai-brand-bot" />
+            <div className="vicky-ai-brand-avatar-wrap">
+              <img src={logoImg} alt="Vicky-Shop IA" className="vicky-ai-brand-avatar-img" />
               <span className="vicky-ai-status-pulse" title="Vicky IA est en ligne" />
             </div>
             <div className="vicky-ai-brand-info">
               <div className="vicky-ai-brand-title-row">
-                <h1 className="vicky-ai-brand-title">Vicky IA</h1>
+                <h1 className="vicky-ai-brand-title">
+                  Vicky-Shop <span className="vicky-ai-title-ia">IA</span>
+                </h1>
                 <span className="vicky-ai-badge-official">
-                  <ShieldCheck size={12} /> Officiel
+                  <ShieldCheck size={11} /> Officiel
                 </span>
               </div>
               <p className="vicky-ai-brand-subtitle">
-                Conseillère experte Vicky-Shop • En direct
+                Conseillère experte • En direct
               </p>
             </div>
           </div>
@@ -91,12 +94,12 @@ export const AIAssistantPage = ({
             type="button"
             onClick={resetSession}
             disabled={isLoading}
-            className="vicky-ai-reset-btn"
+            className="vicky-ai-reset-btn motion-press"
             title="Effacer la discussion et recommencer à zéro"
             aria-label="Nouvelle discussion"
           >
-            <RotateCcw size={16} />
-            <span className="vicky-ai-reset-text">Nouvelle discussion</span>
+            <RotateCcw size={17} />
+            <span className="vicky-ai-reset-text">Nouveau</span>
           </button>
         </div>
       </header>
@@ -110,10 +113,27 @@ export const AIAssistantPage = ({
               <Sparkles size={14} />
               <span>Assistant E-Commerce Intelligent</span>
             </div>
+            <h2 className="vicky-ai-drawer-welcome-heading">
+              Comment puis-je vous <span className="vicky-ai-gradient-text">accompagner</span> aujourd&apos;hui ?
+            </h2>
             <p className="vicky-ai-welcome-text">
               Posez toutes vos questions sur les articles, tarifs de livraison en Côte d&apos;Ivoire,
               le paiement en espèces à la réception ou l&apos;Espace Vendeur.
             </p>
+            <div className="vicky-ai-drawer-service-pills">
+              <span className="vicky-ai-service-pill is-delivery">
+                <Truck size={13} />
+                <span>Abidjan 2 000 FCFA</span>
+              </span>
+              <span className="vicky-ai-service-pill is-cash">
+                <Banknote size={13} />
+                <span>Cash à la livraison</span>
+              </span>
+              <span className="vicky-ai-service-pill is-exchange">
+                <RotateCw size={13} />
+                <span>Échange 48h</span>
+              </span>
+            </div>
           </div>
 
           {/* Suggestions de questions rapides */}

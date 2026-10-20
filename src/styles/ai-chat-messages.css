@@ -7,7 +7,7 @@
 .vicky-ai-messages-list {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 1.55rem;
 }
 
 .vicky-ai-message-row {
@@ -29,18 +29,28 @@
 .vicky-ai-avatar-wrapper { flex-shrink: 0; margin-top: 2px; }
 
 .vicky-ai-avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.vicky-ai-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  display: block;
 }
 
 .vicky-ai-avatar-bot {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: var(--text-primary);
+  border: 1.5px solid var(--primary);
   box-shadow: 0 4px 14px var(--primary-glow);
 }
 
@@ -52,10 +62,10 @@
 
 /* Bulles de conversation avec effet verre dépoli */
 .vicky-ai-bubble {
-  padding: 1rem 1.35rem;
+  padding: 1.1rem 1.35rem;
   border-radius: var(--radius-lg);
   font-size: 0.935rem;
-  line-height: 1.6;
+  line-height: 1.65;
   word-break: break-word;
   position: relative;
 }
@@ -72,7 +82,7 @@
 
 .vicky-ai-bubble-user {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-  color: var(--text-primary);
+  color: #ffffff !important;
   border-top-right-radius: 4px;
   box-shadow: 0 4px 18px var(--primary-glow);
 }
@@ -122,7 +132,8 @@
 .vicky-ai-bullet-item { display: flex; align-items: flex-start; gap: 0.45rem; margin: 0.25rem 0; }
 .vicky-ai-bullet-dot, .vicky-ai-numbered-prefix { color: var(--primary); font-weight: 700; }
 .vicky-ai-bubble-user .vicky-ai-bullet-dot,
-.vicky-ai-bubble-user .vicky-ai-numbered-prefix { color: var(--text-primary); }
+.vicky-ai-bubble-user .vicky-ai-numbered-prefix,
+.vicky-ai-bubble-user .vicky-ai-strong { color: #ffffff !important; }
 .vicky-ai-strong { font-weight: 700; color: var(--text-primary); }
 .vicky-ai-bubble-spacer { height: 0.45rem; }
 
@@ -142,7 +153,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  color: #ffffff !important;
   box-shadow: 0 4px 10px var(--primary-glow);
 }
 
@@ -220,49 +231,93 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.65rem;
-  padding-top: 0.45rem;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--border-color);
+  flex-wrap: nowrap;
 }
 
-.vicky-ai-feedback-group { display: inline-flex; align-items: center; gap: 0.4rem; }
-.vicky-ai-feedback-hint { font-size: 0.72rem; color: var(--text-muted); }
-
-.vicky-ai-feedback-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0.2rem 0.35rem;
-  border-radius: var(--radius-sm);
+.vicky-ai-feedback-group {
   display: inline-flex;
   align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.vicky-ai-feedback-hint { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
+
+.vicky-ai-feedback-btn {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--transition-fast);
 }
 
 .vicky-ai-feedback-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-surface-elevated);
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
 
-.vicky-ai-feedback-btn.active-helpful { color: var(--accent-green); }
-.vicky-ai-feedback-btn.active-unhelpful { color: var(--accent-red); }
-.vicky-ai-feedback-ack { font-size: 0.72rem; color: var(--text-secondary); }
+.vicky-ai-feedback-btn.active-helpful {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.vicky-ai-feedback-btn.active-unhelpful {
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+  background: var(--accent-red-soft);
+}
+
+.vicky-ai-feedback-ack { font-size: 0.72rem; color: var(--accent-green); font-weight: 600; white-space: nowrap; }
 
 .vicky-ai-copy-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: color var(--transition-fast);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.vicky-ai-copy-button:hover { color: var(--primary); }
+.vicky-ai-copy-button:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.vicky-ai-copy-button.is-copied {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.vicky-ai-copy-button .copy-label {
+  white-space: nowrap;
+}
 
 @media (max-width: 768px) {
-  .vicky-ai-message-row { max-width: 95%; }
+  .vicky-ai-message-row { max-width: 92%; }
+  .vicky-ai-bubble { padding: 0.95rem 1.15rem; font-size: 0.9rem; }
+  .vicky-ai-feedback-hint { display: none; }
 }

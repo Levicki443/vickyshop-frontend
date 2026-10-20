@@ -1,5 +1,16 @@
 import { useEffect, useRef } from 'react';
 
+// Timestamp pour détecter les retours arrière déclenchés programmatiquement par le hook
+let lastInternalModalBackTime = 0;
+
+/**
+ * Indique si un événement popstate récent a été provoqué par le nettoyage interne d'une modale
+ * plutôt que par une navigation utilisateur réelle.
+ */
+export const isRecentInternalModalBack = () => {
+  return Date.now() - lastInternalModalBackTime < 300;
+};
+
 /**
  * Hook personnalisé pour synchroniser l'ouverture d'une modale, d'un tiroir ou d'une lightbox
  * avec l'historique du navigateur et les gestes de retour mobiles.
@@ -38,6 +49,7 @@ export const useModalHistory = (isOpen, onClose, modalName = 'overlay') => {
       if (isPushedRef.current && !isPoppedByPopstateRef.current) {
         isPushedRef.current = false;
         if (window.history.state && window.history.state.isModalOverlay) {
+          lastInternalModalBackTime = Date.now();
           window.history.back();
         }
       }
@@ -46,7 +58,7 @@ export const useModalHistory = (isOpen, onClose, modalName = 'overlay') => {
   }, [isOpen, modalName]);
 
   useEffect(() => {
-    const handlePopState = (event) => {
+    const handlePopState = () => {
       // Si l'utilisateur appuie sur "Retour" sur son téléphone alors que la modale est ouverte
       if (isPushedRef.current) {
         isPoppedByPopstateRef.current = true;

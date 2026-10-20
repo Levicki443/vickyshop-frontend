@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getAdminToken } from './services/adminApi';
 import { useShopProducts } from './hooks/useShopProducts';
-import { useModalHistory } from './hooks/useModalHistory';
+import { useModalHistory, isRecentInternalModalBack } from './hooks/useModalHistory';
 import { initScrollRestoration, saveCatalogScroll, restoreCatalogScroll } from './utils/scrollMemory';
 import { Header } from './components/common/Header';
 import { HeroSection } from './components/home/HeroSection';
@@ -64,7 +64,8 @@ export const App = () => {
   }, []);
 
   const cleanPath = useMemo(() => currentPath.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/', [currentPath]);
-  const isHomePath = ['/', '/accueil', '/home', '/index.html'].includes(cleanPath);
+  const isAuthRoute = ['/connexion', '/login', '/inscription', '/register', '/auth'].includes(cleanPath);
+  const isHomePath = ['/', '/accueil', '/home', '/index.html'].includes(cleanPath) || isAuthRoute;
   const isSellerRoute = cleanPath.startsWith('/vendeur') || cleanPath.startsWith('/seller');
   const isAdminRoute = cleanPath.startsWith('/admin') || cleanPath.startsWith('/dashboard') || cleanPath.startsWith('/backoffice');
   const isOrdersRoute = cleanPath.startsWith('/commandes') || cleanPath.startsWith('/orders') || cleanPath.startsWith('/suivi');
@@ -72,7 +73,6 @@ export const App = () => {
   const isProductRoute = cleanPath.startsWith('/produit/') || cleanPath.startsWith('/produits/') || cleanPath.startsWith('/product/') || cleanPath.startsWith('/products/');
   const isCartRoute = cleanPath === '/panier' || cleanPath === '/cart';
   const isCheckoutRoute = cleanPath === '/commande' || cleanPath === '/checkout';
-  const isAuthRoute = ['/connexion', '/login', '/inscription', '/register', '/auth'].includes(cleanPath);
   const isForgotPasswordRoute = cleanPath === '/mot-de-passe-oublie' || cleanPath === '/forgot-password';
   const isResetPasswordRoute = ['/reinitialisation-mot-de-passe', '/reinitialiser-mot-de-passe', '/reset-password'].includes(cleanPath);
   const isCategoryRoute = cleanPath.startsWith('/categorie') || cleanPath.startsWith('/categories');
@@ -110,8 +110,7 @@ export const App = () => {
     if (currentPath.includes('commande')) return 'orders';
     if (currentPath.includes('notif')) return 'notifications';
     if (currentPath.includes('profil')) return 'profile';
-    if (currentPath.includes('parametre') || currentPath.includes('setting')) return 'settings';
-    return 'dashboard';
+    return (currentPath.includes('parametre') || currentPath.includes('setting')) ? 'settings' : 'dashboard';
   }, [currentPath]);
 
   const closeAllOverlays = useCallback(() => {
@@ -129,6 +128,9 @@ export const App = () => {
 
   useEffect(() => {
     const handleLocationChange = () => {
+      if (isRecentInternalModalBack()) {
+        return;
+      }
       closeAllOverlays();
       const newPath = window.location.pathname.toLowerCase();
       setCurrentPath(newPath);
@@ -213,16 +215,18 @@ export const App = () => {
       <PwaInstallModal />
       {showAnnouncementBar && <AnnouncementBar />}
 
-      <Header
-        onOpenAdmin={handleOpenAdmin}
-        isAdminActive={isAdminViewActive}
-        onOpenAIAssistant={() => setIsAIDrawerOpen(true)}
-        onOpenOrdersTracking={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
-        onOpenProfile={(tab = 'profile') => { setProfileInitialTab(tab); navigateTo('/profil'); }}
-        onOpenSeller={() => navigateTo('/vendeur/dashboard')}
-        onOpenNotificationCenter={openNotificationCenter}
-        onSelectProduct={handleSelectProduct}
-      />
+      {!isAIRoute && (
+        <Header
+          onOpenAdmin={handleOpenAdmin}
+          isAdminActive={isAdminViewActive}
+          onOpenAIAssistant={() => setIsAIDrawerOpen(true)}
+          onOpenOrdersTracking={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+          onOpenProfile={(tab = 'profile') => { setProfileInitialTab(tab); navigateTo('/profil'); }}
+          onOpenSeller={() => navigateTo('/vendeur/dashboard')}
+          onOpenNotificationCenter={openNotificationCenter}
+          onSelectProduct={handleSelectProduct}
+        />
+      )}
 
       <React.Suspense fallback={null}>
         {isProductRoute ? (

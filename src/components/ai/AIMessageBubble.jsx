@@ -14,6 +14,7 @@ import {
   ThumbsDown,
 } from 'lucide-react';
 import AIProductCard from './AIProductCard';
+import logoImg from '../../assets/logo.png';
 
 const ACTION_REGEX = /\[ACTION:(TRACK_ORDER|VIEW_PRODUCT|ADD_TO_CART|OPEN_CART|OPEN_CHECKOUT|AUTH_MODAL|SELLER_DASHBOARD|WHATSAPP_SUPPORT)(?::([^\]]+))?\]/g;
 
@@ -170,7 +171,7 @@ const AIMessageBubble = ({
       <div className="vicky-ai-avatar-wrapper" aria-hidden="true">
         {isAssistant ? (
           <div className="vicky-ai-avatar vicky-ai-avatar-bot">
-            <Bot size={18} />
+            <img src={logoImg} alt="Vicky IA" className="vicky-ai-avatar-img" />
           </div>
         ) : (
           <div className="vicky-ai-avatar vicky-ai-avatar-user">
@@ -257,41 +258,41 @@ const AIMessageBubble = ({
         {isAssistant && !isError && message.id !== 'welcome-msg' && (
           <div className="vicky-ai-bubble-actions">
             <div className="vicky-ai-feedback-group">
-              <span className="vicky-ai-feedback-hint">Cette réponse vous a-t-elle aidé ?</span>
+              <span className="vicky-ai-feedback-hint">Utile ?</span>
               <button
                 type="button"
                 onClick={() => setFeedback('helpful')}
-                className={`vicky-ai-feedback-btn ${feedback === 'helpful' ? 'active-helpful' : ''}`}
+                className={`vicky-ai-feedback-btn motion-press ${feedback === 'helpful' ? 'active-helpful' : ''}`}
                 title="Oui, réponse utile"
                 aria-label="Réponse utile"
               >
-                <ThumbsUp size={13} />
+                <ThumbsUp size={15} />
               </button>
               <button
                 type="button"
                 onClick={() => setFeedback('unhelpful')}
-                className={`vicky-ai-feedback-btn ${feedback === 'unhelpful' ? 'active-unhelpful' : ''}`}
+                className={`vicky-ai-feedback-btn motion-press ${feedback === 'unhelpful' ? 'active-unhelpful' : ''}`}
                 title="Non, réponse à améliorer"
                 aria-label="Réponse à améliorer"
               >
-                <ThumbsDown size={13} />
+                <ThumbsDown size={15} />
               </button>
               {feedback && (
                 <span className="vicky-ai-feedback-ack">
-                  {feedback === 'helpful' ? 'Merci pour votre retour !' : 'Merci, nous nous améliorons.'}
+                  {feedback === 'helpful' ? 'Merci !' : 'Noté, merci !'}
                 </span>
               )}
             </div>
 
             <button
               type="button"
-              className="vicky-ai-copy-button"
+              className={`vicky-ai-copy-button motion-press ${copied ? 'is-copied' : ''}`}
               onClick={handleCopy}
-              aria-label="Copier la réponse"
-              title="Copier la réponse"
+              aria-label={copied ? 'Réponse copiée' : 'Copier la réponse'}
+              title={copied ? 'Copié dans le presse-papier' : 'Copier'}
             >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span>{copied ? 'Copié !' : 'Copier'}</span>
+              {copied ? <Check size={14} className="copy-icon-check" /> : <Copy size={14} />}
+              <span className="copy-label">{copied ? 'Copié !' : 'Copier'}</span>
             </button>
           </div>
         )}

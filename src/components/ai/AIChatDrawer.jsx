@@ -17,6 +17,7 @@ import { useAIChat } from '../../hooks/useAIChat';
 import AIMessageBubble from './AIMessageBubble';
 import AIPromptSuggestions from './AIPromptSuggestions';
 import AIChatInput from './AIChatInput';
+import logoImg from '../../assets/logo.png';
 
 /**
  * Fenêtre de discussion interactive flottante (Tiroir / Drawer) pour Vicky IA.
@@ -86,19 +87,21 @@ export const AIChatDrawer = ({
       {/* En-tête du tiroir conversationnel */}
       <header className="vicky-ai-drawer-header">
         <div className="vicky-ai-drawer-header-brand">
-          <div className="vicky-ai-drawer-avatar">
-            <Bot size={20} />
-            <span className="vicky-ai-drawer-pulse" title="Vicky IA est en ligne" />
+          <div className="vicky-ai-brand-avatar-wrap">
+            <img src={logoImg} alt="Vicky-Shop IA" className="vicky-ai-brand-avatar-img" />
+            <span className="vicky-ai-status-pulse" title="Vicky IA est en ligne" />
           </div>
           <div className="vicky-ai-drawer-info">
             <div className="vicky-ai-drawer-title-row">
-              <h3 className="vicky-ai-drawer-title">Vicky IA</h3>
+              <h3 className="vicky-ai-drawer-title">
+                Vicky-Shop <span className="vicky-ai-title-ia">IA</span>
+              </h3>
               <span className="vicky-ai-drawer-badge">
                 <ShieldCheck size={11} /> Officiel
               </span>
             </div>
             <span className="vicky-ai-drawer-status">
-              Conseillère Vicky-Shop • En direct
+              Conseillère experte • En direct
             </span>
           </div>
         </div>
@@ -161,7 +164,7 @@ export const AIChatDrawer = ({
             </div>
 
             <h4 className="vicky-ai-drawer-welcome-heading">
-              Comment puis-je vous accompagner aujourd&apos;hui ?
+              Comment puis-je vous <span className="vicky-ai-gradient-text">accompagner</span> aujourd&apos;hui ?
             </h4>
 
             <p className="vicky-ai-drawer-welcome-desc">
@@ -169,14 +172,17 @@ export const AIChatDrawer = ({
             </p>
 
             <div className="vicky-ai-drawer-service-pills">
-              <span className="vicky-ai-service-pill">
-                <Truck size={12} /> Abidjan 2 000 FCFA
+              <span className="vicky-ai-service-pill is-delivery">
+                <Truck size={13} />
+                <span>Abidjan 2 000 FCFA</span>
               </span>
-              <span className="vicky-ai-service-pill">
-                <Banknote size={12} /> Cash à la livraison
+              <span className="vicky-ai-service-pill is-cash">
+                <Banknote size={13} />
+                <span>Cash à la livraison</span>
               </span>
-              <span className="vicky-ai-service-pill">
-                <RotateCw size={12} /> Échange 48h
+              <span className="vicky-ai-service-pill is-exchange">
+                <RotateCw size={13} />
+                <span>Échange 48h</span>
               </span>
             </div>
           </div>

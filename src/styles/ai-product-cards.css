@@ -1,0 +1,185 @@
+/* ==========================================================================
+   VICKY-SHOP - CARTES ET GRILLES PRODUITS INTERACTIVES DE L'IA
+   Cartes de recommandations fluides et ergonomiques (Design System)
+   ========================================================================== */
+
+.vicky-ai-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+  width: 100%;
+}
+
+.vicky-ai-product-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform var(--transition-normal), border-color var(--transition-fast), box-shadow var(--transition-normal);
+  animation: fadeInUp 0.35s var(--ease-out-expo) backwards;
+  will-change: transform, box-shadow;
+}
+
+.vicky-ai-product-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-highlight);
+  box-shadow: var(--shadow-md);
+}
+
+.vicky-ai-product-card:active {
+  transform: scale(0.98);
+}
+
+.vicky-ai-product-card.is-out-of-stock {
+  opacity: 0.75;
+}
+
+.vicky-ai-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--bg-input);
+  overflow: hidden;
+}
+
+.vicky-ai-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.vicky-ai-product-card:hover .vicky-ai-card-img {
+  transform: scale(1.04);
+}
+
+.vicky-ai-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.vicky-ai-card-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--text-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+}
+
+.vicky-ai-card-badge-stock {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--accent-red-soft);
+  color: var(--accent-red);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+}
+
+.vicky-ai-card-content {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.vicky-ai-card-category {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.vicky-ai-card-title {
+  margin: 0.2rem 0 0.4rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vicky-ai-card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: auto;
+  margin-bottom: 0.5rem;
+}
+
+.vicky-ai-card-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.vicky-ai-card-old-price {
+  font-size: 0.72rem;
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.vicky-ai-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.vicky-ai-card-view-btn,
+.vicky-ai-card-cart-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+  min-height: 38px;
+}
+
+.vicky-ai-card-view-btn:hover {
+  background: var(--bg-surface-elevated);
+  border-color: var(--border-highlight);
+}
+
+.vicky-ai-card-cart-btn {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--border-highlight);
+}
+
+.vicky-ai-card-cart-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: var(--text-primary);
+}
+
+.vicky-ai-card-cart-btn.is-added {
+  background: var(--accent-green);
+  color: var(--text-primary);
+  border-color: var(--accent-green);
+}

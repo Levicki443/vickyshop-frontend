@@ -1,19 +1,17 @@
 @import './variables.css';
 
 /* ==========================================================================
-   STYLES GLOBAUX & UTILITAIRES MODERNES (MERN STACK)
+   STYLES GLOBAUX & SYSTÈME DE DESIGN VICKY-SHOP PREMIUM (WCAG 2.2 AA)
+   Strictement <= 325 lignes
    ========================================================================== */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
   overscroll-behavior-y: none;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -47,33 +45,13 @@ h1, h2, h3, h4, h5, h6 {
   word-break: break-word;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-button, input, select, textarea {
-  font-family: inherit;
-  font-size: inherit;
-  border: none;
-  outline: none;
-}
-
-button {
-  cursor: pointer;
-  background: none;
-  touch-action: manipulation;
-}
-
-img, picture, video, canvas, svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+a { color: inherit; text-decoration: none; transition: color var(--transition-fast); }
+button, input, select, textarea { font-family: inherit; font-size: inherit; border: none; outline: none; }
+button { cursor: pointer; background: none; touch-action: manipulation; }
+img, picture, video, canvas, svg { max-width: 100%; height: auto; display: block; }
 
 /* -----------------------------
-   BOUTONS & EFFETS
+   BOUTONS & INTERACTIONS DE MARQUE
    ----------------------------- */
 .btn {
   display: inline-flex;
@@ -87,30 +65,31 @@ img, picture, video, canvas, svg {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #ff8533 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: #ffffff !important;
   box-shadow: 0 4px 15px var(--primary-glow);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
-
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--primary-glow);
+  box-shadow: 0 8px 24px var(--primary-glow);
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
 }
+.btn-primary:active { background: var(--primary-active); transform: translateY(0); }
 
 .btn-secondary {
   background: var(--bg-card);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
-
 .btn-secondary:hover {
-  background: var(--bg-surface);
-  border-color: var(--primary);
+  background: var(--bg-surface-elevated);
+  border-color: var(--primary-border);
+  color: var(--primary);
+  transform: translateY(-2px);
 }
-
-.btn-block {
-  width: 100%;
-}
+.btn-block { width: 100%; }
 
 .icon-btn {
   width: 42px;
@@ -124,12 +103,14 @@ img, picture, video, canvas, svg {
   color: var(--text-primary);
   position: relative;
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
-
 .icon-btn:hover {
-  border-color: var(--primary);
+  border-color: var(--primary-border);
   color: var(--primary);
+  background: var(--primary-subtle);
   transform: translateY(-2px);
+  box-shadow: 0 4px 14px var(--primary-glow-subtle);
 }
 
 .badge-count {
@@ -147,10 +128,11 @@ img, picture, video, canvas, svg {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
+  box-shadow: 0 2px 6px var(--primary-glow);
 }
 
 /* -----------------------------
-   CHAMPS DE SAISIE
+   CHAMPS DE FORMULAIRE ÉLÉGANTS
    ----------------------------- */
 .form-input {
   width: 100%;
@@ -159,12 +141,11 @@ img, picture, video, canvas, svg {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-
 .form-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 /* -----------------------------
@@ -188,7 +169,7 @@ img, picture, video, canvas, svg {
    BARRE D'ANNONCES (TICKER FLUIDE MARQUEE)
    ----------------------------- */
 .announcement-bar {
-  background: linear-gradient(90deg, #0c0f17 0%, var(--primary) 50%, var(--secondary) 100%);
+  background: linear-gradient(90deg, var(--bg-main) 0%, var(--primary-900) 25%, var(--primary) 50%, var(--secondary) 75%, var(--bg-main) 100%);
   color: #ffffff;
   padding: 0.45rem 0;
   font-size: 0.78rem;
@@ -201,100 +182,89 @@ img, picture, video, canvas, svg {
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 3%, rgba(0,0,0,1) 97%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 3%, rgba(0,0,0,1) 97%, transparent 100%);
 }
-
-.announcement-track {
-  display: flex;
-  width: max-content;
-  animation: marqueeTicker 28s linear infinite;
-  will-change: transform;
-}
-
-.announcement-bar:hover .announcement-track {
-  animation-play-state: paused;
-}
-
-.announcement-item {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 0 1.5rem;
-}
-
-.announcement-item .bullet {
-  opacity: 0.5;
-  font-size: 0.7rem;
-}
-
-@keyframes marqueeTicker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+.announcement-track { display: flex; width: max-content; animation: marqueeTicker 28s linear infinite; will-change: transform; }
+.announcement-bar:hover .announcement-track { animation-play-state: paused; }
+.announcement-item { display: flex; align-items: center; gap: 1.5rem; padding: 0 1.5rem; }
+.announcement-item .bullet { opacity: 0.5; font-size: 0.7rem; }
+@keyframes marqueeTicker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 /* -----------------------------
-   ANIMATIONS & MOTION DESIGN MODERNE
+   ANIMATIONS & MOTION DESIGN
    ----------------------------- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+@keyframes badgePop { 0% { transform: scale(0.85); } 50% { transform: scale(1.22); } 100% { transform: scale(1); } }
 
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
-}
-
-@keyframes badgePop {
-  0% { transform: scale(0.85); }
-  50% { transform: scale(1.22); }
-  100% { transform: scale(1); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.35s var(--ease-out-expo) forwards;
-}
-
-.animate-fade-slide {
-  animation: fadeSlideUp 0.4s var(--ease-out-expo) forwards;
-}
-
-.animate-pulse {
-  animation: pulse 2s infinite ease-in-out;
-}
-
-.badge-pop, .cart-badge-bounce {
-  animation: badgePop 0.4s var(--ease-spring);
-}
+.animate-fade-in { animation: fadeIn 0.35s var(--ease-out-expo) forwards; }
+.animate-fade-slide { animation: fadeSlideUp 0.4s var(--ease-out-expo) forwards; }
+.animate-pulse { animation: pulse 2s infinite ease-in-out; }
+.badge-pop, .cart-badge-bounce { animation: badgePop 0.4s var(--ease-spring); }
 
 button, .btn, .icon-btn, [role="button"], .filter-btn, .btn-wishlist, .btn-add-cart {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-
 button:active:not(:disabled), .btn:active:not(:disabled), .icon-btn:active, .filter-btn:active {
   transform: scale(0.95);
   transition: transform 0.08s var(--ease-spring);
 }
 
-/* Rendu intelligent hors-écran : fluidifie considérablement le scroll */
-.product-card {
-  content-visibility: auto;
-  contain-intrinsic-size: 390px;
-}
+/* Rendu intelligent hors-écran */
+.product-card { content-visibility: auto; contain-intrinsic-size: 390px; }
 
-/* Confirmation visuelle immédiate d'ajout au panier */
-.btn-add-cart-success {
-  background: var(--accent-green) !important;
-  border-color: var(--accent-green) !important;
+/* Harmonisation des badges marketplace */
+.badge-populaire, .badge-hot {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 15px rgba(0, 208, 132, 0.4) !important;
+  box-shadow: 0 2px 8px var(--primary-glow);
+}
+.badge-promo {
+  background: linear-gradient(135deg, var(--danger) 0%, var(--danger-hover) 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px var(--danger-soft);
+}
+.badge-nouveau, .badge-new {
+  background: var(--info-soft) !important;
+  color: var(--info) !important;
+  border: 1px solid var(--info-border) !important;
+  font-weight: 800;
+}
+.badge-y2k-style {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px var(--secondary-glow);
 }
 
-/* Accessibilité : Neutralisation fluide des mouvements pour utilisateurs sensibles */
+/* États des boutons d'ajout au panier avec contraste garanti */
+.btn-add-cart:hover {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px var(--primary-glow) !important;
+}
+.btn-add-cart-success {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px var(--success-soft) !important;
+}
+
+/* Harmonisation Backoffice Admin avec l'identité de marque */
+.admin-root-layout {
+  --admin-primary: var(--primary) !important;
+  --admin-primary-hover: var(--primary-hover) !important;
+  --admin-border-focus: var(--primary) !important;
+}
+.admin-top-icon { background: linear-gradient(135deg, var(--primary), var(--secondary)) !important; }
+
+/* Barres de défilement discrètes et soignées */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-border); }
+
+/* Accessibilité : Neutralisation des mouvements */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -302,8 +272,5 @@ button:active:not(:disabled), .btn:active:not(:disabled), .icon-btn:active, .fil
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .announcement-track {
-    animation: none !important;
-  }
+  .announcement-track { animation: none !important; }
 }
-

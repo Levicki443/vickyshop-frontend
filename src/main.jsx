@@ -22,8 +22,11 @@ import './styles/notifications.css';
 import './styles/orders.css';
 import './styles/share-modal.css';
 import './styles/ai-assistant.css';
+import './styles/ai-welcome-hero.css';
+import './styles/ai-suggestions.css';
 import './styles/ai-chat-messages.css';
 import './styles/ai-drawer.css';
+import './styles/ai-product-cards.css';
 import './styles/ai-fab.css';
 import './styles/responsive.css';
 
