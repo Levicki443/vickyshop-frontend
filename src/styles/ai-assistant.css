@@ -191,6 +191,7 @@
   .vicky-ai-back-text, .vicky-ai-reset-text { display: none; }
   .vicky-ai-header { padding: 0.5rem 0.75rem; }
   .vicky-ai-brand-group { gap: 0.5rem; }
+  .vicky-ai-input-footer { display: none !important; }
 }
 
 @media (max-width: 480px) {
