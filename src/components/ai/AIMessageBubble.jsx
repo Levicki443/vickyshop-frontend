@@ -16,7 +16,7 @@ import {
 import AIProductCard from './AIProductCard';
 import logoImg from '../../assets/logo.png';
 
-const ACTION_REGEX = /\[ACTION:(TRACK_ORDER|VIEW_PRODUCT|ADD_TO_CART|OPEN_CART|OPEN_CHECKOUT|AUTH_MODAL|SELLER_DASHBOARD|WHATSAPP_SUPPORT)(?::([^\]]+))?\]/g;
+const ACTION_REGEX = /\[ACTION:(TRACK_ORDER|VIEW_PRODUCT|ADD_TO_CART|OPEN_CART|OPEN_CHECKOUT|AUTH_MODAL|SELLER_DASHBOARD|SELLER_REGISTER|EXPLORE_CATALOG|WHATSAPP_SUPPORT)(?::([^\]]+))?\]/g;
 
 const extractActions = (content, propActions = []) => {
   if (!content || typeof content !== 'string') return { cleanContent: '', actions: propActions || [] };
@@ -156,6 +156,13 @@ const AIMessageBubble = ({
       case 'SELLER_DASHBOARD':
         if (onOpenSeller) onOpenSeller();
         break;
+      case 'SELLER_REGISTER':
+        if (onOpenSeller) onOpenSeller();
+        else window.location.href = '/seller/register';
+        break;
+      case 'EXPLORE_CATALOG':
+        window.location.href = '/shop';
+        break;
       case 'WHATSAPP_SUPPORT': {
         const text = encodeURIComponent('Bonjour Vicky-Shop, j\'ai besoin d\'assistance concernant ma boutique/commande.');
         window.open(`https://wa.me/2250554726574?text=${text}`, '_blank', 'noopener,noreferrer');
@@ -238,16 +245,23 @@ const AIMessageBubble = ({
                 {act.type === 'OPEN_CHECKOUT' && <Truck size={14} />}
                 {act.type === 'AUTH_MODAL' && <LogIn size={14} />}
                 {act.type === 'SELLER_DASHBOARD' && <Store size={14} />}
+                {act.type === 'SELLER_REGISTER' && <Store size={14} />}
+                {act.type === 'EXPLORE_CATALOG' && <ShoppingBag size={14} />}
                 {act.type === 'WHATSAPP_SUPPORT' && <MessageCircle size={14} />}
                 <span>
-                  {act.type === 'TRACK_ORDER' && `Suivre la commande ${act.param || ''}`}
-                  {act.type === 'VIEW_PRODUCT' && 'Voir la fiche'}
-                  {act.type === 'ADD_TO_CART' && 'Ajouter au panier'}
-                  {act.type === 'OPEN_CART' && 'Ouvrir mon panier'}
-                  {act.type === 'OPEN_CHECKOUT' && 'Passer à la caisse'}
-                  {act.type === 'AUTH_MODAL' && 'Se connecter / S\'inscrire'}
-                  {act.type === 'SELLER_DASHBOARD' && 'Ouvrir mon Espace Vendeur'}
-                  {act.type === 'WHATSAPP_SUPPORT' && 'Contacter le support WhatsApp (+225)'}
+                  {act.label || (
+                    act.type === 'TRACK_ORDER' ? `Suivre la commande ${act.param || ''}` :
+                    act.type === 'VIEW_PRODUCT' ? 'Voir la fiche' :
+                    act.type === 'ADD_TO_CART' ? 'Ajouter au panier' :
+                    act.type === 'OPEN_CART' ? 'Ouvrir mon panier' :
+                    act.type === 'OPEN_CHECKOUT' ? 'Passer à la caisse' :
+                    act.type === 'AUTH_MODAL' ? "Se connecter / S'inscrire" :
+                    act.type === 'SELLER_DASHBOARD' ? 'Ouvrir mon Espace Vendeur' :
+                    act.type === 'SELLER_REGISTER' ? 'Créer un compte vendeur' :
+                    act.type === 'EXPLORE_CATALOG' ? 'Découvrir la boutique' :
+                    act.type === 'WHATSAPP_SUPPORT' ? 'Contacter le support WhatsApp (+225)' :
+                    'Action'
+                  )}
                 </span>
               </button>
             ))}
