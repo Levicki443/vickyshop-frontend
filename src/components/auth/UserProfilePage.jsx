@@ -249,16 +249,33 @@ export const UserProfilePage = ({ onBackToShop, onOpenSellerDashboard, initialTa
               </h3>
               <div className="account-details-card">
                 <div className="account-info-row">
-                  <span className="account-info-label"><i className="fa-solid fa-user-tag text-primary"></i> Rôle sur le site</span>
-                  <span className={`profile-role-pill ${roleBadgeClass}`}>{roleLabel}</span>
+                  <span className="account-info-label">
+                    <i className="fa-solid fa-user-tag text-primary"></i>
+                    <span>Rôle sur le site</span>
+                  </span>
+                  <div className="account-info-value">
+                    <span className={`profile-role-pill ${roleBadgeClass}`}>{roleLabel}</span>
+                  </div>
                 </div>
                 <div className="account-info-row">
-                  <span className="account-info-label"><i className="fa-solid fa-envelope text-primary"></i> Email de connexion</span>
-                  <strong>{user?.email}</strong>
+                  <span className="account-info-label">
+                    <i className="fa-solid fa-envelope text-primary"></i>
+                    <span>Email de connexion</span>
+                  </span>
+                  <div className="account-info-value">
+                    <strong className="account-email-text">{user?.email}</strong>
+                  </div>
                 </div>
                 <div className="account-info-row">
-                  <span className="account-info-label"><i className="fa-solid fa-circle-check text-success"></i> Statut du compte</span>
-                  <strong className="text-success">Actif &amp; Vérifié</strong>
+                  <span className="account-info-label">
+                    <i className="fa-solid fa-circle-check text-success"></i>
+                    <span>Statut du compte</span>
+                  </span>
+                  <div className="account-info-value">
+                    <span className="account-status-badge text-success">
+                      <i className="fa-solid fa-check"></i> Actif &amp; Vérifié
+                    </span>
+                  </div>
                 </div>
               </div>
               {isSeller && (
