@@ -56,13 +56,13 @@ export const MobileBottomNav = ({ currentPath, onNavigate, onOpenAdmin }) => {
       const productsEl = document.getElementById('produits');
       if (productsEl) {
         const rect = productsEl.getBoundingClientRect();
-        if (rect.top <= 200 && rect.bottom >= 200) {
+        if (rect.top <= 120 && rect.bottom >= 150) {
           setActiveTab('products');
           return;
         }
       }
 
-      if (window.scrollY < 250) {
+      if (window.scrollY < 200) {
         setActiveTab('home');
       }
     };
@@ -72,49 +72,99 @@ export const MobileBottomNav = ({ currentPath, onNavigate, onOpenAdmin }) => {
   }, [isCartOpen, isWishlistOpen, isNotificationCenterOpen]);
 
   const handleHomeClick = (e) => {
-    // Si l'accès secret de 10 secondes vient de se déclencher, on bloque le clic normal
     if (isTriggeredRef.current) return;
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
     closeAllOverlays();
     setActiveTab('home');
-    if (onNavigate) onNavigate('/');
+    if (onNavigate && window.location.pathname !== '/') {
+      onNavigate('/');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleProductsClick = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
     closeAllOverlays();
     setActiveTab('products');
+
+    const scrollToCatalog = () => {
+      const scroll = () => {
+        const el = document.getElementById('produits');
+        if (el) {
+          const headerOffset = 68;
+          const targetTop = el.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          return true;
+        }
+        return false;
+      };
+
+      if (!scroll()) {
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (scroll() || attempts >= 12) {
+            clearInterval(interval);
+          }
+        }, 50);
+      }
+    };
+
     if (window.location.pathname !== '/') {
       if (onNavigate) onNavigate('/');
-      setTimeout(() => {
-        document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' });
-      }, 80);
+      setTimeout(scrollToCatalog, 60);
     } else {
-      document.getElementById('produits')?.scrollIntoView({ behavior: 'smooth' });
+      scrollToCatalog();
     }
   };
 
   const handleNotifClick = () => {
-    closeCart();
-    closeWishlist();
-    closeAuthModal();
-    setActiveTab('alerts');
-    openNotificationCenter();
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
+    if (isNotificationCenterOpen) {
+      closeNotificationCenter();
+    } else {
+      closeCart();
+      closeWishlist();
+      closeAuthModal();
+      setActiveTab('alerts');
+      openNotificationCenter();
+    }
   };
 
   const handleWishlistClick = () => {
-    closeCart();
-    closeNotificationCenter();
-    closeAuthModal();
-    setActiveTab('wishlist');
-    openWishlist();
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
+    if (isWishlistOpen) {
+      closeWishlist();
+    } else {
+      closeCart();
+      closeNotificationCenter();
+      closeAuthModal();
+      setActiveTab('wishlist');
+      openWishlist();
+    }
   };
 
   const handleCartClick = () => {
-    closeWishlist();
-    closeNotificationCenter();
-    closeAuthModal();
-    setActiveTab('cart');
-    openCart();
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
+    if (isCartOpen) {
+      closeCart();
+    } else {
+      closeWishlist();
+      closeNotificationCenter();
+      closeAuthModal();
+      setActiveTab('cart');
+      openCart();
+    }
   };
 
   return (
@@ -123,8 +173,11 @@ export const MobileBottomNav = ({ currentPath, onNavigate, onOpenAdmin }) => {
       <button
         type="button"
         className={`mobile-nav-tab ${activeTab === 'home' ? 'active' : ''}`}
-        onClick={handleHomeClick}
         {...triggerProps}
+        onClick={(e) => {
+          if (triggerProps?.onClick) triggerProps.onClick(e);
+          handleHomeClick(e);
+        }}
         aria-label="Accueil"
       >
         <div className="mobile-nav-icon-wrap">
