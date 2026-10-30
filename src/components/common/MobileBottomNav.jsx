@@ -34,7 +34,7 @@ export const MobileBottomNav = ({ currentPath, onNavigate, onOpenAdmin }) => {
       setActiveTab('cart');
     } else if (isWishlistOpen) {
       setActiveTab('wishlist');
-    } else if (isNotificationCenterOpen) {
+    } else if (currentPath.startsWith('/notification') || currentPath.startsWith('/alertes') || isNotificationCenterOpen) {
       setActiveTab('alerts');
     } else if (currentPath === '/' || currentPath === '') {
       if (window.location.hash === '#produits') {
@@ -126,14 +126,13 @@ export const MobileBottomNav = ({ currentPath, onNavigate, onOpenAdmin }) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       try { navigator.vibrate(10); } catch (_) {}
     }
-    if (isNotificationCenterOpen) {
-      closeNotificationCenter();
+    closeAllOverlays();
+    setActiveTab('alerts');
+    if (onNavigate) {
+      onNavigate('/notifications');
     } else {
-      closeCart();
-      closeWishlist();
-      closeAuthModal();
-      setActiveTab('alerts');
-      openNotificationCenter();
+      window.history.pushState(null, '', '/notifications');
+      window.dispatchEvent(new Event('app-navigate'));
     }
   };
 

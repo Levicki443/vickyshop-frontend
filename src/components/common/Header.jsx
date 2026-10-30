@@ -127,7 +127,8 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
     if (onOpenNotificationCenter) {
       onOpenNotificationCenter();
     } else {
-      openNotificationCenter();
+      window.history.pushState(null, '', '/notifications');
+      window.dispatchEvent(new Event('app-navigate'));
     }
   };
 
@@ -200,19 +201,25 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
             </button>
 
             {/* Cloche de notifications unifiée en temps réel */}
-            {isAuthenticated && (
-              <div className="header-notif-wrapper" ref={notifRef}>
-                <button
-                  type="button"
-                  className={`icon-btn motion-press header-notif-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
-                  onClick={() => setNotifDropdownOpen((prev) => !prev)}
-                  title="Notifications"
-                  aria-label="Notifications"
-                >
-                  <i className="fa-solid fa-bell"></i>
-                  {unreadCount > 0 && <span className="notif-badge-count motion-badge-bump">{unreadCount}</span>}
-                </button>
+            <div className="header-notif-wrapper" ref={notifRef}>
+              <button
+                type="button"
+                className={`icon-btn motion-press header-notif-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
+                onClick={() => {
+                  if (!isAuthenticated || window.innerWidth <= 768) {
+                    handleOpenNotifs();
+                  } else {
+                    setNotifDropdownOpen((prev) => !prev);
+                  }
+                }}
+                title="Notifications"
+                aria-label="Notifications"
+              >
+                <i className="fa-solid fa-bell"></i>
+                {unreadCount > 0 && <span className="notif-badge-count motion-badge-bump">{unreadCount}</span>}
+              </button>
 
+              {isAuthenticated && (
                 <NotificationDropdown
                   isOpen={notifDropdownOpen}
                   onClose={() => setNotifDropdownOpen(false)}
@@ -220,8 +227,8 @@ export const Header = ({ onOpenAdmin, onOpenAIAssistant, onOpenOrdersTracking, o
                   onSelectProduct={(prodId) => onSelectProduct && onSelectProduct(prodId)}
                   onOpenCenter={handleOpenNotifs}
                 />
-              </div>
-            )}
+              )}
+            </div>
 
             <button type="button" className="icon-btn motion-press desktop-only-action" onClick={openWishlist} title="Favoris" aria-label="Favoris">
               <i className="fa-solid fa-heart"></i>

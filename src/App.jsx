@@ -18,6 +18,7 @@ import { PwaInstallModal } from './components/common/PwaInstallModal';
 const ProductDetailsPage = React.lazy(() => import('./components/products/ProductDetailsPage'));
 const UserOrdersPage = React.lazy(() => import('./components/orders/UserOrdersPage'));
 const UserProfilePage = React.lazy(() => import('./components/auth/UserProfilePage'));
+const NotificationsPage = React.lazy(() => import('./components/notifications/NotificationsPage'));
 const ForgotPasswordPage = React.lazy(() => import('./components/auth/ForgotPasswordPage'));
 const ResetPasswordPage = React.lazy(() => import('./components/auth/ResetPasswordPage'));
 const AIAssistantPage = React.lazy(() => import('./components/ai/AIAssistantPage'));
@@ -43,7 +44,6 @@ export const App = () => {
   const [isAdminViewActive, setIsAdminViewActive] = useState(false);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
   const [profileInitialTab, setProfileInitialTab] = useState('profile');
-  const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
   const [recentlyViewedIds, setRecentlyViewedIds] = useState([]);
 
   const [activeCategory, setActiveCategory] = useState('all');
@@ -70,6 +70,7 @@ export const App = () => {
   const isAdminRoute = cleanPath.startsWith('/admin') || cleanPath.startsWith('/dashboard') || cleanPath.startsWith('/backoffice');
   const isOrdersRoute = cleanPath.startsWith('/commandes') || cleanPath.startsWith('/orders') || cleanPath.startsWith('/suivi');
   const isProfileRoute = cleanPath.startsWith('/profil') || cleanPath.startsWith('/profile') || cleanPath.startsWith('/compte');
+  const isNotificationsRoute = cleanPath.startsWith('/notifications') || cleanPath.startsWith('/notification') || cleanPath.startsWith('/alertes');
   const isProductRoute = cleanPath.startsWith('/produit/') || cleanPath.startsWith('/produits/') || cleanPath.startsWith('/product/') || cleanPath.startsWith('/products/');
   const isCartRoute = cleanPath === '/panier' || cleanPath === '/cart';
   const isCheckoutRoute = cleanPath === '/commande' || cleanPath === '/checkout';
@@ -88,7 +89,7 @@ export const App = () => {
   const isFiltering = activeCategory !== 'all' || Boolean(searchTerm && searchTerm.trim());
   const isOverlayOpen = Boolean(
     isCartOpen || isWishlistOpen || isNotificationCenterOpen ||
-    isAuthModalOpen || isCheckoutOpen || isAdminAuthModalOpen || isReviewModalOpen || isAdminViewActive || isAIDrawerOpen
+    isAuthModalOpen || isCheckoutOpen || isAdminAuthModalOpen || isReviewModalOpen || isAdminViewActive
   );
   const showAnnouncementBar = isHomePath && !isCategoryRoute && !isSearchRoute && !isFiltering && !isOverlayOpen;
 
@@ -121,7 +122,6 @@ export const App = () => {
     setIsCheckoutOpen(false);
     setIsAdminAuthModalOpen(false);
     setIsReviewModalOpen(false);
-    setIsAIDrawerOpen(false);
   }, [closeCart, closeWishlist, closeNotificationCenter, closeAuthModal]);
 
   useModalHistory(isOverlayOpen, closeAllOverlays, 'app-overlay');
@@ -219,11 +219,11 @@ export const App = () => {
         <Header
           onOpenAdmin={handleOpenAdmin}
           isAdminActive={isAdminViewActive}
-          onOpenAIAssistant={() => setIsAIDrawerOpen(true)}
+          onOpenAIAssistant={() => navigateTo('/assistant-ia')}
           onOpenOrdersTracking={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
           onOpenProfile={(tab = 'profile') => { setProfileInitialTab(tab); navigateTo('/profil'); }}
           onOpenSeller={() => navigateTo('/vendeur/dashboard')}
-          onOpenNotificationCenter={openNotificationCenter}
+          onOpenNotificationCenter={() => navigateTo('/notifications')}
           onSelectProduct={handleSelectProduct}
         />
       )}
@@ -231,24 +231,16 @@ export const App = () => {
       <React.Suspense fallback={null}>
         {isProductRoute ? (
           <ProductDetailsPage
-            productId={currentProductId}
-            initialProduct={detailedProduct}
-            allProducts={products}
-            onBack={handleBackFromProduct}
-            onOpenCheckout={() => setIsCheckoutOpen(true)}
-            onSelectProduct={handleSelectProduct}
+            productId={currentProductId} initialProduct={detailedProduct} allProducts={products}
+            onBack={handleBackFromProduct} onOpenCheckout={() => setIsCheckoutOpen(true)} onSelectProduct={handleSelectProduct}
           />
         ) : isAIRoute ? (
           <AIAssistantPage
             onBackToShop={() => navigateTo('/')}
             onTrackOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
-            onViewProduct={(slugOrId) => navigateTo(`/produit/${slugOrId}`)}
-            onAddToCart={(p) => addToCart(p, 1)}
-            onOpenCart={openCart}
-            onOpenCheckout={() => setIsCheckoutOpen(true)}
-            onOpenAuth={openAuthModal}
-            onOpenSeller={() => navigateTo('/vendeur/dashboard')}
-            recentlyViewedIds={recentlyViewedIds}
+            onViewProduct={(slugOrId) => navigateTo(`/produit/${slugOrId}`)} onAddToCart={(p) => addToCart(p, 1)}
+            onOpenCart={openCart} onOpenCheckout={() => setIsCheckoutOpen(true)} onOpenAuth={openAuthModal}
+            onOpenSeller={() => navigateTo('/vendeur/dashboard')} recentlyViewedIds={recentlyViewedIds}
           />
         ) : isForgotPasswordRoute ? (
           <ForgotPasswordPage onNavigate={navigateTo} onOpenLogin={openAuthModal} />
@@ -257,10 +249,12 @@ export const App = () => {
         ) : isOrdersRoute ? (
           <UserOrdersPage onBackToShop={() => navigateTo('/')} initialOrderNumber={selectedOrderNumber} />
         ) : isProfileRoute ? (
-          <UserProfilePage
-            onBackToShop={() => navigateTo('/')}
-            onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')}
-            initialTab={profileInitialTab}
+          <UserProfilePage onBackToShop={() => navigateTo('/')} onOpenSellerDashboard={() => navigateTo('/vendeur/dashboard')} initialTab={profileInitialTab} />
+        ) : isNotificationsRoute ? (
+          <NotificationsPage
+            onBackToShop={() => navigateTo('/')} onSelectProduct={handleSelectProduct}
+            onSelectOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
+            onOpenSettings={() => { setProfileInitialTab('notifications'); navigateTo('/profil'); }}
           />
         ) : isHomePath ? (
           <>
@@ -306,16 +300,13 @@ export const App = () => {
           onSelectOrder={(ordNum) => { if (ordNum) setSelectedOrderNumber(ordNum); navigateTo('/commandes'); }}
           onSelectProduct={handleSelectProduct} onOpenProfileTab={(tab) => { setProfileInitialTab(tab); navigateTo('/profil'); }}
           currentPath={currentPath} onNavigate={navigateTo} onOpenAdmin={handleOpenAdmin}
-          isAIDrawerOpen={isAIDrawerOpen} onCloseAIDrawer={() => setIsAIDrawerOpen(false)}
-          onAddToCart={(p) => addToCart(p, 1)} onOpenCart={openCart} onOpenAuth={openAuthModal}
-          onOpenSeller={() => navigateTo('/vendeur/dashboard')} recentlyViewedIds={recentlyViewedIds}
         />
       </React.Suspense>
 
       <FloatingAIAssistantButton
-        onClick={() => setIsAIDrawerOpen((prev) => !prev)}
-        isOpen={isAIDrawerOpen}
-        isVisible={!isAIRoute && !isAdminViewActive && !isSellerRoute && !isAIDrawerOpen}
+        onClick={() => navigateTo('/assistant-ia')}
+        isOpen={false}
+        isVisible={!isAIRoute && !isAdminViewActive && !isSellerRoute}
       />
     </div>
   );

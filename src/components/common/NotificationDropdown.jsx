@@ -33,9 +33,11 @@ export const NotificationDropdown = ({ isOpen, onClose, onSelectOrder, onSelectP
       case 'price_drop':
         return 'fa-tag text-warning';
       case 'new_product':
-        return 'fa-sparkles text-primary';
+        return 'fa-wand-magic-sparkles text-primary';
       case 'promo_ending':
         return 'fa-fire text-danger';
+      case 'system':
+        return 'fa-gear text-info';
       default:
         return 'fa-bell text-primary';
     }
@@ -48,75 +50,80 @@ export const NotificationDropdown = ({ isOpen, onClose, onSelectOrder, onSelectP
       <div className="notif-dropdown-backdrop" onClick={onClose} />
       <div className="notification-dropdown-panel animate-fade-in" onClick={(e) => e.stopPropagation()}>
         <div className="notif-dropdown-header">
-        <div className="d-flex align-items-center gap-2">
-          <i className="fa-solid fa-bell text-primary"></i>
-          <strong>Notifications</strong>
-          {unreadCount > 0 && <span className="notif-count-badge">{unreadCount}</span>}
+          <div className="d-flex align-items-center gap-2">
+            <i className="fa-solid fa-bell text-primary"></i>
+            <strong>Notifications</strong>
+            {unreadCount > 0 && <span className="notif-count-badge">{unreadCount}</span>}
+          </div>
+          {unreadCount > 0 && (
+            <button type="button" className="btn-mark-all-read-sm" onClick={markAllAsRead} title="Tout marquer comme lu">
+              <i className="fa-solid fa-check-double"></i> <span>Tout marquer</span>
+            </button>
+          )}
         </div>
-        {unreadCount > 0 && (
-          <button type="button" className="btn-mark-all-read-sm" onClick={markAllAsRead} title="Tout marquer comme lu">
-            <i className="fa-solid fa-check-double"></i> <span>Tout marquer</span>
-          </button>
-        )}
-      </div>
 
-      <div className="notif-dropdown-body">
-        {loading && notifications.length === 0 ? (
-          <div className="notif-loading-state">
-            <i className="fa-solid fa-spinner fa-spin"></i>
-            <span>Chargement des alertes...</span>
-          </div>
-        ) : recentNotifications.length === 0 ? (
-          <div className="notif-empty-state">
-            <i className="fa-regular fa-bell-slash empty-icon"></i>
-            <p>Aucune notification pour le moment.</p>
-          </div>
-        ) : (
-          <div className="notif-items-list">
-            {recentNotifications.map((n) => (
-              <div
-                key={n._id}
-                className={`notif-item-row ${n.isRead ? 'read' : 'unread'}`}
-                onClick={() => handleItemClick(n)}
-              >
-                <div className="notif-icon-circle">
-                  <i className={`fa-solid ${getNotifIcon(n.type)}`}></i>
-                </div>
-                <div className="notif-text-col">
-                  <div className="notif-title-row">
-                    <strong>{n.title}</strong>
-                    {!n.isRead && <span className="notif-unread-dot" />}
+        <div className="notif-dropdown-body">
+          {loading && notifications.length === 0 ? (
+            <div className="notif-loading-state">
+              <i className="fa-solid fa-spinner fa-spin"></i>
+              <span>Chargement des alertes...</span>
+            </div>
+          ) : recentNotifications.length === 0 ? (
+            <div className="notif-empty-state">
+              <i className="fa-regular fa-bell-slash empty-icon"></i>
+              <p>Aucune notification pour le moment.</p>
+            </div>
+          ) : (
+            <div className="notif-items-list">
+              {recentNotifications.map((n) => (
+                <div
+                  key={n._id}
+                  className={`notif-item-row ${n.isRead ? 'read' : 'unread'}`}
+                  onClick={() => handleItemClick(n)}
+                >
+                  <div className="notif-icon-circle">
+                    <i className={`fa-solid ${getNotifIcon(n.type)}`}></i>
                   </div>
-                  <p className="notif-desc-text">{n.message}</p>
-                  <span className="notif-date-sub">
-                    {new Date(n.createdAt).toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+                  <div className="notif-text-col">
+                    <div className="notif-title-row">
+                      <strong>{n.title}</strong>
+                      {!n.isRead && <span className="notif-unread-dot" />}
+                    </div>
+                    <p className="notif-desc-text">{n.message}</p>
+                    <span className="notif-date-sub">
+                      {new Date(n.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      <div className="notif-dropdown-footer">
-        <button
-          type="button"
-          className="btn-view-all-notifs"
-          onClick={() => {
-            onClose();
-            if (onOpenCenter) onOpenCenter();
-          }}
-        >
-          <span>Voir toutes les notifications</span>
-          <i className="fa-solid fa-arrow-right"></i>
-        </button>
+        <div className="notif-dropdown-footer">
+          <button
+            type="button"
+            className="btn-view-all-notifs"
+            onClick={() => {
+              onClose();
+              if (onOpenCenter) {
+                onOpenCenter();
+              } else {
+                window.history.pushState(null, '', '/notifications');
+                window.dispatchEvent(new Event('app-navigate'));
+              }
+            }}
+          >
+            <span>Voir toutes les notifications</span>
+            <i className="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
       </div>
-    </div>
     </>
   );
 };

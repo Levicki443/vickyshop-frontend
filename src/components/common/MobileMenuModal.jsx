@@ -253,20 +253,30 @@ export const MobileMenuModal = ({
                 </button>
               </li>
 
-              {isAuthenticated && (
-                <li>
-                  <button type="button" className="mobile-nav-card mobile-nav-btn" onClick={() => handleAction(onOpenNotifs)}>
-                    <div className="mobile-nav-card-left">
-                      <i className="fa-solid fa-bell mobile-nav-card-icon text-primary"></i>
-                      <span>Notifications</span>
-                    </div>
-                    <div className="mobile-nav-card-right">
-                      {unreadCount > 0 && <span className="badge-count-pill">{unreadCount}</span>}
-                      <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
-                    </div>
-                  </button>
-                </li>
-              )}
+              <li>
+                <button
+                  type="button"
+                  className="mobile-nav-card mobile-nav-btn"
+                  onClick={() => {
+                    handleAction(() => {
+                      if (onOpenNotifs) onOpenNotifs();
+                      else {
+                        window.history.pushState(null, '', '/notifications');
+                        window.dispatchEvent(new Event('app-navigate'));
+                      }
+                    });
+                  }}
+                >
+                  <div className="mobile-nav-card-left">
+                    <i className="fa-solid fa-bell mobile-nav-card-icon text-primary"></i>
+                    <span>Notifications</span>
+                  </div>
+                  <div className="mobile-nav-card-right">
+                    {unreadCount > 0 && <span className="badge-count-pill">{unreadCount}</span>}
+                    <i className="fa-solid fa-chevron-right mobile-nav-arrow"></i>
+                  </div>
+                </button>
+              </li>
 
               {isSeller && isAuthenticated && (
                 <li>

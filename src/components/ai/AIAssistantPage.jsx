@@ -43,10 +43,24 @@ export const AIAssistantPage = ({
 
   const messagesEndRef = useRef(null);
 
+  // Actualisation du titre du document et défilement au sommet lors de l'accès à la page
+  useEffect(() => {
+    document.title = 'Assistant IA | Vicky-Shop';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   // Défilement automatique vers le dernier message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  const handleBack = () => {
+    if (window.history.length > 1 && window.history.state?.fromApp) {
+      window.history.back();
+    } else if (onBackToShop) {
+      onBackToShop();
+    }
+  };
 
   const handleSuggestionSelect = (prompt) => {
     sendMessage(prompt);
@@ -59,7 +73,7 @@ export const AIAssistantPage = ({
         <div className="vicky-ai-header-left">
           <button
             type="button"
-            onClick={onBackToShop}
+            onClick={handleBack}
             className="vicky-ai-back-btn motion-press"
             aria-label="Retourner à la boutique"
             title="Retour à la boutique"
